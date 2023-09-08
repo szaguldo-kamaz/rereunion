@@ -431,6 +431,8 @@ class ReReGFX:
         #  0 original blue
         #  1 yellow
         #  2 red
+        if type(text_to_render) == bytes:
+            text_to_render = text_to_render.decode('ascii')
         textlength = len(text_to_render)
         rendered_text = pygame.Surface((textlength * 6, 8))
         for curr_char_no in range(textlength):
