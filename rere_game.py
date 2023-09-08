@@ -417,6 +417,7 @@ class ReReGame:
         planettype_names_from_exe = self.extract_dynamic_strings(reunionexe_image, exepos_planettypenames, 10)
         planettype_names = [ "" ] + planettype_names_from_exe + [ b"Artificial" ]
         commander_names = struct.unpack("19p"*12, reunionexe_image[exepos_commandernames:exepos_commandernames + 12*19])
+        commander_names_processed = [ commander_names[0:3], commander_names[3:6], commander_names[6:9], commander_names[9:12] ]
         mineral_names   = struct.unpack( "9p"*6,  reunionexe_image[exepos_mineralnames:exepos_mineralnames + 6*9])
         race_names      = struct.unpack("10p"*12, reunionexe_image[exepos_racenames:exepos_racenames + 12*10])
         skill_names     = struct.unpack( "8p"*4,  reunionexe_image[exepos_skillnames:exepos_skillnames + 4*8])
@@ -429,7 +430,7 @@ class ReReGame:
         gamedata_static = {
                 "buildings_info": buildings_info,
                 "planettype_names": planettype_names,
-                "commander_names": commander_names,
+                "commander_names": commander_names_processed,
                 "mineral_names": mineral_names,
                 "race_names": race_names,
                 "skill_names": skill_names
@@ -617,7 +618,7 @@ class ReReGame:
         #    print(planetno, self.gamedata_dynamic["systems"][systemno][planetno]["planetname"], self.gamedata_const["planets_id_mapping"][systemno][planetno] )
 
         self.screens = {}
-        self.screens["controlroom"] = screen_controlroom(self.gamedata_dynamic)
+        self.screens["controlroom"] = screen_controlroom(self.gamedata_static, self.gamedata_dynamic)
         self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,5,0)])  # New-Earth
         #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,4,4)])  # Penelope
         #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,3,3)])  # Mir
