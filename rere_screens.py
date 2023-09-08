@@ -138,7 +138,7 @@ class screen:
 
 class screen_controlroom(screen):
 
-    def __init__(self, gamedata_dynamic):
+    def __init__(self, gamedata_static, gamedata_dynamic):
 
         self.screentype = "controlroom"
 
@@ -151,6 +151,7 @@ class screen_controlroom(screen):
         self.anim_exists = True
         self.anim_states["radarscreen"] = { "state" : 0, "count" : 6 }
 
+        self.commander_names = gamedata_static["commander_names"]
         self.current_commanders = self.gamedata_dynamic["commanders"]
 
 
@@ -164,7 +165,7 @@ class screen_controlroom(screen):
         if 51+49 <= mouse_pos[1] <= 51+49+65 and 200 <= mouse_pos[0] <= 200+46:
 
             if self.current_commanders[1] != 0:
-                self.menu_info["actiontext"] = 'Builder'
+                self.menu_info["actiontext"] = self.commander_names[1][self.current_commanders[1] - 1]
                 if mouse_buttonevent[0]:  # mouse button pressed
                     self.sfx_to_play = "BUILDERS"
 
@@ -172,7 +173,7 @@ class screen_controlroom(screen):
         elif 38+49 <= mouse_pos[1] <= 38+49+84 and 77 <= mouse_pos[0] <= 77+57:
 
             if self.current_commanders[2] != 0:
-                self.menu_info["actiontext"] = 'Fighter'
+                self.menu_info["actiontext"] = self.commander_names[2][self.current_commanders[2] - 1]
                 if mouse_buttonevent[0]:  # mouse button pressed
                     self.sfx_to_play = "FIGHTERS"
 
@@ -180,7 +181,7 @@ class screen_controlroom(screen):
         elif 56+49 <= mouse_pos[1] <= 56+49+95 and 43 <= mouse_pos[0] <= 43+49:
 
             if self.current_commanders[3] != 0:
-                self.menu_info["actiontext"] = 'DEVELOPER'
+                self.menu_info["actiontext"] = self.commander_names[3][self.current_commanders[3] - 1]
                 if mouse_buttonevent[0]:  # mouse button pressed
                     self.sfx_to_play = "DEVELOPE"
 
@@ -188,7 +189,7 @@ class screen_controlroom(screen):
         elif 54+49 <= mouse_pos[1] <= 54+49+97 and 245 <= mouse_pos[0] <= 245+50:
 
             if self.current_commanders[0] != 0:
-                self.menu_info["actiontext"] = 'Pilots'
+                self.menu_info["actiontext"] = self.commander_names[0][self.current_commanders[0] - 1]
                 if mouse_buttonevent[0]:  # mouse button pressed
                     self.sfx_to_play = "PILOTS"
 
