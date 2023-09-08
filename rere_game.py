@@ -16,9 +16,9 @@ from rere_screens import *
 class ReReGame:
 
     # how to extract this from the main binary?...
-    gameconsts = {}
-    gameconsts["planets_id_mapping"] = {}
-    gameconsts["planets_id_mapping"][1] = {
+    gamedata_const = {}
+    gamedata_const["planets_id_mapping"] = {}
+    gamedata_const["planets_id_mapping"][1] = {
          # System 1
          1: (1, 1, 0), # 'Amnesty 1'
          2: (1, 2, 0), # 'Klatoo'
@@ -61,7 +61,7 @@ class ReReGame:
         32: (1, 7, 8)  # 'Kepler'
     }
 
-    gameconsts["planets_id_mapping"][2] = {
+    gamedata_const["planets_id_mapping"][2] = {
         # System 2
 
          1: (2, 1, 0), # 'Phoenix 1'
@@ -175,7 +175,7 @@ class ReReGame:
                 planetsdata[planetno]["mineral_production"][mineral] = struct.unpack("B", mineral_bytes)[0]
                 planet_imagepos += 1
 
-    #        print("%d: %s %s"%(planetno, planetsdata[planetno], gameconsts["planettypes"][planetsdata[planetno]["planettype"]]))
+    #        print("%d: %s %s"%(planetno, planetsdata[planetno], gamedata_const["planettypes"][planetsdata[planetno]["planettype"]]))
 
         return planetsdata
 
@@ -580,7 +580,7 @@ class ReReGame:
             self.solarsystems.append(solarsystem(systemno,
                                             "System %d"%(systemno),
                                             loc_gamedata_dynamic["systems"][systemno],
-                                            self.gameconsts["planets_id_mapping"][systemno],
+                                            self.gamedata_const["planets_id_mapping"][systemno],
                                             loc_gamedata_static,
                                             self.cache))
 
@@ -608,13 +608,13 @@ class ReReGame:
         # load static data (buildings_info) from reunion binary
         [ self.gamedata_static, self.gamedata_dynamic ] = self.load_reunionprg()
         # load dynamic data initial values (money, date, buildings_data, etc.) from savegame
-        [ self.gamedata_dynamic ] = self.load_savegame(savegame_filename)
+        [ self.gamedata_dynamic ] = self.load_savegame(savegame_filename)  # needs self.gamedata_static !
 
         self.__setup_solarsystems(self.gamedata_static, self.gamedata_dynamic)
         self.__setup_buildings_on_planets(self.gamedata_dynamic)
 
         #for planetno in self.gamedata_dynamic["systems"][systemno].keys():
-        #    print(planetno, self.gamedata_dynamic["systems"][systemno][planetno]["planetname"], self.gameconsts["planets_id_mapping"][systemno][planetno] )
+        #    print(planetno, self.gamedata_dynamic["systems"][systemno][planetno]["planetname"], self.gamedata_const["planets_id_mapping"][systemno][planetno] )
 
         self.screens = {}
         self.screens["controlroom"] = screen_controlroom(self.gamedata_dynamic)
