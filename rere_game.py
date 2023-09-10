@@ -10,7 +10,8 @@ import struct
 import pygame
 import time
 from rere_planets import solarsystem
-from rere_screens import *
+from rere_screen_controlroom import *
+from rere_screen_planetmain import *
 
 
 class ReReGame:
