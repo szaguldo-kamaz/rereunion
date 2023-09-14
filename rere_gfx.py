@@ -60,6 +60,7 @@ class ReReGFX:
         self.prepare_mousepointers()
         self.prepare_heroes_and_commanders()
         self.prepare_felszin()
+        self.prepare_researchdesign_computer()
         self.prepare_planetmain()
 
         self.menu_full = pygame.Surface((320, 64))
@@ -199,6 +200,9 @@ class ReReGFX:
         PIClist.append("PLANETS/FANIM10.PIC")  # Felszin animacio - Surface anim (tropical)
 
         PIClist.append("GRAFIKA/CHARSET1.PIC")  # Karakterkeszlet - Charset
+
+        PIClist.append("GRAFIKA/RESEARCH.PIC")  # Talalmanyok nezet - Research-design
+        PIClist.append("GRAFIKA/CDS.PIC")  # Talalmanyok nezet - CD-k
 
         PIClist.append("GRAFIKA/DESIGNER.PIC")  # Bolygo felszin nezet - Planet main
 
@@ -346,6 +350,21 @@ class ReReGFX:
         for commander_type in self.commanders.keys():
             for commander_no in range(1,4):
                 self.commanders[commander_type][commander_no].set_colorkey(pygame.Color(0, 0, 0xFF))
+
+
+    def prepare_researchdesign_computer(self):
+
+        self.researchdesign_invention_cds = []
+
+        for cd_y in range(0, 5):
+            self.researchdesign_invention_cds.append([])
+            for cd_x in range(0, 320, 32):
+                self.researchdesign_invention_cds[cd_y].append( self.PICs["CDS"].subsurface(pygame.Rect( cd_x, cd_y * 16, 32, 15)) )
+
+        self.researchdesign_computer_txt = ( self.PICs["CDS"].subsurface(pygame.Rect( 18, 79, 11, 5)),
+                                             self.PICs["CDS"].subsurface(pygame.Rect(  0, 79, 11, 5)) )
+        self.researchdesign_computer_led = ( self.PICs["CDS"].subsurface(pygame.Rect( 30, 79,  5, 5)),
+                                             self.PICs["CDS"].subsurface(pygame.Rect( 12, 79,  5, 5)) )
 
 
     def prepare_planetmain(self):
@@ -563,6 +582,8 @@ class ReReGFX:
             return self.render_controlroom(screenobj)
         elif screenobj.screentype == "planetmain":
             return self.render_planetmain(screenobj)
+        elif screenobj.screentype == "researchdesign":
+            return self.render_researchdesign(screenobj)
 
 
     # current_commanders <- gamedata_dynamic["commanders"]
@@ -592,6 +613,58 @@ class ReReGFX:
         # TODO: anim
 
         return self.screen_controlroom
+
+
+    # research-design - inventions
+    def render_researchdesign(self, screenobj_researchdesign):
+
+        self.screen_buffer.blit(self.render_menu(screenobj_researchdesign.menu_info), (0, 0))
+        self.screen_buffer.blit(self.render_infobar(screenobj_researchdesign.menu_info), (0, 32))
+
+        # TODO
+        animstate = 0
+
+        # main pic
+        self.screen_buffer.blit(self.PICs["RESEARCH"], (0, 49))
+
+        # CDs
+        for invention_no in range(0,35):
+            cd_state = screenobj_researchdesign.iconstates[invention_no]
+            if cd_state == -1:
+                continue
+            if cd_state == 4:  # under analysis
+                cd_to_blit = self.researchdesign_invention_cds[cd_state][screenobj_researchdesign.anim_states["vumeter"]["state"]]
+            else:
+            # TODO
+                cd_to_blit = self.researchdesign_invention_cds[cd_state][0]
+            cd_pos = (0 + (invention_no % 5) * 32, 49 + 4 + int(invention_no / 5) * 16)
+            self.screen_buffer.blit(cd_to_blit, cd_pos)
+
+        # Project name / status
+        if screenobj_researchdesign.project_selected != None:
+            self.screen_buffer.blit(self.render_text("Project name :", textcolor = 1), (190, 76))
+            self.screen_buffer.blit(self.render_text(screenobj_researchdesign.project_selected_name, textcolor = 1), (200, 88))
+            self.screen_buffer.blit(self.render_text(screenobj_researchdesign.project_selected_status, textcolor = 1), (190, 100))
+
+        # computer state - on/off text
+        self.screen_buffer.blit(self.researchdesign_computer_txt[screenobj_researchdesign.computer_state], ( 76, 170))
+        # computer state - on/off led
+        self.screen_buffer.blit(self.researchdesign_computer_led[screenobj_researchdesign.computer_state], (149, 170))
+
+        # developer name
+        yellow_text_developer_name = self.render_text(screenobj_researchdesign.developer_name.decode('ascii'), textcolor = 1)
+        self.screen_buffer.blit(yellow_text_developer_name, (8, 188))
+        # developer level
+        yellow_text_developer_level_math  = self.render_text(str(screenobj_researchdesign.developer_level[0]), textcolor = 1)
+        yellow_text_developer_level_phys  = self.render_text(str(screenobj_researchdesign.developer_level[1]), textcolor = 1)
+        yellow_text_developer_level_elect = self.render_text(str(screenobj_researchdesign.developer_level[2]), textcolor = 1)
+        yellow_text_developer_level_AI    = self.render_text(str(screenobj_researchdesign.developer_level[3]), textcolor = 1)
+        self.screen_buffer.blit(yellow_text_developer_level_math,  (136, 188))
+        self.screen_buffer.blit(yellow_text_developer_level_phys,  (203, 188))
+        self.screen_buffer.blit(yellow_text_developer_level_elect, (259, 188))
+        self.screen_buffer.blit(yellow_text_developer_level_AI,    (296, 188))
+
+        return self.screen_buffer
 
 
     # planet main - planet surface
