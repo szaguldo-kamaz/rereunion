@@ -22,8 +22,8 @@ class screen_planetmain(screen):
         super().__init__(gamedata_dynamic, [ menu_icons, menu_text, menu_sfx ])
 
         self.anim_exists = True
-        self.anim_states["surface"] = { "state" : 0, "count" : 3 }
-        self.anim_states["builddemolish"] = { "state" : 0, "count" : 2 }
+        self.anim_states["surface"] = { "currframe" : 0, "frames" : 3, "currtick" : 0, "ticks" : 5, "loop": 1 }
+        self.anim_states["builddemolish"] = { "currframe" : 0, "frames" : 2, "currtick" : 0, "ticks" : 5, "loop": 1 }
 
         self.planet = planet
         self.__select_building_by_index(selected_building_index)
@@ -212,11 +212,11 @@ class screen_planetmain(screen):
                     self.sfx_to_play = "BUILD"
                     self.build_mode = True
                     self.demolish_mode = False
-#                    self.anim_states["builddemolish"]["state"] = 1
+                    self.anim_states["builddemolish"]["currframe"] = 1
+                    self.anim_states["builddemolish"]["currtick"] = 0
                 else:
                     self.sfx_to_play = "X"
                     self.build_mode = False
-#                    self.anim_states["builddemolish"]["state"] = 0
 
         # Demolish icon
         elif 50 <= mouse_pos[1] <= 62 and 45 <= mouse_pos[0] <= 88:
@@ -227,11 +227,11 @@ class screen_planetmain(screen):
                     self.sfx_to_play = "X"
                     self.build_mode = False
                     self.demolish_mode = True
-#                    self.anim_states["builddemolish"]["state"] = 1
+                    self.anim_states["builddemolish"]["currframe"] = 1
+                    self.anim_states["builddemolish"]["currtick"] = 0
                 else:
                     self.sfx_to_play = "X"
                     self.demolish_mode = False
-#                    self.anim_states["builddemolish"]["state"] = 0
 
         if (horizontal_scroll != 0) or (vertical_scroll != 0):
             self.set_map_position([ self.map_position[0] + horizontal_scroll,

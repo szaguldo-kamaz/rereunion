@@ -633,7 +633,7 @@ class ReReGFX:
             if cd_state == -1:
                 continue
             if cd_state == 4:  # under analysis
-                cd_to_blit = self.researchdesign_invention_cds[cd_state][screenobj_researchdesign.anim_states["vumeter"]["state"]]
+                cd_to_blit = self.researchdesign_invention_cds[cd_state][screenobj_researchdesign.anim_states["vumeter"]["currframe"]]
             else:
             # TODO
                 cd_to_blit = self.researchdesign_invention_cds[cd_state][0]
@@ -677,10 +677,10 @@ class ReReGFX:
         self.screen_buffer.blit(self.PICs["DESIGNER"], (0, 49))
 
         # build icon
-        buildicon_state = screenobj_planetmain.anim_states["builddemolish"]["state"] and screenobj_planetmain.build_mode
+        buildicon_state = screenobj_planetmain.anim_states["builddemolish"]["currframe"] and screenobj_planetmain.build_mode
         self.screen_buffer.blit(self.planetmain_buildicon[buildicon_state], (0, 1 + 49))
         # demolish icon
-        demolishicon_state = screenobj_planetmain.anim_states["builddemolish"]["state"] and screenobj_planetmain.demolish_mode
+        demolishicon_state = screenobj_planetmain.anim_states["builddemolish"]["currframe"] and screenobj_planetmain.demolish_mode
         self.screen_buffer.blit(self.planetmain_demolishicon[demolishicon_state], (45, 1 + 49))
         # building - invention up kammide
         self.screen_buffer.blit(self.planetmain_arrowup[screenobj_planetmain.selected_building_is_first], (0, 15 + 49))
@@ -695,7 +695,7 @@ class ReReGFX:
         self.screen_buffer.blit(yellow_text_building_name, (2, 81 + 49))
 
         # surface map
-        planet_surface = self.render_surface_with_buildings(screenobj_planetmain.planet, screenobj_planetmain.anim_states["surface"]["state"])
+        planet_surface = self.render_surface_with_buildings(screenobj_planetmain.planet, screenobj_planetmain.anim_states["surface"]["currframe"])
         planet_surface_cropped = planet_surface.subsurface(pygame.Rect(screenobj_planetmain.map_position[0] * 16,
                                                                        screenobj_planetmain.map_position[1] * 16,
                                                                        14*16, 9*16))
