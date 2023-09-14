@@ -25,7 +25,6 @@ class screen:
             self.infobar_timespinning_type = 0
 
         self.anim_exists = False
-        self.anim_ticks = 0
         self.anim_states = {}
 
         self.action = None
@@ -59,13 +58,13 @@ class screen:
         if not self.anim_exists:
             return
 
-        self.anim_ticks += 1
-        if self.anim_ticks == 5:
-            self.anim_ticks = 0
-            for curr_state_id in self.anim_states.keys():
-                self.anim_states[curr_state_id]["state"] += 1
-                if self.anim_states[curr_state_id]["state"] == self.anim_states[curr_state_id]["count"]:
-                    self.anim_states[curr_state_id]["state"] = 0
+        for curr_state_id in self.anim_states.keys():
+            self.anim_states[curr_state_id]["currtick"] += 1
+            if self.anim_states[curr_state_id]["currtick"] == self.anim_states[curr_state_id]["ticks"]:
+                self.anim_states[curr_state_id]["currtick"] = 0
+                self.anim_states[curr_state_id]["currframe"] += 1
+                if self.anim_states[curr_state_id]["currframe"] == self.anim_states[curr_state_id]["frames"]:
+                    self.anim_states[curr_state_id]["currframe"] = 0
 
 
     def update_menu(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):
