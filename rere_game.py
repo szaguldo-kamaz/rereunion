@@ -12,6 +12,7 @@ import time
 from rere_planets import solarsystem
 from rere_screen_controlroom import *
 from rere_screen_planetmain import *
+from rere_screen_researchdesign import *
 
 
 class ReReGame:
@@ -620,6 +621,7 @@ class ReReGame:
 
         self.screens = {}
         self.screens["controlroom"] = screen_controlroom(self.gamedata_static, self.gamedata_dynamic)
+        self.screens["researchdesign"] = screen_researchdesign(self.gamedata_static, self.gamedata_dynamic)
         self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,5,0)])  # New-Earth
         #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,4,4)])  # Penelope
         #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,3,3)])  # Mir
@@ -635,6 +637,9 @@ class ReReGame:
             screen_changed = True
         elif screen_action == "PLANET MAIN":
             self.current_screen = self.screens["planetmain"]
+            screen_changed = True
+        elif screen_action == "RESEARCH-DESIGN":
+            self.current_screen = self.screens["researchdesign"]
             screen_changed = True
 
         if screen_changed:

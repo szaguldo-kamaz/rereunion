@@ -86,6 +86,7 @@ class screen_controlroom(screen):
             self.menu_info["actiontext"] = 'RESEARCH-DESIGN'
             if mouse_buttonevent[0]:  # mouse button pressed
                 self.sfx_to_play = "RESEARCH"
+                self.action = "RESEARCH-DESIGN"
 
         # Local
         elif 0+49 <= mouse_pos[1] <= 46+49 and 83 <= mouse_pos[0] <= 128:
