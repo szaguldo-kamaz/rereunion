@@ -257,10 +257,10 @@ class ReReGFX:
             for pixel_y in range(len(yellow_charset_full[0])):
                 if  yellow_charset_full[pixel_x][pixel_y] == 0x17579f:
                     yellow_charset_full[pixel_x][pixel_y] = 0x827500
-                    red_charset_full[pixel_x][pixel_y] = 0xe74518
+                    red_charset_full[pixel_x][pixel_y] = 0xa63410
                 elif yellow_charset_full[pixel_x][pixel_y] == 0x3b87df:
                     yellow_charset_full[pixel_x][pixel_y] = 0xb6aa00
-                    red_charset_full[pixel_x][pixel_y] = 0xa63410
+                    red_charset_full[pixel_x][pixel_y] = 0xe74518
 
         yellow_charset_full_surface = pygame.Surface((320, 32))
         red_charset_full_surface = pygame.Surface((320, 32))
