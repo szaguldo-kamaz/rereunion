@@ -114,14 +114,16 @@ class ReReGFX:
                 PCXdata_pointer_compressed_raw += 1
                 palette_pos = PCXdata_compressed_raw[PCXdata_pointer_compressed_raw] * 3
                 for minoroffset in range(repeat):
+                    if PCXdata_pointer_uncompressed_RGB >= imagesize:  # e.g. INFO26
+                        break
     #                PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB:PCXdata_pointer_uncompressed_RGB+3] = palette[ palette_pos: palette_pos+3 ];
     #                PCXdata_pointer_uncompressed_RGB += 3
     # this is faster... :
-                    PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB] = palette[ palette_pos ];
+                    PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB] = palette[ palette_pos ]
                     PCXdata_pointer_uncompressed_RGB += 1
-                    PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB] = palette[ palette_pos + 1 ];
+                    PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB] = palette[ palette_pos + 1 ]
                     PCXdata_pointer_uncompressed_RGB += 1
-                    PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB] = palette[ palette_pos + 2 ];
+                    PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB] = palette[ palette_pos + 2 ]
                     PCXdata_pointer_uncompressed_RGB += 1
 
             PCXdata_pointer_compressed_raw += 1
