@@ -11,6 +11,7 @@ import pygame
 import time
 from rere_planets import solarsystem
 from rere_screen_controlroom import *
+from rere_screen_infobuy import *
 from rere_screen_planetmain import *
 from rere_screen_researchdesign import *
 
@@ -248,14 +249,28 @@ class ReReGame:
             # research state 5 - done
 
             inventions[invention_seqno] = dict(zip(keys1, unpacklist1))
-            inventions[invention_seqno]["minerals"] = dict(zip(self.gamedata_static["mineral_names"], struct.unpack("<HHHHHH", raw_inventionsdata[invention_imagepos:invention_imagepos + 12])))
+#            inventions[invention_seqno]["minerals"] = dict(zip(self.gamedata_static["mineral_names"], struct.unpack("<HHHHHH", raw_inventionsdata[invention_imagepos:invention_imagepos + 12])))
+            inventions[invention_seqno]["minerals"] = struct.unpack("<HHHHHH", raw_inventionsdata[invention_imagepos:invention_imagepos + 12])
             invention_imagepos += 12
-            inventions[invention_seqno]["requiredskills"] = dict(zip(self.gamedata_static["skill_names"], struct.unpack("BBBB", raw_inventionsdata[invention_imagepos:invention_imagepos + 4])))
+#            inventions[invention_seqno]["requiredskills"] = dict(zip(self.gamedata_static["skill_names"], struct.unpack("BBBB", raw_inventionsdata[invention_imagepos:invention_imagepos + 4])))
+            inventions[invention_seqno]["requiredskills"] = struct.unpack("BBBB", raw_inventionsdata[invention_imagepos:invention_imagepos + 4])
             invention_imagepos += 4
 
     #        print("%d %s"%(invention_seqno, inventions[invention_seqno]))
 
         return inventions
+
+
+    def load_inventionsdesc(self, inventionsdesc_filename = "TEXT/SZ_TALAL.RAW"):
+
+        inventionsdesc = open(inventionsdesc_filename, "rb")
+        inventionsdesc_image = inventionsdesc.read(7595)
+        inventionsdesc.close()
+
+        inv_desc_alltext = struct.unpack("<" + "31p" * 7 * 35, inventionsdesc_image)
+        inv_desc = [ inv_desc_alltext[x:x+7] for x in range(0, 35 * 7, 7) ]
+
+        return inv_desc
 
 
     def process_raw_systemplanetsdata(self, raw_systemplanetsdata):
@@ -613,6 +628,8 @@ class ReReGame:
         # load dynamic data initial values (money, date, buildings_data, etc.) from savegame
         [ self.gamedata_dynamic ] = self.load_savegame(savegame_filename)  # needs self.gamedata_static !
 
+        self.gamedata_static["inventions_desc"] = self.load_inventionsdesc()
+
         self.__setup_solarsystems(self.gamedata_static, self.gamedata_dynamic)
         self.__setup_buildings_on_planets(self.gamedata_dynamic)
 
@@ -621,6 +638,7 @@ class ReReGame:
 
         self.screens = {}
         self.screens["controlroom"] = screen_controlroom(self.gamedata_static, self.gamedata_dynamic)
+        self.screens["infobuy"] = screen_infobuy(self.gamedata_static, self.gamedata_dynamic)
         self.screens["researchdesign"] = screen_researchdesign(self.gamedata_static, self.gamedata_dynamic)
         self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,5,0)])  # New-Earth
         #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,4,4)])  # Penelope
@@ -640,6 +658,9 @@ class ReReGame:
             screen_changed = True
         elif screen_action == "RESEARCH-DESIGN":
             self.current_screen = self.screens["researchdesign"]
+            screen_changed = True
+        elif screen_action == "INFO-BUY":
+            self.current_screen = self.screens["infobuy"]
             screen_changed = True
 
         if screen_changed:
