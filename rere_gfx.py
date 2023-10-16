@@ -59,8 +59,9 @@ class ReReGFX:
         self.prepare_icons()
         self.prepare_mousepointers()
         self.prepare_heroes_and_commanders()
-        self.prepare_felszin()
+        self.prepare_infobuy()
         self.prepare_researchdesign_computer()
+        self.prepare_felszin()
         self.prepare_planetmain()
 
         self.menu_full = pygame.Surface((320, 64))
@@ -203,17 +204,23 @@ class ReReGFX:
 
         PIClist.append("GRAFIKA/CHARSET1.PIC")  # Karakterkeszlet - Charset
 
-        PIClist.append("GRAFIKA/RESEARCH.PIC")  # Talalmanyok nezet - Research-design
-        PIClist.append("GRAFIKA/CDS.PIC")  # Talalmanyok nezet - CD-k
-
-        PIClist.append("GRAFIKA/DESIGNER.PIC")  # Bolygo felszin nezet - Planet main
-
         PIClist.append("ICON/ICONMAIN.PIC")  # Ikonok keretei es egermutatok - Icon frames and mouse pointers
 
         PIClist.append("GRAFIKA/MAIN.PIC")  # Fokepernyo - Main screen
         PIClist.append("GRAFIKA/TEXT.PIC")  # Fokepernyo - gomb funkcioja, penz, datum - Main screen button function, money, date
         PIClist.append("GRAFIKA/HEROES.PIC")  # Heroes
         PIClist.append("GRAFIKA/MAINFACE.PIC")  # Commanders
+
+        PIClist.append("GRAFIKA/RESEARCH.PIC")  # Talalmanyok nezet - Research-design
+        PIClist.append("GRAFIKA/CDS.PIC")  # Talalmanyok nezet - CD-k
+
+        PIClist.append("GRAFIKA/DESIGNER.PIC")  # Bolygo felszin nezet - Planet main
+
+        PIClist.append("GRAFIKA/INFO.PIC")  # INFO-BUY main frame
+        PIClist.append("GRAFIKA/SELECT.PIC")  # INFO-BUY list frame
+        # Info pics
+        for info_no in range(1,36):
+            PIClist.append("INFO/INFO%d.PIC"%(info_no))  # INFO-BUY kepek - illustrations
 
         # Fajok
         for faj_no in range(14):
@@ -352,6 +359,13 @@ class ReReGFX:
         for commander_type in self.commanders.keys():
             for commander_no in range(1,4):
                 self.commanders[commander_type][commander_no].set_colorkey(pygame.Color(0, 0, 0xFF))
+
+
+    def prepare_infobuy(self):
+
+        self.PICs["SELECT"] = self.PICs["SELECT"].subsurface(pygame.Rect(0, 0, 126, 126))
+        for infopic_no in range(1,36):
+            self.PICs["INFO%d"%(infopic_no)] = self.PICs["INFO%d"%(infopic_no)].subsurface(pygame.Rect(6, 6, 180, 115))
 
 
     def prepare_researchdesign_computer(self):
@@ -586,6 +600,8 @@ class ReReGFX:
             return self.render_planetmain(screenobj)
         elif screenobj.screentype == "researchdesign":
             return self.render_researchdesign(screenobj)
+        elif screenobj.screentype == "infobuy":
+            return self.render_infobuy(screenobj)
 
 
     # current_commanders <- gamedata_dynamic["commanders"]
@@ -615,6 +631,58 @@ class ReReGFX:
         # TODO: anim
 
         return self.screen_controlroom
+
+
+    # info-buy
+    def render_infobuy(self, screenobj_infobuy):
+
+        self.screen_buffer.blit(self.render_menu(screenobj_infobuy.menu_info), (0, 0))
+        self.screen_buffer.blit(self.render_infobar(screenobj_infobuy.menu_info), (0, 32))
+
+        # main pic
+        self.screen_buffer.blit(self.PICs["INFO"], (0, 49))
+        self.screen_buffer.blit(self.PICs["SELECT"], (0, 49))
+
+        # Item list
+        for listitem_no in range(min(13,screenobj_infobuy.invention_item_list_len)):
+            listitem_index = listitem_no + screenobj_infobuy.scroll_start
+            if listitem_index == screenobj_infobuy.selected_item_listno:
+                itemcolor = 2
+            else:
+                itemcolor = 1
+            self.screen_buffer.blit(self.render_text(screenobj_infobuy.invention_item_list[listitem_index][1], textcolor = itemcolor),
+                                    (16, 55 + listitem_no * 9) )
+
+        if screenobj_infobuy.picturemode:
+            # Item pic
+            self.screen_buffer.blit(self.PICs["INFO%d"%(screenobj_infobuy.selected_item_invno)], (134, 55))
+        else:
+            # Item info
+            self.screen_buffer.blit(self.render_text(screenobj_infobuy.invention_description[0], textcolor = 2), (136, 59) )
+            for descline_no in range(1, 7):
+                self.screen_buffer.blit(self.render_text(screenobj_infobuy.invention_description[descline_no], textcolor = 1), (136, 61 + descline_no * 10) )
+            self.screen_buffer.blit(self.render_text("Ore needed: [One piece]", textcolor = 2), (136, 133) )
+            self.screen_buffer.blit(self.render_text("Detoxin:%5d"%(screenobj_infobuy.minerals[0]), textcolor = 1), (142, 142) )
+            self.screen_buffer.blit(self.render_text("Energon:%5d"%(screenobj_infobuy.minerals[1]), textcolor = 1), (142, 151) )
+            self.screen_buffer.blit(self.render_text("Raenium:%5d"%(screenobj_infobuy.minerals[4]), textcolor = 1), (142, 160) )
+            self.screen_buffer.blit(self.render_text("Kremir  :%5d"%(screenobj_infobuy.minerals[2]), textcolor = 1), (225, 142) )
+            self.screen_buffer.blit(self.render_text("Texon   :%5d"%(screenobj_infobuy.minerals[5]), textcolor = 1), (225, 151) )
+            self.screen_buffer.blit(self.render_text("Lepitium:%5d"%(screenobj_infobuy.minerals[3]), textcolor = 1), (225, 160) )
+
+        if screenobj_infobuy.can_be_produced:
+            self.screen_buffer.blit(self.render_text("Stores:", textcolor = 1), (14, 189) )
+            self.screen_buffer.blit(self.render_text("%d"%(screenobj_infobuy.stores), textcolor = 2), (100, 189) )
+            if screenobj_infobuy.bought_items > 0:
+                self.screen_buffer.blit(self.render_text("Bought items:", textcolor = 1), (14, 180) )
+                self.screen_buffer.blit(self.render_text("%d"%(screenobj_infobuy.bought_items), textcolor = 2), (100, 180) )
+                self.screen_buffer.blit(self.render_text("Time to go:", textcolor = 1), (160, 180) )
+                self.screen_buffer.blit(self.render_text("%d"%(screenobj_infobuy.time_to_go), textcolor = 2), (264, 180) )
+                self.screen_buffer.blit(self.render_text("Total price:", textcolor = 1), (160, 189) )
+                self.screen_buffer.blit(self.render_text("%d"%(screenobj_infobuy.total_price), textcolor = 2), (264, 189) )
+        else:
+            self.screen_buffer.blit(self.render_text(screenobj_infobuy.cannot_be_produced_reason, textcolor = 2), (14, 189) )
+
+        return self.screen_buffer
 
 
     # research-design - inventions
