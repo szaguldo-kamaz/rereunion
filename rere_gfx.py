@@ -372,12 +372,14 @@ class ReReGFX:
 
     def prepare_researchdesign_computer(self):
 
-        self.researchdesign_invention_cds = []
+        self.researchdesign_invention_cds_anim = []
+        self.researchdesign_invention_cds_init = []
 
         for cd_y in range(0, 5):
-            self.researchdesign_invention_cds.append([])
+            self.researchdesign_invention_cds_anim.append([])
             for cd_x in range(0, 320, 32):
-                self.researchdesign_invention_cds[cd_y].append( self.PICs["CDS"].subsurface(pygame.Rect( cd_x, cd_y * 16, 32, 15)) )
+                self.researchdesign_invention_cds_anim[cd_y].append( self.PICs["CDS"].subsurface(pygame.Rect( cd_x, cd_y * 16, 32, 15)) )
+            self.researchdesign_invention_cds_init.append(self.researchdesign_invention_cds_anim[cd_y].pop(0))
 
         self.researchdesign_computer_txt = ( self.PICs["CDS"].subsurface(pygame.Rect( 18, 79, 11, 5)),
                                              self.PICs["CDS"].subsurface(pygame.Rect(  0, 79, 11, 5)) )
@@ -660,6 +662,7 @@ class ReReGFX:
         if screenobj_infobuy.picturemode:
             # Item pic
             self.screen_buffer.blit(self.PICs["INFO%d"%(screenobj_infobuy.selected_item_invno)], (134, 55))
+#            self.screen_buffer.blit(self.PICs["INFO26"], (134, 55))
         else:
             # Item info
             self.screen_buffer.blit(self.render_text(screenobj_infobuy.invention_description[0], textcolor = 2), (136, 59) )
@@ -707,10 +710,10 @@ class ReReGFX:
             if cd_state == -1:
                 continue
             if cd_state == 4:  # under analysis
-                cd_to_blit = self.researchdesign_invention_cds[cd_state][screenobj_researchdesign.anim_states["vumeter"]["currframe"]]
+                cd_to_blit = self.researchdesign_invention_cds_anim[cd_state][screenobj_researchdesign.anim_states["vumeter"]["currframe"]]
             else:
             # TODO
-                cd_to_blit = self.researchdesign_invention_cds[cd_state][0]
+                cd_to_blit = self.researchdesign_invention_cds_init[cd_state]
             cd_pos = (0 + (invention_no % 5) * 32, 49 + 4 + int(invention_no / 5) * 16)
             self.screen_buffer.blit(cd_to_blit, cd_pos)
 
