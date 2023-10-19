@@ -14,6 +14,7 @@ from rere_screen_controlroom import *
 from rere_screen_infobuy import *
 from rere_screen_planetmain import *
 from rere_screen_researchdesign import *
+from rere_screen_messages import *
 
 
 class ReReGame:
@@ -643,6 +644,7 @@ class ReReGame:
         self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,5,0)])  # New-Earth
         #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,4,4)])  # Penelope
         #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,3,3)])  # Mir
+        self.screens["messages"] = screen_messages(self.gamedata_dynamic)
         self.current_screen = self.screens["controlroom"]
 
 
@@ -661,6 +663,9 @@ class ReReGame:
             screen_changed = True
         elif screen_action == "INFO-BUY":
             self.current_screen = self.screens["infobuy"]
+            screen_changed = True
+        elif screen_action == "MESSAGES":
+            self.current_screen = self.screens["messages"]
             screen_changed = True
 
         if screen_changed:

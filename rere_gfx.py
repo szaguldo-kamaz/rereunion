@@ -226,6 +226,8 @@ class ReReGFX:
         for faj_no in range(14):
             PIClist.append("PLANETS/FAJ%d.PIC"%(faj_no))  # Fajok - Species
 
+        PIClist.append("GRAFIKA/UZENET.PIC")  # Uzenetek - Messages screen
+
         # Nagy
         #for nagy_no in range(13):
         #    PIClist.append("PLANETS/NAGY%d.PIC"%(nagy_no))  #.
@@ -602,6 +604,8 @@ class ReReGFX:
             return self.render_researchdesign(screenobj)
         elif screenobj.screentype == "infobuy":
             return self.render_infobuy(screenobj)
+        elif screenobj.screentype == "messages":
+            return self.render_messages(screenobj)
 
 
     # current_commanders <- gamedata_dynamic["commanders"]
@@ -715,6 +719,10 @@ class ReReGFX:
             self.screen_buffer.blit(self.render_text("Project name :", textcolor = 1), (190, 76))
             self.screen_buffer.blit(self.render_text(screenobj_researchdesign.project_selected_name, textcolor = 1), (200, 88))
             self.screen_buffer.blit(self.render_text(screenobj_researchdesign.project_selected_status, textcolor = 1), (190, 100))
+            if screenobj_researchdesign.project_selected_requiredskills != None:
+                print("puzomajom", screenobj_researchdesign.project_selected_requiredskills[0])
+            if screenobj_researchdesign.project_selected_completionratio != None:
+                print("puzomajom2", screenobj_researchdesign.project_selected_completionratio)
 
         # computer state - on/off text
         self.screen_buffer.blit(self.researchdesign_computer_txt[screenobj_researchdesign.computer_state], ( 76, 170))
@@ -787,4 +795,22 @@ class ReReGFX:
 
         return self.screen_buffer
 
+
+    # messages
+    def render_messages(self, screenobj_messages):
+
+        self.screen_buffer.blit(self.render_menu(screenobj_messages.menu_info), (0, 0))
+        self.screen_buffer.blit(self.render_infobar(screenobj_messages.menu_info), (0, 32))
+
+        animstate = 0
+
+        # main pic
+        self.screen_buffer.blit(self.PICs["UZENET"], (0, 49))
+
+        # messages
+        for msg_no in range(len(screenobj_messages.messages)):
+            msgbitmap = self.render_text(screenobj_messages.messages[msg_no][0], textcolor = screenobj_messages.messages[msg_no][1])
+            self.screen_buffer.blit(msgbitmap, (10, 57 + msg_no * 9))
+
+        return self.screen_buffer
 
