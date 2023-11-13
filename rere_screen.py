@@ -10,19 +10,7 @@ class screen:
 
     def __init__(self, gamedata_dynamic, menu_data):
 
-        [ menu_icons, menu_text, menu_sfx ] = menu_data
-
-        if menu_data == None:
-            self.has_menu = False
-        else:
-            self.has_menu = True
-            self.menu_info = { "icons": menu_icons, "text": menu_text, "sfx": menu_sfx,
-                               "updown": 0, "actiontext": "",
-                               "date": gamedata_dynamic["date"],
-                               "money": gamedata_dynamic["money"] }
-            self.menuicon_pointerover = None
-            self.infobar_timespinning = False
-            self.infobar_timespinning_type = 0
+        self.gamedata_dynamic = gamedata_dynamic
 
         self.anim_exists = False
         self.anim_states = {}
@@ -30,7 +18,23 @@ class screen:
         self.action = None
         self.sfx_to_play = None
 
-        self.gamedata_dynamic = gamedata_dynamic
+        if menu_data == None:
+            self.has_menu = False
+        else:
+            self.has_menu = True
+            self.define_menu(menu_data)
+
+
+    def define_menu(self, menu_data):
+
+        [ menu_icons, menu_text, menu_sfx ] = menu_data
+        self.menu_info = { "icons": menu_icons, "text": menu_text, "sfx": menu_sfx,
+                           "updown": 0, "actiontext": "",
+                           "date": self.gamedata_dynamic["date"],
+                           "money": self.gamedata_dynamic["money"] }
+        self.menuicon_pointerover = None
+        self.infobar_timespinning = False
+        self.infobar_timespinning_type = 0
 
 
     def get_action(self):
