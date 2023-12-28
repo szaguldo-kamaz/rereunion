@@ -808,9 +808,7 @@ class ReReGFX:
         # draw selected forces data text
 
         curgrp = screenobj_ship.current_shipgroup[screenobj_ship.selected_group_no_current]
-        sysname = curgrp.location[0]
-        planetname = curgrp.location[1]
-        moonname = curgrp.location[2]
+        [ sysname, planetname, moonname ] = screenobj_ship.selected_group_location
         if moonname == 0:
             moonname = ""
 
