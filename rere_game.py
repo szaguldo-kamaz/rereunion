@@ -10,8 +10,10 @@ import struct
 import pygame
 import time
 from rere_planets import solarsystem
+from rere_shipgroups import shipgroup
 from rere_screen_controlroom import *
 from rere_screen_infobuy import *
+from rere_screen_ship import *
 from rere_screen_planetmain import *
 from rere_screen_researchdesign import *
 from rere_screen_messages import *
@@ -194,10 +196,10 @@ class ReReGame:
 
         keys1 = [ "type", "name", "system_no", "planet_no", "moon_no", "orbit_status" ]
 
-        keys2 = [ "Hunter", "Hunter_Laser", "Hunter_Twin", "Hunter_Miss", "Hunter_Plasma",
-                  "StarFighter", "StarFighter_Laser", "StarFighter_Twin", "StarFighter_Miss", "StarFighter_Plasma",
-                  "Destroyer", "Destroyer_Laser", "Destroyer_Twin", "Destroyer_Miss", "Destroyer_Plasma",
-                  "Cruiser", "Cruiser_Laser", "Cruiser_Twin", "Cruiser_Miss", "Cruiser_Plasma",
+        keys2 = [ "Ship1", "Ship1_Laser", "Ship1_Twin", "Ship1_Miss", "Ship1_Plasma",
+                  "Ship2", "Ship2_Laser", "Ship2_Twin", "Ship2_Miss", "Ship2_Plasma",
+                  "Ship3", "Ship3_Laser", "Ship3_Twin", "Ship3_Miss", "Ship3_Plasma",
+                  "Ship4", "Ship4_Laser", "Ship4_Twin", "Ship4_Miss", "Ship4_Plasma",
                   "Trooper", "Trooper_Laser", "Trooper_Twin", "Trooper_Miss", "Trooper_Plasma",
                   "Tank", "Tank_Laser", "Tank_Twin", "Tank_Miss", "Tank_Plasma",
                   "Aircraft", "Aircraft_Laser", "Aircraft_Twin", "Aircraft_Miss", "Aircraft_Plasma",
@@ -549,8 +551,8 @@ class ReReGame:
         savegame["groups_numofgroups"] = struct.unpack("<HHH", savegame_fileimage[savegamepos_groups_numofgroups:savegamepos_groups_numofgroups + 6])
         savegame["groups_selectedgroupno"] = struct.unpack("<HHH", savegame_fileimage[savegamepos_groups_selectedgroupno:savegamepos_groups_selectedgroupno + 6])
         savegame["groups_currentview"] = struct.unpack("<H", savegame_fileimage[savegamepos_groups_currentview:savegamepos_groups_currentview + 2])[0]
-        #savegame["groups_spacegroups"]  = self.process_raw_groupdata(savegame_fileimage[savegamepos_groups_spacegroups:savegamepos_groups_spacegroups + savegamepos_groups_spacegroups_len])
-        #savegame["groups_planetforces"] = self.process_raw_groupdata(savegame_fileimage[savegamepos_groups_planetforces:savegamepos_groups_planetforces + savegamepos_groups_planetforces_len])
+        savegame["groups_spacegroups"]  = self.process_raw_groupdata(savegame_fileimage[savegamepos_groups_spacegroups:savegamepos_groups_spacegroups + savegamepos_groups_spacegroups_len])
+        savegame["groups_planetforces"] = self.process_raw_groupdata(savegame_fileimage[savegamepos_groups_planetforces:savegamepos_groups_planetforces + savegamepos_groups_planetforces_len])
 
         savegame["numberofbuildings"] = struct.unpack("<H", savegame_fileimage[savegamepos_buildings_count:savegamepos_buildings_count + 2])[0]
         savegame["buildings_list"] = self.process_raw_buildingslistdata(savegame["numberofbuildings"], savegame_fileimage[savegamepos_buildings_list:savegamepos_buildings_list + savegame["numberofbuildings"]*14])
@@ -619,6 +621,20 @@ class ReReGame:
             self.solarsystems[solsys_id].planets[planet_id].build_new_building(building_type, pos, force_build = True)
 
 
+    def __setup_shipgroups(self, loc_gamedata_dynamic):
+
+        self.shipgroups_spaceforces = [ [] ]
+        self.shipgroups_planetforces = [ [] ]
+
+        for group_no in range(loc_gamedata_dynamic["groups_numofgroups"][1]):  # space groups
+            shipgroup_toadd = shipgroup("", 0, loc_gamedata_dynamic["groups_spacegroups"][group_no])
+            self.shipgroups_spaceforces.append(shipgroup_toadd)
+
+        for group_no in range(loc_gamedata_dynamic["groups_numofgroups"][2]):  # planet forces
+            shipgroup_toadd = shipgroup("", 0, loc_gamedata_dynamic["groups_planetforces"][group_no])
+            self.shipgroups_planetforces.append(shipgroup_toadd)
+
+
     def __init__(self, config, savegame_filename = "SAVE/SPIDYSAV.1"):
 
         self.config = config
@@ -634,6 +650,8 @@ class ReReGame:
         self.__setup_solarsystems(self.gamedata_static, self.gamedata_dynamic)
         self.__setup_buildings_on_planets(self.gamedata_dynamic)
 
+        self.__setup_shipgroups(self.gamedata_dynamic)
+
         #for planetno in self.gamedata_dynamic["systems"][systemno].keys():
         #    print(planetno, self.gamedata_dynamic["systems"][systemno][planetno]["planetname"], self.gamedata_const["planets_id_mapping"][systemno][planetno] )
 
@@ -641,6 +659,7 @@ class ReReGame:
         self.screens["controlroom"] = screen_controlroom(self.gamedata_static, self.gamedata_dynamic)
         self.screens["infobuy"] = screen_infobuy(self.gamedata_static, self.gamedata_dynamic)
         self.screens["researchdesign"] = screen_researchdesign(self.gamedata_static, self.gamedata_dynamic)
+        self.screens["ship"] = screen_ship(self.gamedata_static, self.gamedata_dynamic, self.shipgroups_spaceforces, self.shipgroups_planetforces)
         self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,5,0)])  # New-Earth
         #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,4,4)])  # Penelope
         #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,3,3)])  # Mir
@@ -663,6 +682,9 @@ class ReReGame:
             screen_changed = True
         elif screen_action == "INFO-BUY":
             self.current_screen = self.screens["infobuy"]
+            screen_changed = True
+        elif screen_action in [ "SHIP INFO", "SPACEPORT" ]:
+            self.current_screen = self.screens["ship"]
             screen_changed = True
         elif screen_action == "MESSAGES":
             self.current_screen = self.screens["messages"]
