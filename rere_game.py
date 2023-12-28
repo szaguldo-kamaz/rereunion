@@ -428,6 +428,8 @@ class ReReGame:
         exepos_mineralnames     = 0x44D6C  # len + string (de amugy mind 8 char) - 6*8
         exepos_racenames        = 0x44DA2  # len + string (de amugy mind 9 char) - 12*9
         exepos_skillnames       = 0x44E3E  # len + string (fix 7 char) - 7*4
+        exepos_systemnames      = 0x00044E5E  # 8*8
+        exepos_systemshortnames = 0x00044EA6  # 8*6
 
         reunionexe = open(reunionprg_filename, "rb")
         reunionexe_image = reunionexe.read(288992)
@@ -441,6 +443,8 @@ class ReReGame:
         mineral_names   = struct.unpack( "9p"*6,  reunionexe_image[exepos_mineralnames:exepos_mineralnames + 6*9])
         race_names      = struct.unpack("10p"*12, reunionexe_image[exepos_racenames:exepos_racenames + 12*10])
         skill_names     = struct.unpack( "8p"*4,  reunionexe_image[exepos_skillnames:exepos_skillnames + 4*8])
+        system_names      = list(map(lambda x:x.decode("ascii"), struct.unpack_from( "9p"*8,  reunionexe_image, exepos_systemnames)))
+        system_shortnames = list(map(lambda x:x.decode("ascii"), struct.unpack_from( "7p"*8,  reunionexe_image, exepos_systemshortnames)))
 
 #        print(skill_names)
 #        exit(1)
@@ -453,7 +457,9 @@ class ReReGame:
                 "commander_names": commander_names_processed,
                 "mineral_names": mineral_names,
                 "race_names": race_names,
-                "skill_names": skill_names
+                "skill_names": skill_names,
+                "system_names": system_names,
+                "system_shortnames": system_shortnames
             }
 
         gamedata_dynamic = {}

@@ -27,12 +27,24 @@ class screen_ship(screen):
 
         self.selected_group_no_current = gamedata_dynamic["groups_selectedgroupno"][0]
         self.selected_group_no = [ gamedata_dynamic["groups_selectedgroupno"][1], gamedata_dynamic["groups_selectedgroupno"][2] ]
-#        self.selected_group_location = [ "", "", "" ]
         self.currentview = gamedata_dynamic["groups_currentview"]  # 0 - normal, 1 - planet forces
         self.shipgroups_spaceforces = shipgroups_spaceforces
         self.shipgroups_planetforces = shipgroups_planetforces
+        self.current_shipgroup = self.shipgroups_spaceforces
+        self.__set_location_string()
 
         self.update(gamedata_dynamic, (0,0), [0,0,0], [0,0,0])
+
+
+    def __set_location_string(self, use_long_name = False):
+
+        loctmp = self.current_shipgroup[self.selected_group_no_current].location
+        if use_long_name:
+            sysname = self.gamedata_static["system_names"][loctmp[0]-1]
+        else:
+            sysname = self.gamedata_static["system_shortnames"][loctmp[0]-1]
+
+        self.selected_group_location = [ sysname, str(loctmp[1]), str(loctmp[2]) ]
 
 
     def update(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):
@@ -82,6 +94,7 @@ class screen_ship(screen):
                 if mouse_buttonevent[0]:
                     self.selected_group_no[self.currentview] = mouse_over_groupno
                     self.selected_group_no_current = self.selected_group_no[self.currentview]
+                    self.__set_location_string(bool(self.currentview))
                     if is_icon:
                         self.sfx_to_play = "GROUP"
 
@@ -91,6 +104,5 @@ class screen_ship(screen):
             if mouse_buttonevent[0]:
                 self.currentview = int(not self.currentview)
                 self.selected_group_no_current = self.selected_group_no[self.currentview]
-#                loctmp = self.current_shipgroup[self.selected_group_no_current].location
-#                self.selected_group_location = [ "", "", "" ]
                 self.update(gamedata_dynamic, mouse_pos, [0,0,0], [0,0,0])
+                self.__set_location_string(bool(self.currentview))
