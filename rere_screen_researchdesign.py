@@ -22,7 +22,8 @@ class screen_researchdesign(screen):
         super().__init__(gamedata_dynamic, [ menu_icons, menu_text, menu_sfx ])
 
         self.anim_exists = True
-        self.anim_states["vumeter"] = { "currframe" : 0, "frames" : 10, "currtick": 0, "ticks": 2, "loop" : 1 }
+        self.anim_states["vumeter"] = { "currframe" : 0, "frames" : 9, "currtick": 0, "ticks": 2, "loop" : 1 }
+        self.anim_states["cdtray"]  = { "currframe" : 0, "frames" : 9, "currtick": 0, "ticks": 5, "loop" : 0 }
 
         self.developer_names = gamedata_static["commander_names"][3]
         self.reset(gamedata_dynamic)
@@ -33,6 +34,9 @@ class screen_researchdesign(screen):
         self.project_running = None
         self.project_selected_name = ''
         self.project_selected_status = ''
+        self.project_selected_requiredskills = None
+        self.project_selected_completionratio = None
+        self.project_selected_requiredtime = None
         self.update(gamedata_dynamic, (0,0), [0,0,0], [0,0,0])
 
 
@@ -90,11 +94,13 @@ class screen_researchdesign(screen):
                 if mouse_buttonevent[0] and mouse_buttonstate[0]:  # left mouse button was pressed
                     self.project_selected = gamedata_dynamic["inventions"][invention_no]
                     self.project_selected_name = self.project_selected["name"]
-                    self.project_selected_requiredskills = self.project_selected["requiredskills"]
-                    self.project_selected_completionratio = int(100 * (1 - (self.project_selected["research_remaining"] / self.project_selected["research_requiredtime"])))
-                    self.project_selected_requiredtime = self.project_selected["research_requiredtime"]
+                    self.project_selected_requiredskills = list(map(str,self.project_selected["requiredskills"]))
+#                    self.project_selected_requiredtime = self.project_selected["research_requiredtime"]
+                    self.project_selected_completionratio = str(int(self.project_selected["research_remaining"] / 100))
                     if self.project_selected["research_state"] == 5:
                         self.project_selected_status = "Done"
+                        self.project_selected_requiredskills = None
+                        self.project_selected_completionratio = None
                         self.sfx_to_play = "DESIGNRE"
                     elif self.project_selected["research_state"] in [2, 4]:
                         self.project_selected_status = "Under analysis"
