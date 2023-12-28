@@ -15,11 +15,11 @@ class screen_infobuy(screen):
 
         self.screentype = "infobuy"
 
-        menu_icons = [ "BACK TO M.SCREEN", "RESEARCH-DESIGN", "BUY ITEM", "SELECT", "PROJECT UP", "PROJECT DOWN" ]
-        menu_text  = [ "BACK TO M.SCREEN", "RESEARCH-DESIGN", "BUY ITEM", "SELECT", "PROJECT UP", "PROJECT DOWN" ]
-        menu_sfx   = [ "BACK", "RESEARCH", "BUY", "SELECT", "X", "X" ]
+        self.menu_icons = [ "BACK TO M.SCREEN", "RESEARCH-DESIGN", "BUY ITEM", "INFO-BUY", "PROJECT UP", "PROJECT DOWN" ]
+        self.menu_text  = [ "BACK TO M.SCREEN", "RESEARCH-DESIGN", "BUY ITEM", "SELECT OFF", "PROJECT UP", "PROJECT DOWN" ]
+        self.menu_sfx   = [ "BACK", "RESEARCH", "BUY", "SELECT", "X", "X" ]
 
-        super().__init__(gamedata_dynamic, [ menu_icons, menu_text, menu_sfx ])
+        super().__init__(gamedata_dynamic, [ self.menu_icons, self.menu_text, self.menu_sfx ])
 
         self.gamedata_static = gamedata_static
 
@@ -30,6 +30,7 @@ class screen_infobuy(screen):
         self.selected_item_invno = 1  # Nuclear gen
         self.scroll_start = 0
         self.picturemode = True
+        self.selectmode = True
 
 
     def update(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):
@@ -70,6 +71,14 @@ class screen_infobuy(screen):
             elif menuaction == 'PROJECT DOWN':
                 if self.selected_item_listno < (self.invention_item_list_len - 1):
                     self.selected_item_listno += 1
+            elif menuaction == 'SELECT OFF':
+                self.menu_icons = [ "BACK TO M.SCREEN", "RESEARCH-DESIGN", "BUY ITEM", "SELECT", "PROJECT UP", "PROJECT DOWN" ]
+                self.menu_text  = [ "BACK TO M.SCREEN", "RESEARCH-DESIGN", "BUY ITEM", "SELECT", "PROJECT UP", "PROJECT DOWN" ]
+                self.define_menu([ self.menu_icons, self.menu_text, self.menu_sfx])
+            elif menuaction == 'SELECT':
+                self.menu_icons = [ "BACK TO M.SCREEN", "RESEARCH-DESIGN", "BUY ITEM", "INFO-BUY", "PROJECT UP", "PROJECT DOWN" ]
+                self.menu_text  = [ "BACK TO M.SCREEN", "RESEARCH-DESIGN", "BUY ITEM", "SELECT OFF", "PROJECT UP", "PROJECT DOWN" ]
+                self.define_menu([ self.menu_icons, self.menu_text, self.menu_sfx])
             else:
                 self.action = menuaction
 
