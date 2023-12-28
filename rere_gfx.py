@@ -61,6 +61,7 @@ class ReReGFX:
         self.prepare_heroes_and_commanders()
         self.prepare_infobuy()
         self.prepare_researchdesign_computer()
+        self.prepare_ship()
         self.prepare_felszin()
         self.prepare_planetmain()
 
@@ -228,6 +229,10 @@ class ReReGFX:
 
         PIClist.append("GRAFIKA/UZENET.PIC")  # Uzenetek - Messages screen
 
+        PIClist.append("GRAFIKA/SHIP1.PIC")  # Ship Groups - space forces background
+        PIClist.append("GRAFIKA/SHIP2.PIC")  # Ship Groups - planet forces background
+        PIClist.append("GRAFIKA/SHIP3.PIC")  # Ship Groups - sprites
+
         # Nagy
         #for nagy_no in range(13):
         #    PIClist.append("PLANETS/NAGY%d.PIC"%(nagy_no))  #.
@@ -385,6 +390,20 @@ class ReReGFX:
                                              self.PICs["CDS"].subsurface(pygame.Rect(  0, 79, 11, 5)) )
         self.researchdesign_computer_led = ( self.PICs["CDS"].subsurface(pygame.Rect( 30, 79,  5, 5)),
                                              self.PICs["CDS"].subsurface(pygame.Rect( 12, 79,  5, 5)) )
+
+
+    def prepare_ship(self):
+        self.ship_icon_button_unselected = self.PICs["SHIP3"].subsurface(pygame.Rect( 197, 22, 7, 6))
+        self.ship_icon_button_selected   = self.PICs["SHIP3"].subsurface(pygame.Rect( 213, 22, 7, 6))
+        self.ship_icon_planetforces      = self.PICs["SHIP3"].subsurface(pygame.Rect( 6*32 + 1, 1, 30, 14))
+        self.ship_icons_spaceforces = [ [], [], [], [], [] ]  # dummy, red, green, brown, blue
+        for ship3_icon_y in range(0, 4):
+            self.ship_icons_spaceforces[ship3_icon_y + 1].append(None)  # dummy orbit state
+            for ship3_icon_x in range(1, 129, 32):
+                self.ship_icons_spaceforces[ship3_icon_y + 1].append( self.PICs["SHIP3"].subsurface(pygame.Rect( ship3_icon_x, ship3_icon_y * 16 + 1, 30, 14)) )
+                self.ship_icons_spaceforces[ship3_icon_y + 1][-1].set_colorkey(pygame.Color(0, 0, 0))
+
+        self.ship_icon_planetforces.set_colorkey(pygame.Color(0, 0, 0))
 
 
     def prepare_planetmain(self):
@@ -606,6 +625,8 @@ class ReReGFX:
             return self.render_researchdesign(screenobj)
         elif screenobj.screentype == "infobuy":
             return self.render_infobuy(screenobj)
+        elif screenobj.screentype == "ship":
+            return self.render_ship(screenobj)
         elif screenobj.screentype == "messages":
             return self.render_messages(screenobj)
 
@@ -744,6 +765,68 @@ class ReReGFX:
         self.screen_buffer.blit(yellow_text_developer_level_phys,  (203, 188))
         self.screen_buffer.blit(yellow_text_developer_level_elect, (259, 188))
         self.screen_buffer.blit(yellow_text_developer_level_AI,    (296, 188))
+
+        return self.screen_buffer
+
+
+    # groups/ships
+    def render_ship(self, screenobj_ship):
+
+        self.screen_buffer.blit(self.render_menu(screenobj_ship.menu_info), (0, 0))
+        self.screen_buffer.blit(self.render_infobar(screenobj_ship.menu_info), (0, 32))
+
+        # main pic
+        if screenobj_ship.currentview == 0:  # space forces
+            self.screen_buffer.blit(self.PICs["SHIP1"], (0, 49))
+        else:  # planet forces
+            self.screen_buffer.blit(self.PICs["SHIP2"], (0, 49))
+
+        group_count = len(screenobj_ship.current_shipgroup)
+        for group_no in range(1, 33):
+
+            colpos = (group_no - 1) // 8
+            rowpos = (group_no - 1) % 8
+
+            # draw buttons
+            if group_no == screenobj_ship.selected_group_no_current:
+                buttonicon = self.ship_icon_button_selected
+            else:
+                buttonicon = self.ship_icon_button_unselected
+            self.screen_buffer.blit(buttonicon, (5 + colpos * 48, 65 + rowpos * 16))
+            if group_no >= group_count:
+                continue
+
+            curgrp = screenobj_ship.current_shipgroup[group_no]
+
+            # draw forces icons
+            if curgrp.type == 5:
+                forces_icon = self.ship_icon_planetforces
+            else:
+                forces_icon = self.ship_icons_spaceforces[curgrp.type][curgrp.orbit_status]
+            self.screen_buffer.blit(forces_icon, (17 + colpos * 48, 61 + rowpos * 16))
+
+        # draw selected forces data text
+
+        curgrp = screenobj_ship.current_shipgroup[screenobj_ship.selected_group_no_current]
+        sysname = curgrp.location[0]
+        planetname = curgrp.location[1]
+        moonname = curgrp.location[2]
+        if moonname == 0:
+            moonname = ""
+
+        red_text_group_name = self.render_text(curgrp.name, textcolor = 2)
+        if curgrp.type == 5:
+            yellow_text_group_loc_sysname = self.render_text(f"Base on:  {sysname}", textcolor = 1)
+        else:
+            yellow_text_group_loc_sysname = self.render_text(f"Currently on:{sysname}", textcolor = 1)
+        yellow_text_group_loc_planetname = self.render_text(f"{planetname}", textcolor = 1)
+        yellow_text_group_loc_moonname = self.render_text(f"{moonname}", textcolor = 1)
+
+        self.screen_buffer.blit(red_text_group_name, (202, 60))
+        self.screen_buffer.blit(yellow_text_group_loc_sysname, (202, 70))
+        self.screen_buffer.blit(yellow_text_group_loc_planetname, (211, 79))
+        self.screen_buffer.blit(yellow_text_group_loc_moonname, (220, 89))
+#        self.screen_buffer.blit(yellow_text_group_memb_, (202, 70))
 
         return self.screen_buffer
 
