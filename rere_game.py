@@ -665,7 +665,7 @@ class ReReGame:
         self.screens["controlroom"] = screen_controlroom(self.gamedata_static, self.gamedata_dynamic)
         self.screens["infobuy"] = screen_infobuy(self.gamedata_static, self.gamedata_dynamic)
         self.screens["researchdesign"] = screen_researchdesign(self.gamedata_static, self.gamedata_dynamic)
-        self.screens["ship"] = screen_ship(self.gamedata_static, self.gamedata_dynamic, self.shipgroups_spaceforces, self.shipgroups_planetforces)
+        self.screens["ship"] = screen_ship(self.gamedata_static, self.gamedata_dynamic, self.solarsystems, self.shipgroups_spaceforces, self.shipgroups_planetforces)
         self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,5,0)])  # New-Earth
         #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,4,4)])  # Penelope
         #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,3,3)])  # Mir
