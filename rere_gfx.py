@@ -145,8 +145,8 @@ class ReReGFX:
             print('Error in PIC file (no magic id string): ', PICfilename)
             return [ None, [ 0, 0 ] ]
 
-        [ width, height ] = struct.unpack("<HH", PICdata_compressed_raw[8:12]);
-        PICimagesize = width * height * 3;
+        [ width, height ] = struct.unpack_from("<HH", PICdata_compressed_raw, 8)
+        PICimagesize = width * height * 3
 
         if PICdata_compressed_raw[-769] != 0x0C:
             print('Error in PIC file (no palette magic): ', PICfilename)
@@ -174,7 +174,7 @@ class ReReGFX:
 
         while ICONALLdata_pointer < len(ICONALLdata):
 
-            compressed_raw_length = struct.unpack("<H", ICONALLdata[ICONALLdata_pointer:ICONALLdata_pointer+2])[0]
+            compressed_raw_length = struct.unpack_from("<H", ICONALLdata, ICONALLdata_pointer)[0]
             ICONALLdata_pointer += 2
             PICdata_compressed_raw = ICONALLdata[ICONALLdata_pointer:ICONALLdata_pointer+compressed_raw_length]
             ICONALLdata_pointer += compressed_raw_length
@@ -754,7 +754,7 @@ class ReReGFX:
         self.screen_buffer.blit(self.researchdesign_computer_led[screenobj_researchdesign.computer_state], (149, 170))
 
         # developer name
-        yellow_text_developer_name = self.render_text(screenobj_researchdesign.developer_name.decode('ascii'), textcolor = 1)
+        yellow_text_developer_name = self.render_text(screenobj_researchdesign.developer_name, textcolor = 1)
         self.screen_buffer.blit(yellow_text_developer_name, (8, 188))
         # developer level
         yellow_text_developer_level_math  = self.render_text(str(screenobj_researchdesign.developer_level[0]), textcolor = 1)
@@ -857,7 +857,7 @@ class ReReGFX:
         self.screen_buffer.blit(self.render_building(screenobj_planetmain.planet, self.gamedata_static["buildings_info"][screenobj_planetmain.selected_building_type]), (12, 15 + 49))
         # building name
         yellow_text_building_name = self.render_text(
-                                        self.gamedata_static["buildings_info"][screenobj_planetmain.selected_building_type]["name"].decode('ascii'),
+                                        self.gamedata_static["buildings_info"][screenobj_planetmain.selected_building_type]["name"],
                                         textcolor = 1)
         self.screen_buffer.blit(yellow_text_building_name, (2, 81 + 49))
 

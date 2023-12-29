@@ -109,7 +109,7 @@ class ReReGame:
 
         keys1 = [ "planetname", "orbitingvelocity", "orbitdistance" ]
         for planetno in range(1, num_of_planets + 1):  # no 0, to keep original numbering
-            unpacklist1 = struct.unpack("<10pBH", raw_planetsdata[planet_imagepos:planet_imagepos + 13])
+            unpacklist1 = struct.unpack_from("<10pBH", raw_planetsdata, planet_imagepos)
             planet_imagepos += 13
             planetsdata[planetno] = dict(zip(keys1, unpacklist1))
 
@@ -159,7 +159,7 @@ class ReReGame:
             # 50-59 like
             # 60-69 loyal
 
-            unpacklist2 = struct.unpack("<BBBBBBBBBBBBBIBBBBBBHH", raw_planetsdata[planet_imagepos:planet_imagepos + 27])
+            unpacklist2 = struct.unpack_from("<BBBBBBBBBBBBBIBBBBBBHH", raw_planetsdata, planet_imagepos)
             planet_imagepos += 27
 
             planetsdata[planetno] |= dict(zip(keys2, unpacklist2))
@@ -181,6 +181,8 @@ class ReReGame:
                 planetsdata[planetno]["mineral_production"][mineral] = struct.unpack("B", mineral_bytes)[0]
                 planet_imagepos += 1
 
+            planetsdata[planetno]["planetname"] = planetsdata[planetno]["planetname"].decode('ascii')
+
     #        print("%d: %s %s"%(planetno, planetsdata[planetno], gamedata_const["planettypes"][planetsdata[planetno]["planettype"]]))
 
         return planetsdata
@@ -191,8 +193,8 @@ class ReReGame:
         group_imagepos = 0
         groups = {};
 
-        # type: 1 army, 2 trade, 4 carrier
-        # orbit status: 1 grounded, 2 orbiting planet, ?4 in transit wihtin system?, ?6 in transit through systems?
+        # type: 1 army, 2 trade, (3 pirate), 4 carrier
+        # orbit status: 1 grounded, 2 orbiting planet, ?4 in transit within system?, ?6 in transit through systems?
 
         keys1 = [ "type", "name", "system_no", "planet_no", "moon_no", "orbit_status" ]
 
@@ -212,17 +214,19 @@ class ReReGame:
 
         for groupno in range(24):
 
-            unpacklist = struct.unpack("<B18pBBBB", raw_groupdata[group_imagepos:group_imagepos + 23])
+            unpacklist = struct.unpack_from("<B18pBBBB", raw_groupdata, group_imagepos)
             group_imagepos += 23
 
             # remaining flight time should be here
             group_unknown1 = raw_groupdata[group_imagepos:group_imagepos + 6]
             group_imagepos += 6
 
-            unpacklist2 = struct.unpack("<HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHIIIIIIHHHHHHHHHHHHHH", raw_groupdata[group_imagepos:group_imagepos + 132])
+            unpacklist2 = struct.unpack_from("<HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHIIIIIIHHHHHHHHHHHHHH", raw_groupdata, group_imagepos)
             group_imagepos += 132
 
             groups[groupno] = dict(zip(keys1+keys2, unpacklist+unpacklist2))
+
+            groups[groupno]["name"] = groups[groupno]["name"].decode("ascii")
 
     #        print(groups[groupno])
     #        print("%s"%(list(group_unknown1)))
@@ -241,7 +245,7 @@ class ReReGame:
         # 35 inventions in total
         for invention_seqno in range(1, 36):
 
-            unpacklist1 = struct.unpack("<17pHHHIHHHHBB", raw_inventionsdata[invention_imagepos:invention_imagepos + 37]);
+            unpacklist1 = struct.unpack_from("<17pHHHIHHHHBB", raw_inventionsdata, invention_imagepos)
             invention_imagepos += 37
 
             # research state 0 - unavailable (not shown)
@@ -253,10 +257,10 @@ class ReReGame:
 
             inventions[invention_seqno] = dict(zip(keys1, unpacklist1))
 #            inventions[invention_seqno]["minerals"] = dict(zip(self.gamedata_static["mineral_names"], struct.unpack("<HHHHHH", raw_inventionsdata[invention_imagepos:invention_imagepos + 12])))
-            inventions[invention_seqno]["minerals"] = struct.unpack("<HHHHHH", raw_inventionsdata[invention_imagepos:invention_imagepos + 12])
+            inventions[invention_seqno]["minerals"] = struct.unpack_from("<HHHHHH", raw_inventionsdata, invention_imagepos)
             invention_imagepos += 12
 #            inventions[invention_seqno]["requiredskills"] = dict(zip(self.gamedata_static["skill_names"], struct.unpack("BBBB", raw_inventionsdata[invention_imagepos:invention_imagepos + 4])))
-            inventions[invention_seqno]["requiredskills"] = struct.unpack("BBBB", raw_inventionsdata[invention_imagepos:invention_imagepos + 4])
+            inventions[invention_seqno]["requiredskills"] = struct.unpack_from("BBBB", raw_inventionsdata, invention_imagepos)
             invention_imagepos += 4
 
     #        print("%d %s"%(invention_seqno, inventions[invention_seqno]))
@@ -290,7 +294,7 @@ class ReReGame:
         # 1 felfedezve a holdakkal egyutt
 
         for systemno in range(1,9):
-            systemplanets["System%d"%(systemno)] = struct.unpack("<bbbbbbbb", raw_systemplanetsdata[systemplanets_imagepos:systemplanets_imagepos + 8])
+            systemplanets["System%d"%(systemno)] = struct.unpack_from("<bbbbbbbb", raw_systemplanetsdata, systemplanets_imagepos)
             systemplanets_imagepos += 8
 
         return systemplanets
@@ -318,7 +322,7 @@ class ReReGame:
         # one entry is 14 bytes
         for buildinglist_entry_seqno in range(numberofbuildings):
 
-            unpacklist1 = struct.unpack("<BBBBBBBBBHHB", raw_buildingslistdata[buildingslist_imagepos:buildingslist_imagepos + 14])
+            unpacklist1 = struct.unpack_from("<BBBBBBBBBHHB", raw_buildingslistdata, buildingslist_imagepos)
             buildingslist_imagepos += 14
 
             buildingslist_entry = dict(zip(keys1, unpacklist1))
@@ -340,11 +344,11 @@ class ReReGame:
         # 25 buildings in total - one entry is 63 bytes
         for building_seqno in range(1, 26):
 
-            unpacklist1 = struct.unpack("<15pBBBBB", buildingsinfodata[buildingsinfo_imagepos:buildingsinfo_imagepos + 20])
+            unpacklist1 = struct.unpack_from("<15pBBBBB", buildingsinfodata, buildingsinfo_imagepos)
             buildingsinfo_imagepos += 20
             building_can_be_built_on_planet_type = buildingsinfodata[buildingsinfo_imagepos:buildingsinfo_imagepos + 11]
             buildingsinfo_imagepos += 11
-            unpacklist2 = struct.unpack("<HHBBHIBBBB", buildingsinfodata[buildingsinfo_imagepos:buildingsinfo_imagepos + 16])
+            unpacklist2 = struct.unpack_from("<HHBBHIBBBB", buildingsinfodata, buildingsinfo_imagepos)
             buildingsinfo_imagepos += 16
 
             building = dict(zip(keys1+keys2, unpacklist1+unpacklist2))
@@ -380,8 +384,8 @@ class ReReGame:
 
     #    keys1 = [ "name", "", "" ]
         for raceno in range(11):
-    #        unpacklist = struct.unpack("<13pBH", racedata[race_imagepos:race_imagepos + 13])
-            unpacklist = struct.unpack("<14p", racedata[race_imagepos:race_imagepos + 14])
+    #        unpacklist = struct.unpack_from("<13pBH", racedata, race_imagepos)
+            unpacklist = struct.unpack_from("<14p", racedata, race_imagepos)
             race_imagepos += 14
 
     #        races[raceno] = dict(zip(keys1, unpacklist))
@@ -402,7 +406,7 @@ class ReReGame:
 
         keys1 = [ "name" ]
         for spaceguest_no in range(10):
-            unpacklist = struct.unpack("<13p", spacelocaldata[spacelocal_imagepos:spacelocal_imagepos + 13])
+            unpacklist = struct.unpack_from("<13p", spacelocaldata, spacelocal_imagepos)
             spacelocal_imagepos += 13
 
             spacelocal_guests[spaceguest_no] = dict(zip(keys1, unpacklist))
@@ -415,21 +419,22 @@ class ReReGame:
 
     def load_reunionprg(self, reunionprg_filename = "GRWAR/REUNION.PRG"):
 
-        exepos_spacelocal_guest = 0x0003F42A  # len: 10 * 27
-        exepos_planets_system1  = 0x00040D8C  # System 1 planets in reunion.prg
-        exepos_systemplanets    = 0x00043AC6  # 8*8
-        exepos_money            = 0x00044A94  # (4bytes)
-        exepos_inventions       = 0x0004509C
-        exepos_buildings_info   = 0x00045882  # 25*
-        exepos_races            = 0x00045EBE
-
-        exepos_planettypenames  = 0x2A4AE  # len + string (es tenyleg csak ollyan hosszu) 10 db
-        exepos_commandernames   = 0x44B34  # len + string (mind 18 char) (pilot, builder, fighter, developer) 18*12
-        exepos_mineralnames     = 0x44D6C  # len + string (de amugy mind 8 char) - 6*8
-        exepos_racenames        = 0x44DA2  # len + string (de amugy mind 9 char) - 12*9
-        exepos_skillnames       = 0x44E3E  # len + string (fix 7 char) - 7*4
-        exepos_systemnames      = 0x00044E5E  # 8*8
-        exepos_systemshortnames = 0x00044EA6  # 8*6
+        exepos_planettypenames     = 0x2A4AE  # len + string (es tenyleg csak ollyan hosszu) 10 db
+        exepos_spacelocal_guest    = 0x3F42A  # len: 10 * 27
+        exepos_planets_system1     = 0x40D8C  # System 1 planets in reunion.prg
+        exepos_systemplanets       = 0x43AC6  # 8*8
+        exepos_money               = 0x44A94  # (4bytes)
+        exepos_commandernames      = 0x44B34  # len + string (mind 18 char) (pilot, builder, fighter, developer) 18*12
+        exepos_shipnames_ground    = 0x44CE4  # 4
+        exepos_vehiclenames_ground = 0x44D0C  # 4
+        exepos_mineralnames        = 0x44D6C  # len + string (de amugy mind 8 char) - 6*8
+        exepos_racenames           = 0x44DA2  # len + string (de amugy mind 9 char) - 12*9
+        exepos_skillnames          = 0x44E3E  # len + string (fix 7 char) - 7*4
+        exepos_systemnames         = 0x44E5E  # 8*8
+        exepos_systemshortnames    = 0x44EA6  # 8*6
+        exepos_inventions          = 0x4509C
+        exepos_buildings_info      = 0x45882  # 25*
+        exepos_races               = 0x45EBE
 
         reunionexe = open(reunionprg_filename, "rb")
         reunionexe_image = reunionexe.read(288992)
@@ -438,11 +443,11 @@ class ReReGame:
         buildings_info = self.process_raw_buildingsinfodata(reunionexe_image[exepos_buildings_info:exepos_buildings_info + 25*63])
         planettype_names_from_exe = self.extract_dynamic_strings(reunionexe_image, exepos_planettypenames, 10)
         planettype_names = [ "" ] + planettype_names_from_exe + [ b"Artificial" ]
-        commander_names = struct.unpack("19p"*12, reunionexe_image[exepos_commandernames:exepos_commandernames + 12*19])
+        commander_names   = list(map(lambda x:x.decode("ascii"), struct.unpack_from("19p"*12, reunionexe_image, exepos_commandernames)))
         commander_names_processed = [ commander_names[0:3], commander_names[3:6], commander_names[6:9], commander_names[9:12] ]
-        mineral_names   = struct.unpack( "9p"*6,  reunionexe_image[exepos_mineralnames:exepos_mineralnames + 6*9])
-        race_names      = struct.unpack("10p"*12, reunionexe_image[exepos_racenames:exepos_racenames + 12*10])
-        skill_names     = struct.unpack( "8p"*4,  reunionexe_image[exepos_skillnames:exepos_skillnames + 4*8])
+        mineral_names     = list(map(lambda x:x.decode("ascii"), struct.unpack_from( "9p"*6,  reunionexe_image, exepos_mineralnames)))
+        race_names        = list(map(lambda x:x.decode("ascii"), struct.unpack_from("10p"*12, reunionexe_image, exepos_racenames)))
+        skill_names       = list(map(lambda x:x.decode("ascii"), struct.unpack_from( "8p"*4,  reunionexe_image, exepos_skillnames)))
         system_names      = list(map(lambda x:x.decode("ascii"), struct.unpack_from( "9p"*8,  reunionexe_image, exepos_systemnames)))
         system_shortnames = list(map(lambda x:x.decode("ascii"), struct.unpack_from( "7p"*8,  reunionexe_image, exepos_systemshortnames)))
 
@@ -538,29 +543,29 @@ class ReReGame:
         #self.process_raw_spacelocaldata(savegame_fileimage[savegamepos_spacelocal_guests:savegamepos_spacelocal_guests + savegamepos_spacelocal_guests_len])
         #self.process_raw_racedata(savegame_fileimage[savegamepos_races:savegamepos_races+savegamepos_races_len])
 
-        savegame["name"] = struct.unpack("20p", savegame_fileimage[savegamepos_savename:savegamepos_savename + savegamepos_savename_len])[0]
-        savegame["message_count"] = struct.unpack("<H", savegame_fileimage[savegamepos_message_count:savegamepos_message_count + 2])[0]
-        savegame["messages"] = struct.unpack("53p" * savegame["message_count"], savegame_fileimage[savegamepos_messages:savegamepos_messages + savegamepos_message_len*savegame["message_count"]])
-        savegame["date"] = struct.unpack("<HHHH", savegame_fileimage[savegamepos_date:savegamepos_date + 8])
-        savegame["money"] = struct.unpack("<I", savegame_fileimage[savegamepos_money:savegamepos_money + 4])[0]
-        savegame["commanders"] = struct.unpack("<HHHH", savegame_fileimage[savegamepos_commanders:savegamepos_commanders + 8])
-        savegame["developer_level"] = struct.unpack("<HHHH", savegame_fileimage[savegamepos_developer_level:savegamepos_developer_level + 8])
-        savegame["minerals_main"] = dict(zip(self.gamedata_static["mineral_names"], struct.unpack("<IIIIII", savegame_fileimage[savegamepos_minerals_main:savegamepos_minerals_main + 24])))
-        savegame["inventions"] = self.process_raw_inventionsdata(savegame_fileimage[savegamepos_inventions:savegamepos_inventions + savegamepos_inventions_len])
-        savegame["systems_available"] = struct.unpack("bbbbbbbb", savegame_fileimage[savegamepos_systemsavailable:savegamepos_systemsavailable + 8])
+        savegame["name"]              = struct.unpack_from("20p", savegame_fileimage, savegamepos_savename)[0].decode("ascii")
+        savegame["message_count"]     = struct.unpack_from("<H", savegame_fileimage, savegamepos_message_count)[0]
+        savegame["messages"]          = list(map(lambda x:x.decode("ascii"), struct.unpack_from("53p" * savegame["message_count"], savegame_fileimage, savegamepos_messages)))
+        savegame["date"]              = struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_date)
+        savegame["money"]             = struct.unpack_from("<I", savegame_fileimage, savegamepos_money)[0]
+        savegame["commanders"]        = struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_commanders)
+        savegame["developer_level"]   = struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_developer_level)
+        savegame["minerals_main"]     = dict(zip(self.gamedata_static["mineral_names"], struct.unpack_from("<IIIIII", savegame_fileimage, savegamepos_minerals_main)))
+        savegame["inventions"]        = self.process_raw_inventionsdata(savegame_fileimage[savegamepos_inventions:savegamepos_inventions + savegamepos_inventions_len])
+        savegame["systems_available"] = struct.unpack_from("bbbbbbbb", savegame_fileimage, savegamepos_systemsavailable)
 
         savegame["systems"] = [ 0 ]  # 0 dummy
         for systemno in range(1,9):
             raw_systemdata = savegame_fileimage[savegamepos_planets_in_system[systemno]:savegamepos_planets_in_system[systemno] + savegamepos_planets_in_system_count[systemno] * savegamepos_planets_in_one_system_len]
             savegame["systems"].append(self.process_raw_planetsdata(raw_systemdata, savegamepos_planets_in_system_count[systemno]))
 
-        savegame["groups_numofgroups"] = struct.unpack("<HHH", savegame_fileimage[savegamepos_groups_numofgroups:savegamepos_groups_numofgroups + 6])
-        savegame["groups_selectedgroupno"] = struct.unpack("<HHH", savegame_fileimage[savegamepos_groups_selectedgroupno:savegamepos_groups_selectedgroupno + 6])
-        savegame["groups_currentview"] = struct.unpack("<H", savegame_fileimage[savegamepos_groups_currentview:savegamepos_groups_currentview + 2])[0]
-        savegame["groups_spacegroups"]  = self.process_raw_groupdata(savegame_fileimage[savegamepos_groups_spacegroups:savegamepos_groups_spacegroups + savegamepos_groups_spacegroups_len])
-        savegame["groups_planetforces"] = self.process_raw_groupdata(savegame_fileimage[savegamepos_groups_planetforces:savegamepos_groups_planetforces + savegamepos_groups_planetforces_len])
+        savegame["groups_numofgroups"]     = struct.unpack_from("<HHH", savegame_fileimage, savegamepos_groups_numofgroups)
+        savegame["groups_selectedgroupno"] = struct.unpack_from("<HHH", savegame_fileimage, savegamepos_groups_selectedgroupno)
+        savegame["groups_currentview"]     = struct.unpack_from("<H", savegame_fileimage, savegamepos_groups_currentview)[0]
+        savegame["groups_spacegroups"]     = self.process_raw_groupdata(savegame_fileimage[savegamepos_groups_spacegroups:savegamepos_groups_spacegroups + savegamepos_groups_spacegroups_len])
+        savegame["groups_planetforces"]    = self.process_raw_groupdata(savegame_fileimage[savegamepos_groups_planetforces:savegamepos_groups_planetforces + savegamepos_groups_planetforces_len])
 
-        savegame["numberofbuildings"] = struct.unpack("<H", savegame_fileimage[savegamepos_buildings_count:savegamepos_buildings_count + 2])[0]
+        savegame["numberofbuildings"] = struct.unpack_from("<H", savegame_fileimage, savegamepos_buildings_count)[0]
         savegame["buildings_list"] = self.process_raw_buildingslistdata(savegame["numberofbuildings"], savegame_fileimage[savegamepos_buildings_list:savegamepos_buildings_list + savegame["numberofbuildings"]*14])
 
         if develmode:

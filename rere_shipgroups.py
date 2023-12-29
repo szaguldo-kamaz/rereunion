@@ -78,8 +78,8 @@ class shipgroup:
 
         else:
 
-            self.type = initial_groupraw_data['type']  # type: 1 army, 2 trade, 4 carrier
-            self.name = initial_groupraw_data['name'].decode('utf-8')
+            self.type = initial_groupraw_data['type']  # type: 1 army, 2 trade, (3 pirate), 4 carrier
+            self.name = initial_groupraw_data['name']
             self.location = [
                              initial_groupraw_data['system_no'],
                              initial_groupraw_data['planet_no'],
