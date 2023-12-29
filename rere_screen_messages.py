@@ -29,8 +29,8 @@ class screen_messages(screen):
         self.update_menu(gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent)
 
         self.messages = []
-        for msg_no in range (gamedata_dynamic["message_count"]):
-            msg = gamedata_dynamic["messages"][msg_no].decode('ascii')
+        for msg_no in range(gamedata_dynamic["message_count"]):
+            msg = gamedata_dynamic["messages"][msg_no]
             if msg.find('arrived to') != -1:
                 msgtextcolor = 1
             else:
