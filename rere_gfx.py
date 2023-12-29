@@ -808,23 +808,28 @@ class ReReGFX:
         # draw selected forces data text
 
         curgrp = screenobj_ship.current_shipgroup[screenobj_ship.selected_group_no_current]
-        [ sysname, planetname, moonname ] = screenobj_ship.selected_group_location
-        if moonname == 0:
-            moonname = ""
+        [ sysname, planetname, moonname ] = screenobj_ship.selected_group_location_names
 
+        # group name
         red_text_group_name = self.render_text(curgrp.name, textcolor = 2)
+
+        # location
         if curgrp.type == 5:
             yellow_text_group_loc_sysname = self.render_text(f"Base on:  {sysname}", textcolor = 1)
         else:
             yellow_text_group_loc_sysname = self.render_text(f"Currently on:{sysname}", textcolor = 1)
         yellow_text_group_loc_planetname = self.render_text(f"{planetname}", textcolor = 1)
-        yellow_text_group_loc_moonname = self.render_text(f"{moonname}", textcolor = 1)
+        if moonname != None:
+            yellow_text_group_loc_moonname = self.render_text(f"{moonname}", textcolor = 1)
+
+        # fleet data
 
         self.screen_buffer.blit(red_text_group_name, (202, 60))
         self.screen_buffer.blit(yellow_text_group_loc_sysname, (202, 70))
         self.screen_buffer.blit(yellow_text_group_loc_planetname, (211, 79))
-        self.screen_buffer.blit(yellow_text_group_loc_moonname, (220, 89))
-#        self.screen_buffer.blit(yellow_text_group_memb_, (202, 70))
+        if moonname != None:
+            self.screen_buffer.blit(yellow_text_group_loc_moonname, (220, 89))
+
 
         return self.screen_buffer
 
