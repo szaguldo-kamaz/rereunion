@@ -77,7 +77,7 @@ class ReReGame:
          5: (2, 5, 0), # 'Phoenix 5'
 
          6: (2, 3, 1), # 'Moon 1'
-         7: (2, 3, 2), # 'Moon E'
+         7: (2, 3, 2), # 'Moon 2'
 
          8: (2, 4, 1), # 'Moon 1'
          9: (2, 4, 2), # 'Moon 2'
@@ -85,6 +85,33 @@ class ReReGame:
         11: (2, 4, 4), # 'Moon 4'
 
         12: (2, 5, 1)  # 'Moon 1'
+    }
+
+    gamedata_const["planets_id_mapping"][3] = {
+        # System 3
+
+         1: (3, 1, 0), # 'Mirach 1'
+         2: (3, 2, 0), # 'Mirach 2'
+         3: (3, 3, 0), # 'Mirach 3'
+         4: (3, 4, 0), # 'Mirach 4'
+         5: (3, 5, 0), # 'Mirach 5'
+
+         6: (3, 2, 1), # 'Moon 1'
+         7: (3, 2, 2), # 'Moon 2'
+
+         8: (3, 3, 1), # 'Moon 1'
+         9: (3, 3, 2), # 'Moon 2'
+
+        10: (3, 4, 1), # 'Moon 1'
+        11: (3, 4, 2), # 'Moon 2'
+        12: (3, 4, 3), # 'Moon 3'
+        13: (3, 4, 4), # 'Moon 4'
+        14: (3, 4, 5), # 'Moon 5'
+
+        15: (3, 5, 1), # 'Moon 1'
+        16: (3, 5, 2), # 'Moon 2'
+        17: (3, 5, 3), # 'Moon 3'
+        18: (3, 5, 4), # 'Moon 4'
     }
 
 
@@ -95,7 +122,7 @@ class ReReGame:
         for planetname_no in range(number_of_strings):
             strlen = int(raw_data[rawdata_start + stroffset])
             stroffset += 1
-            extracted_strings.append(raw_data[rawdata_start + stroffset: rawdata_start + stroffset + strlen])
+            extracted_strings.append(raw_data[rawdata_start + stroffset: rawdata_start + stroffset + strlen].decode('ascii'))
             stroffset += strlen
 
         return extracted_strings
@@ -419,7 +446,8 @@ class ReReGame:
 
     def load_reunionprg(self, reunionprg_filename = "GRWAR/REUNION.PRG"):
 
-        exepos_planettypenames     = 0x2A4AE  # len + string (es tenyleg csak ollyan hosszu) 10 db
+        exepos_planettypenames     = 0x2A4AE  # len + string (es tenyleg csak olyan hosszu) 10 db
+        exepos_cannotbuy_reasons   = 0x28DEE  # len + string (es tenyleg csak olyan hosszu) 6+1 db
         exepos_spacelocal_guest    = 0x3F42A  # len: 10 * 27
         exepos_planets_system1     = 0x40D8C  # System 1 planets in reunion.prg
         exepos_systemplanets       = 0x43AC6  # 8*8
@@ -432,6 +460,7 @@ class ReReGame:
         exepos_skillnames          = 0x44E3E  # len + string (fix 7 char) - 7*4
         exepos_systemnames         = 0x44E5E  # 8*8
         exepos_systemshortnames    = 0x44EA6  # 8*6
+        exepos_charset             = 0x44EDE  # 78
         exepos_inventions          = 0x4509C
         exepos_buildings_info      = 0x45882  # 25*
         exepos_races               = 0x45EBE
@@ -442,7 +471,7 @@ class ReReGame:
 
         buildings_info = self.process_raw_buildingsinfodata(reunionexe_image[exepos_buildings_info:exepos_buildings_info + 25*63])
         planettype_names_from_exe = self.extract_dynamic_strings(reunionexe_image, exepos_planettypenames, 10)
-        planettype_names = [ "" ] + planettype_names_from_exe + [ b"Artificial" ]
+        planettype_names = [ "" ] + planettype_names_from_exe + [ "Artificial" ]
         commander_names   = list(map(lambda x:x.decode("ascii"), struct.unpack_from("19p"*12, reunionexe_image, exepos_commandernames)))
         commander_names_processed = [ commander_names[0:3], commander_names[3:6], commander_names[6:9], commander_names[9:12] ]
         mineral_names     = list(map(lambda x:x.decode("ascii"), struct.unpack_from( "9p"*6,  reunionexe_image, exepos_mineralnames)))
@@ -606,7 +635,7 @@ class ReReGame:
 
         # process solar system data
         self.solarsystems = [ 0 ]
-        for systemno in range(1,3):
+        for systemno in range(1,4):
             if self.config["verbose"] > 1:
                 print("System no", systemno)
             self.solarsystems.append(solarsystem(systemno,
