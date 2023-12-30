@@ -5,6 +5,8 @@
 # github.com/szaguldo-kamaz/rereunion
 #
 
+import math
+
 class shipgroup:
 
 
@@ -35,10 +37,13 @@ class shipgroup:
 
         if initial_groupraw_data == None:
 
-            self.type = grouptype  # type: 1 army, 2 trade, 4 carrier
+            self.type = grouptype  # type: 1 army, 2 trade, (3 pirate), 4 carrier
             self.name = groupname
             self.location = [ 1, 5, 0 ]  # groups are always created on New Earth
-            self.orbit_status = 1  # orbit status: 1 grounded, 2 orbiting planet, ?4 in transit wihtin system?, ?6 in transit through systems?
+            self.orbit_status = 1  # orbit status: 1 grounded, 2 orbiting planet, ?4 in transit within system?, ?6 in transit through systems?
+            self.remaining_travel_time_between_solsystems = 0
+            self.outside_destination_solsystem = 0
+            self.remaining_travel_time_inside_solsystem = 0
 
             if self.type in [1, 5]:  # army / ground forces
 
@@ -86,6 +91,9 @@ class shipgroup:
                              initial_groupraw_data['moon_no']
                             ]
             self.orbit_status = initial_groupraw_data['orbit_status']  # orbit status: 1 grounded, 2 orbiting planet, ?4 in transit wihtin system?, ?6 in transit through systems?
+            self.remaining_travel_time_between_solsystems = initial_groupraw_data['travel_time_between_solsystems']
+            self.outside_destination_solsystem = initial_groupraw_data['outside_destination_solsystem']
+            self.remaining_travel_time_inside_solsystem = initial_groupraw_data['travel_time_inside_solsystem']
 
             if self.type in [1, 5]:  # army
                 self.fleet = {
@@ -109,26 +117,26 @@ class shipgroup:
                     "Cruiser_Twin":     initial_groupraw_data['Ship4_Twin'],
                     "Cruiser_Miss":     initial_groupraw_data['Ship4'],
                     "Cruiser_Plasma":   initial_groupraw_data['Ship4_Plasma'],
-                    "Trooper":          0,
-                    "Trooper_Laser":    0,
-                    "Trooper_Twin":     0,
-                    "Trooper_Miss":     0,
-                    "Trooper_Plasma":   0,
-                    "Tank":             0,
-                    "Tank_Laser":       0,
-                    "Tank_Twin":        0,
-                    "Tank_Miss":        0,
-                    "Tank_Plasma":      0,
-                    "Aircraft":         0,
-                    "Aircraft_Laser":   0,
-                    "Aircraft_Twin":    0,
-                    "Aircraft_Miss":    0,
-                    "Aircraft_Plasma":  0,
-                    "Launcher":         0,
-                    "Launcher_Laser":   0,
-                    "Launcher_Twin":    0,
-                    "Launcher_Miss":    0,
-                    "Launcher_Plasma":  0
+                    "Trooper":          initial_groupraw_data['Trooper'],
+                    "Trooper_Laser":    initial_groupraw_data['Trooper_Laser'],
+                    "Trooper_Twin":     initial_groupraw_data['Trooper_Twin'],
+                    "Trooper_Miss":     initial_groupraw_data['Trooper_Miss'],
+                    "Trooper_Plasma":   initial_groupraw_data['Trooper_Plasma'],
+                    "Tank":             initial_groupraw_data['Tank'],
+                    "Tank_Laser":       initial_groupraw_data['Tank_Laser'],
+                    "Tank_Twin":        initial_groupraw_data['Tank_Twin'],
+                    "Tank_Miss":        initial_groupraw_data['Tank_Miss'],
+                    "Tank_Plasma":      initial_groupraw_data['Tank_Plasma'],
+                    "Aircraft":         initial_groupraw_data['Aircraft'],
+                    "Aircraft_Laser":   initial_groupraw_data['Aircraft_Laser'],
+                    "Aircraft_Twin":    initial_groupraw_data['Aircraft_Twin'],
+                    "Aircraft_Miss":    initial_groupraw_data['Aircraft_Miss'],
+                    "Aircraft_Plasma":  initial_groupraw_data['Aircraft_Plasma'],
+                    "Launcher":         initial_groupraw_data['Launcher'],
+                    "Launcher_Laser":   initial_groupraw_data['Launcher_Laser'],
+                    "Launcher_Twin":    initial_groupraw_data['Launcher_Twin'],
+                    "Launcher_Miss":    initial_groupraw_data['Launcher_Miss'],
+                    "Launcher_Plasma":  initial_groupraw_data['Launcher_Plasma']
                 }
 
             elif self.type == 2:  # trade
@@ -163,7 +171,13 @@ class shipgroup:
             for cargoname in self.__cargonames:
                 self.transfer[cargoname] = initial_groupraw_data[f"Transfer_{cargoname}"]
 
+        self.update()
+
 
     def update(self):
-        # decrease flight time, update location, etc
-        pass
+
+        # TODO, get real value
+        commander_pilot_scholar_level = 73
+
+        self.remaining_flight_time = math.ceil(self.remaining_travel_time_between_solsystems / (commander_pilot_scholar_level) + 1)
+        self.remaining_flight_time += math.ceil(self.remaining_travel_time_inside_solsystem / (commander_pilot_scholar_level) + 1)
