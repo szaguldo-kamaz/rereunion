@@ -218,45 +218,35 @@ class ReReGame:
     def process_raw_groupdata(self, raw_groupdata):
 
         group_imagepos = 0
-        groups = {};
+        groups = {}
 
         # type: 1 army, 2 trade, (3 pirate), 4 carrier
         # orbit status: 1 grounded, 2 orbiting planet, ?4 in transit within system?, ?6 in transit through systems?
 
-        keys1 = [ "type", "name", "system_no", "planet_no", "moon_no", "orbit_status" ]
-
-        keys2 = [ "Ship1", "Ship1_Laser", "Ship1_Twin", "Ship1_Miss", "Ship1_Plasma",
-                  "Ship2", "Ship2_Laser", "Ship2_Twin", "Ship2_Miss", "Ship2_Plasma",
-                  "Ship3", "Ship3_Laser", "Ship3_Twin", "Ship3_Miss", "Ship3_Plasma",
-                  "Ship4", "Ship4_Laser", "Ship4_Twin", "Ship4_Miss", "Ship4_Plasma",
-                  "Trooper", "Trooper_Laser", "Trooper_Twin", "Trooper_Miss", "Trooper_Plasma",
-                  "Tank", "Tank_Laser", "Tank_Twin", "Tank_Miss", "Tank_Plasma",
-                  "Aircraft", "Aircraft_Laser", "Aircraft_Twin", "Aircraft_Miss", "Aircraft_Plasma",
-                  "Launcher", "Launcher_Laser", "Launcher_Twin", "Launcher_Miss", "Launcher_Plasma",
-                  "Transfer_Detoxin", "Transfer_Energon", "Transfer_Kremir", "Transfer_Lepitium", "Transfer_Raenium", "Transfer_Texon",
-                  "Transfer_Hunter", "Transfer_unknown1", "Transfer_unknown2", "Transfer_unknown3",  # star fight?, destroyer?, cruiser?
-                  "Transfer_Trooper", "Transfer_Battle tank", "Transfer_Aircraft?", "Transfer_Missilie launcher?",
-                  "Transfer_Laser cannon", "Transfer_Twin Laser gun", "Transfer_Missile", "Transfer_Plasma gun?",
-                  "Transfer_Miner droid", "Transfer_unknown4" ]
+        keys = [ "type", "name", "system_no", "planet_no", "moon_no", "orbit_status",
+                 "travel_time_between_solsystems", "outside_destination_solsystem", "travel_time_inside_solsystem",
+                 "Ship1", "Ship1_Laser", "Ship1_Twin", "Ship1_Miss", "Ship1_Plasma",
+                 "Ship2", "Ship2_Laser", "Ship2_Twin", "Ship2_Miss", "Ship2_Plasma",
+                 "Ship3", "Ship3_Laser", "Ship3_Twin", "Ship3_Miss", "Ship3_Plasma",
+                 "Ship4", "Ship4_Laser", "Ship4_Twin", "Ship4_Miss", "Ship4_Plasma",
+                 "Trooper", "Trooper_Laser", "Trooper_Twin", "Trooper_Miss", "Trooper_Plasma",
+                 "Tank", "Tank_Laser", "Tank_Twin", "Tank_Miss", "Tank_Plasma",
+                 "Aircraft", "Aircraft_Laser", "Aircraft_Twin", "Aircraft_Miss", "Aircraft_Plasma",
+                 "Launcher", "Launcher_Laser", "Launcher_Twin", "Launcher_Miss", "Launcher_Plasma",
+                 "Transfer_Detoxin", "Transfer_Energon", "Transfer_Kremir", "Transfer_Lepitium", "Transfer_Raenium", "Transfer_Texon",
+                 "Transfer_Hunter", "Transfer_unknown1", "Transfer_unknown2", "Transfer_unknown3",  # star fight?, destroyer?, cruiser?
+                 "Transfer_Trooper", "Transfer_Battle tank", "Transfer_Aircraft?", "Transfer_Missilie launcher?",
+                 "Transfer_Laser cannon", "Transfer_Twin Laser gun", "Transfer_Missile", "Transfer_Plasma gun?",
+                 "Transfer_Miner droid", "Transfer_unknown4" ]
 
         for groupno in range(24):
-
-            unpacklist = struct.unpack_from("<B18pBBBB", raw_groupdata, group_imagepos)
-            group_imagepos += 23
-
-            # remaining flight time should be here
-            group_unknown1 = raw_groupdata[group_imagepos:group_imagepos + 6]
-            group_imagepos += 6
-
-            unpacklist2 = struct.unpack_from("<HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHIIIIIIHHHHHHHHHHHHHH", raw_groupdata, group_imagepos)
-            group_imagepos += 132
-
-            groups[groupno] = dict(zip(keys1+keys2, unpacklist+unpacklist2))
-
+            unpacklist = struct.unpack_from("<B18pBBBBHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHIIIIIIHHHHHHHHHHHHHH", raw_groupdata, group_imagepos)
+            group_imagepos += 161
+            groups[groupno] = dict(zip(keys, unpacklist))
             groups[groupno]["name"] = groups[groupno]["name"].decode("ascii")
 
-    #        print(groups[groupno])
-    #        print("%s"%(list(group_unknown1)))
+#            if 0 < groups[groupno]["type"] < 5:
+#                print(groups[groupno])
 
         return groups
 
