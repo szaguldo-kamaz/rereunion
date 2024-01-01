@@ -62,6 +62,7 @@ class ReReGFX:
         self.prepare_infobuy()
         self.prepare_researchdesign_computer()
         self.prepare_ship()
+        self.prepare_starmap()
         self.prepare_felszin()
         self.prepare_planetmain()
 
@@ -227,6 +228,12 @@ class ReReGFX:
         for faj_no in range(14):
             PIClist.append("PLANETS/FAJ%d.PIC"%(faj_no))  # Fajok - Species
 
+        # Naprendszerek / csillagterkep
+        for hatter_no in range(1,5):
+            PIClist.append(f"PLANETS/HATTER{hatter_no}.PIC")  # Starmap hatterek/ikonok - Starmap backgrounds/icons
+        for napr_no in range(1,9):
+            PIClist.append(f"PLANETS/NAPR{napr_no}.PIC")  # Naprendszer grafikak, nap/bolygok/holdak/flotta/ikonok - Solarsys graphics sun/planets/moons/fleet/icons
+
         PIClist.append("GRAFIKA/UZENET.PIC")  # Uzenetek - Messages screen
 
         PIClist.append("GRAFIKA/SHIP1.PIC")  # Ship Groups - space forces background
@@ -237,13 +244,6 @@ class ReReGFX:
         #for nagy_no in range(13):
         #    PIClist.append("PLANETS/NAGY%d.PIC"%(nagy_no))  #.
 
-        # Hatter - Background
-        #for hatter_no in range(1,5):
-        #    PIClist.append("PLANETS/HATTER%d.PIC"%(hatter_no))  # Naprendszerek hatter, hatter 1-8 kerettel, kisikonok, nagyikonok
-
-        # Naprendszer - Solar System
-        #for napr_no in range(1,9):
-        #    PIClist.append("PLANETS/NAPR%d.PIC"%(napr_no))  # Nap, bolygok, holdak
         #PIClist.append("PLANETS/MUSZI.PIC")  # Urhajo Muszerfal
         #PIClist.append("PLANETS/MUSZIANM.PIC")  # Urhajo Muszerfal animacio
         #PIClist.append("PLANETS/MASZK1.PIC")  #.
@@ -404,6 +404,36 @@ class ReReGFX:
                 self.ship_icons_spaceforces[ship3_icon_y + 1][-1].set_colorkey(pygame.Color(0, 0, 0))
 
         self.ship_icon_planetforces.set_colorkey(pygame.Color(0, 0, 0))
+
+
+    def prepare_starmap(self):
+
+        self.starmap_suns = []
+        self.starmap_labels = []
+        self.starmap_planets = []  # for each solsys
+        self.starmap_moons = []  # for each solsys
+
+        for solsys_no in range(8):
+
+            solsys_col = solsys_no // 4
+            solsys_idx = solsys_no % 4
+            self.starmap_labels.append(self.PICs["HATTER3"].subsurface(pygame.Rect(solsys_idx*64, solsys_col*19, 64, 19)))
+            self.starmap_labels[solsys_no].set_colorkey(pygame.Color(0, 0, 0))
+
+            self.starmap_suns.append(self.PICs[f"NAPR{solsys_no+1}"].subsurface(pygame.Rect(0, 1, 64, 64)))
+            self.starmap_suns[solsys_no].set_colorkey(pygame.Color(0, 0, 0))
+
+            self.starmap_planets.append([])
+            for planet_no in range(8):
+                self.starmap_planets[solsys_no].append(self.PICs[f"NAPR{solsys_no+1}"].subsurface(pygame.Rect(64 + planet_no*32, 1, 32, 32)))
+                self.starmap_planets[solsys_no][planet_no].set_colorkey(pygame.Color(0, 0, 0))
+
+            self.starmap_moons.append([])
+            for moon_no in range(28):
+                moon_col = moon_no // 14
+                moon_idx = moon_no % 14
+                self.starmap_moons[solsys_no].append(self.PICs[f"NAPR{solsys_no+1}"].subsurface(pygame.Rect(66 + moon_idx*17, 34 + (moon_col * 17), 16, 16)))
+                self.starmap_moons[solsys_no][moon_no].set_colorkey(pygame.Color(0, 0, 0))
 
 
     def prepare_planetmain(self):
@@ -627,6 +657,8 @@ class ReReGFX:
             return self.render_infobuy(screenobj)
         elif screenobj.screentype == "ship":
             return self.render_ship(screenobj)
+        elif screenobj.screentype == "starmap":
+            return self.render_starmap(screenobj)
         elif screenobj.screentype == "messages":
             return self.render_messages(screenobj)
 
@@ -765,6 +797,51 @@ class ReReGFX:
         self.screen_buffer.blit(yellow_text_developer_level_phys,  (203, 188))
         self.screen_buffer.blit(yellow_text_developer_level_elect, (259, 188))
         self.screen_buffer.blit(yellow_text_developer_level_AI,    (296, 188))
+
+        return self.screen_buffer
+
+
+    # starmap / galactic map
+    def render_starmap(self, screenobj_starmap):
+
+        self.screen_buffer.blit(self.render_menu(screenobj_starmap.menu_info), (0, 0))
+        self.screen_buffer.blit(self.render_infobar(screenobj_starmap.menu_info), (0, 32))
+
+        curr_solsys_no = screenobj_starmap.location[0] - 1
+
+        if screenobj_starmap.planet_and_moon_mode:
+
+            curr_planet_no = screenobj_starmap.location[1] - 1
+
+            # background pic
+            self.screen_buffer.blit(self.PICs["HATTER2"], (0, 49))
+
+            # Planet
+            self.screen_buffer.blit(self.starmap_planets[curr_solsys_no][curr_planet_no], (160-16, 49+75-16))
+
+            # Moons
+            mooncnt = 0
+            for moon_seqid in screenobj_starmap.selected_planet.moons_seqids:
+                self.screen_buffer.blit(self.starmap_moons[curr_solsys_no][moon_seqid], screenobj_starmap.orbit_pixposes[mooncnt])
+                mooncnt += 1
+
+        else:
+
+            # background pic
+            self.screen_buffer.blit(self.PICs["HATTER1"], (0, 49))
+
+            # Sun
+            self.screen_buffer.blit(self.starmap_suns[curr_solsys_no], (160-32, 49+75-32))
+
+            # Planets
+            for planet_no in range(screenobj_starmap.selected_solarsystem.num_of_planets):
+                self.screen_buffer.blit(self.starmap_planets[curr_solsys_no][planet_no], screenobj_starmap.orbit_pixposes[planet_no])
+
+            # System no. labels
+            for system_no in range(8):
+                if screenobj_starmap.gamedata_dynamic["systems_available"][system_no] > -1:
+                    self.screen_buffer.blit(self.starmap_labels[system_no], (256, 49 + system_no * 19))
+
 
         return self.screen_buffer
 
