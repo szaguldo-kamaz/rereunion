@@ -129,13 +129,13 @@ class ReReGame:
 
 
     # raw data from savegame/reunion.prg for one solar system
-    def process_raw_planetsdata(self, raw_planetsdata, num_of_planets):
+    def process_raw_planetsdata(self, raw_planetsdata, num_of_planets_and_moons):
 
         planet_imagepos = 0
         planetsdata = {}
 
         keys1 = [ "planetname", "orbitingvelocity", "orbitdistance" ]
-        for planetno in range(1, num_of_planets + 1):  # no 0, to keep original numbering
+        for planetno in range(1, num_of_planets_and_moons + 1):  # no 0, to keep original numbering
             unpacklist1 = struct.unpack_from("<10pBH", raw_planetsdata, planet_imagepos)
             planet_imagepos += 13
             planetsdata[planetno] = dict(zip(keys1, unpacklist1))
@@ -145,7 +145,7 @@ class ReReGame:
                   "population_count", "development_level", "tax_level", "population_mood", "unknown4",
                   "planettype", "mapnumber", "diameter", "temperature" ]
 
-        for planetno in range(1, num_of_planets + 1):  # no 0, to keep original numbering
+        for planetno in range(1, num_of_planets_and_moons + 1):  # no 0, to keep original numbering
 
             # race:
             #  1 - humans

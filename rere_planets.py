@@ -81,6 +81,9 @@ class solarsystem:
             self.solarsat_count = planet_data["solarsat_count"]
             self.sat_exploration_timecount = planet_data["sat_exploration_timecount"]
 
+            self.moons_seqids = []  # no in solsys
+            self.moons_ids = []  # solsys, planet, moon
+
             self.storage = { "miner_droids" : 0, "hunter" : 0 }
 
             self.has_radar = False
@@ -119,6 +122,11 @@ class solarsystem:
             self.recreate_map_of_buildings()
             self.update_sat_exploration()
             self.update_possible_buildings_list()
+
+
+        def add_moon(self, moon_seqid, moon_id):
+            self.moons_seqids.append(moon_seqid)  # no in solsys
+            self.moons_ids.append(moon_id)  # solsys, planet, moon
 
 
         def update_possible_buildings_list(self):
@@ -303,16 +311,22 @@ class solarsystem:
         self.planets = {}
 
         for planetno in planets_data.keys():
-            self.add_planet(planets_data[planetno], planets_id_mapping[planetno], gamedata_static, cache)
+            self.add_planet(planets_data[planetno], planetno, planets_id_mapping[planetno], gamedata_static, cache)
 
 
-    def add_planet(self, planet_data, planet_id, gamedata_static, cache):
+    def add_planet(self, planet_data, planet_seqid, planet_id, gamedata_static, cache):
 
-        self.num_of_planets += 1
         if planet_id in self.planets.keys():
             print('planets: FATAL: planet "%s" already added! This should never happen.'%(planet_id))
             sys.exit(1)
+
         self.planets[planet_id] = self.planet(planet_data, gamedata_static, cache)
+
+        if planet_id[2] == 0:
+            self.num_of_planets += 1
+        else:
+            parent_planet = planet_id[:2] + (0,)
+            self.planets[parent_planet].add_moon(planet_seqid, planet_id)
 
 
     def get_numberofplanets(self):
