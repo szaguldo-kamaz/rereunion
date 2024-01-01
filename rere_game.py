@@ -16,6 +16,7 @@ from rere_screen_infobuy import *
 from rere_screen_ship import *
 from rere_screen_planetmain import *
 from rere_screen_researchdesign import *
+from rere_screen_starmap import *
 from rere_screen_messages import *
 
 
@@ -693,6 +694,7 @@ class ReReGame:
         self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,5,0)])  # New-Earth
         #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,4,4)])  # Penelope
         #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,3,3)])  # Mir
+        self.screens["starmap"] = screen_starmap(self.gamedata_static, self.gamedata_dynamic, self.solarsystems)
         self.screens["messages"] = screen_messages(self.gamedata_dynamic)
         self.current_screen = self.screens["controlroom"]
 
@@ -715,6 +717,12 @@ class ReReGame:
             screen_changed = True
         elif screen_action in [ "SHIP INFO", "SPACEPORT" ]:
             self.current_screen = self.screens["ship"]
+            screen_changed = True
+        elif screen_action == "GALACTIC MAP":
+            self.current_screen = self.screens["starmap"]
+            screen_changed = True
+        elif screen_action == "ZOOM OUT":
+            self.screens["starmap"].zoomout()
             screen_changed = True
         elif screen_action == "MESSAGES":
             self.current_screen = self.screens["messages"]
