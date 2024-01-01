@@ -326,7 +326,8 @@ class solarsystem:
             self.num_of_planets += 1
         else:
             parent_planet = planet_id[:2] + (0,)
-            self.planets[parent_planet].add_moon(planet_seqid, planet_id)
+            # planets are always before moons in the rawlist, so self.num_of_planets won't increase after reaching the moon list
+            self.planets[parent_planet].add_moon(planet_seqid - self.num_of_planets - 1, planet_id)
 
 
     def get_numberofplanets(self):
