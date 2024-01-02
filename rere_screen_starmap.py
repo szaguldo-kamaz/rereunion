@@ -51,6 +51,7 @@ class screen_starmap(screen):
                  (   160-16 <= mouse_pos[0] <= 160+16):
 
                 self.menu_info["actiontext"] = self.selected_planet.planetname
+                self.mousecursor = "cross"
 
             else:
 
