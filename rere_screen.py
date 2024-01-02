@@ -47,7 +47,7 @@ class screen:
             self.action_params = None
             return [ action, action_params ]
         else:
-            return None
+            return [ None, None ]
 
 
     def get_sfx(self):
