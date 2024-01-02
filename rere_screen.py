@@ -97,6 +97,8 @@ class screen:
                         if mouse_buttonevent[0]:  # buttondown
                             print("activate menuitem: ", self.menu_info["text"][menuicon_pointerover_index])
                             self.action = self.menu_info["text"][menuicon_pointerover_index]
+                            if self.action == "PLANET MAIN":
+                                self.action_params = self.current_planet_surface
                             self.sfx_to_play = self.menu_info["sfx"][menuicon_pointerover_index]
                     else:
                         self.menuicon_pointerover = ''

@@ -691,9 +691,6 @@ class ReReGame:
         self.screens["infobuy"] = screen_infobuy(self.gamedata_static, self.gamedata_dynamic)
         self.screens["researchdesign"] = screen_researchdesign(self.gamedata_static, self.gamedata_dynamic)
         self.screens["ship"] = screen_ship(self.gamedata_static, self.gamedata_dynamic, self.solarsystems, self.shipgroups_spaceforces, self.shipgroups_planetforces)
-        self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,5,0)])  # New-Earth
-        #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,4,4)])  # Penelope
-        #self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[1].planets[(1,3,3)])  # Mir
         self.screens["starmap"] = screen_starmap(self.gamedata_static, self.gamedata_dynamic, self.solarsystems)
         self.screens["messages"] = screen_messages(self.gamedata_dynamic)
         self.current_screen = self.screens["controlroom"]
@@ -707,6 +704,7 @@ class ReReGame:
             self.current_screen = self.screens["controlroom"]
             screen_changed = True
         elif screen_action == "PLANET MAIN":
+            self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[screen_action_params[0]].planets[screen_action_params])
             self.current_screen = self.screens["planetmain"]
             screen_changed = True
         elif screen_action == "RESEARCH-DESIGN":

@@ -33,6 +33,7 @@ class screen_ship(screen):
         self.shipgroups_planetforces = shipgroups_planetforces
         self.current_shipgroup = self.shipgroups_spaceforces
         self.__set_location_names()
+        self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
 
         self.update(gamedata_dynamic, (0,0), [0,0,0], [0,0,0])
 
@@ -103,6 +104,7 @@ class screen_ship(screen):
                     self.selected_group_no[self.currentview] = mouse_over_groupno
                     self.selected_group_no_current = self.selected_group_no[self.currentview]
                     self.__set_location_names(bool(self.currentview))
+                    self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
                     if is_icon:
                         self.sfx_to_play = "GROUP"
 
@@ -114,3 +116,4 @@ class screen_ship(screen):
                 self.selected_group_no_current = self.selected_group_no[self.currentview]
                 self.update(gamedata_dynamic, mouse_pos, [0,0,0], [0,0,0])
                 self.__set_location_names(bool(self.currentview))
+                self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
