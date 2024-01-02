@@ -76,12 +76,15 @@ class ReReGFX:
         self.window = pygame.display.set_mode(self.window_size)
         #self.window = pygame.display.set_mode((320, 200), flags = pygame.SCALED | pygame.RESIZABLE)
 
+        self.current_mousecursor = None
         self.set_mousecursor("normal")
 
 
     def set_mousecursor(self, towhat):
 
-        pygame.mouse.set_cursor(self.mousecursors[towhat])
+        if self.current_mousecursor != towhat:
+            self.current_mousecursor = towhat
+            pygame.mouse.set_cursor(self.mousecursors[towhat])
 
 
     def draw(self, current_game):
