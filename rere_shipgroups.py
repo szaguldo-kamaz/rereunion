@@ -39,7 +39,7 @@ class shipgroup:
 
             self.type = grouptype  # type: 1 army, 2 trade, (3 pirate), 4 carrier
             self.name = groupname
-            self.location = [ 1, 5, 0 ]  # groups are always created on New Earth
+            self.location = ( 1, 5, 0 )  # groups are always created on New Earth
             self.orbit_status = 1  # orbit status: 1 grounded, 2 orbiting planet, ?4 in transit within system?, ?6 in transit through systems?
             self.remaining_travel_time_between_solsystems = 0
             self.outside_destination_solsystem = 0
@@ -85,11 +85,11 @@ class shipgroup:
 
             self.type = initial_groupraw_data['type']  # type: 1 army, 2 trade, (3 pirate), 4 carrier
             self.name = initial_groupraw_data['name']
-            self.location = [
+            self.location = (
                              initial_groupraw_data['system_no'],
                              initial_groupraw_data['planet_no'],
                              initial_groupraw_data['moon_no']
-                            ]
+                            )
             self.orbit_status = initial_groupraw_data['orbit_status']  # orbit status: 1 grounded, 2 orbiting planet, ?4 in transit wihtin system?, ?6 in transit through systems?
             self.remaining_travel_time_between_solsystems = initial_groupraw_data['travel_time_between_solsystems']
             self.outside_destination_solsystem = initial_groupraw_data['outside_destination_solsystem']
