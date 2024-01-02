@@ -846,6 +846,9 @@ class ReReGFX:
                     self.screen_buffer.blit(self.starmap_labels[system_no], (256, 49 + system_no * 19))
 
 
+        self.set_mousecursor(screenobj_starmap.mousecursor)
+
+
         return self.screen_buffer
 
 

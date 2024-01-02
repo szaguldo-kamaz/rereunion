@@ -30,11 +30,14 @@ class screen_starmap(screen):
         self.orbit_pixposes = [ [10+planet_no*35, 64] for planet_no in range(8) ]
         self.planet_and_moon_mode = False
         self.selected_planet = None
+        self.mousecursor = "normal"
 
 
     def update(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):
 
         self.update_menu(gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent)
+
+        self.mousecursor = "normal"
 
         if self.planet_and_moon_mode:  # Planet view
 
@@ -57,6 +60,7 @@ class screen_starmap(screen):
 
                         selected_moon_id = self.selected_planet.moons_ids[moon_no]
                         self.menu_info["actiontext"] = self.selected_solarsystem.planets[selected_moon_id].planetname
+                        self.mousecursor = "cross"
 
         else:  # Solarsys view
 
@@ -80,6 +84,7 @@ class screen_starmap(screen):
 
                         full_location = (self.location[0], planet_no + 1, 0)
                         self.menu_info["actiontext"] = self.selected_solarsystem.planets[full_location].planetname
+                        self.mousecursor = "cross"
                         if mouse_buttonevent[0]:
                             self.planet_and_moon_mode = True
                             self.parent_location = self.location
