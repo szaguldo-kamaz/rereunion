@@ -569,7 +569,7 @@ class ReReGFX:
 
         map_felszin = self.major_vs_felszin[planet.planettype]
 
-        base_mapsurface = self.render_surface(planet, animstate).copy()
+        base_mapsurface = self.render_surface(planet, animstate).copy()  # copy() because it's coming from cache
 
         for curr_building in planet.buildings:
             for tilepos_y in range(curr_building.building_data["building_size_y"]):
@@ -972,23 +972,24 @@ class ReReGFX:
         # main pic
         self.screen_buffer.blit(self.PICs["DESIGNER"], (0, 49))
 
-        # build icon
-        buildicon_state = screenobj_planetmain.anim_states["builddemolish"]["currframe"] and screenobj_planetmain.build_mode
-        self.screen_buffer.blit(self.planetmain_buildicon[buildicon_state], (0, 1 + 49))
-        # demolish icon
-        demolishicon_state = screenobj_planetmain.anim_states["builddemolish"]["currframe"] and screenobj_planetmain.demolish_mode
-        self.screen_buffer.blit(self.planetmain_demolishicon[demolishicon_state], (45, 1 + 49))
-        # building - invention up kammide
-        self.screen_buffer.blit(self.planetmain_arrowup[screenobj_planetmain.selected_building_is_first], (0, 15 + 49))
-        # building - invention down
-        self.screen_buffer.blit(self.planetmain_arrowdown[screenobj_planetmain.selected_building_is_last], (0, 48 + 49))
-        # building on surface illustration
-        self.screen_buffer.blit(self.render_building(screenobj_planetmain.planet, self.gamedata_static["buildings_info"][screenobj_planetmain.selected_building_type]), (12, 15 + 49))
-        # building name
-        yellow_text_building_name = self.render_text(
-                                        self.gamedata_static["buildings_info"][screenobj_planetmain.selected_building_type]["name"],
-                                        textcolor = 1)
-        self.screen_buffer.blit(yellow_text_building_name, (2, 81 + 49))
+        if screenobj_planetmain.planet.colony == 1:
+            # build icon
+            buildicon_state = screenobj_planetmain.anim_states["builddemolish"]["currframe"] and screenobj_planetmain.build_mode
+            self.screen_buffer.blit(self.planetmain_buildicon[buildicon_state], (0, 1 + 49))
+            # demolish icon
+            demolishicon_state = screenobj_planetmain.anim_states["builddemolish"]["currframe"] and screenobj_planetmain.demolish_mode
+            self.screen_buffer.blit(self.planetmain_demolishicon[demolishicon_state], (45, 1 + 49))
+            # building - invention up
+            self.screen_buffer.blit(self.planetmain_arrowup[int(screenobj_planetmain.selected_building_is_first)], (0, 15 + 49))
+            # building - invention down
+            self.screen_buffer.blit(self.planetmain_arrowdown[int(screenobj_planetmain.selected_building_is_last)], (0, 48 + 49))
+            # building on surface illustration
+            self.screen_buffer.blit(self.render_building(screenobj_planetmain.planet, self.gamedata_static["buildings_info"][screenobj_planetmain.selected_building_type]), (12, 15 + 49))
+            # building name
+            yellow_text_building_name = self.render_text(
+                                            self.gamedata_static["buildings_info"][screenobj_planetmain.selected_building_type]["name"],
+                                            textcolor = 1)
+            self.screen_buffer.blit(yellow_text_building_name, (2, 81 + 49))
 
         # surface map
         planet_surface = self.render_surface_with_buildings(screenobj_planetmain.planet, screenobj_planetmain.anim_states["surface"]["currframe"])
