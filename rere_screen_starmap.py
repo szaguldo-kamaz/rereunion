@@ -51,7 +51,12 @@ class screen_starmap(screen):
                  (   160-16 <= mouse_pos[0] <= 160+16):
 
                 self.menu_info["actiontext"] = self.selected_planet.planetname
-                self.mousecursor = "cross"
+                if mouse_buttonevent[0]:
+                    self.sfx_to_play = "SURFACE"
+                    self.action = "PLANET MAIN"
+                    self.action_params = self.location + (0, )
+                else:
+                    self.mousecursor = "cross"
 
             else:
 
@@ -61,7 +66,13 @@ class screen_starmap(screen):
 
                         selected_moon_id = self.selected_planet.moons_ids[moon_no]
                         self.menu_info["actiontext"] = self.selected_solarsystem.planets[selected_moon_id].planetname
-                        self.mousecursor = "cross"
+                        if mouse_buttonevent[0]:
+                            self.sfx_to_play = "SURFACE"
+                            self.action = "PLANET MAIN"
+                            self.action_params = self.location + (moon_no + 1,)
+                            break
+                        else:
+                            self.mousecursor = "cross"
 
         else:  # Solarsys view
 
