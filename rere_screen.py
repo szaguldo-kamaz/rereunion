@@ -16,6 +16,7 @@ class screen:
         self.anim_states = {}
 
         self.action = None
+        self.action_params = None
         self.sfx_to_play = None
 
         if menu_data == None:
@@ -41,8 +42,10 @@ class screen:
 
         if self.action != None:
             action = self.action
+            action_params = self.action_params
             self.action = None
-            return action
+            self.action_params = None
+            return [ action, action_params ]
         else:
             return None
 
