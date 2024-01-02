@@ -63,7 +63,7 @@ class screen_infobuy(screen):
             self.can_be_produced = False
             self.cannot_be_produced_reason = "This will be fitted on your nose."
 
-        menuaction = self.get_action()
+        [ menuaction, _ ] = self.get_action()
         if menuaction != None:
             if   menuaction == 'PROJECT UP':
                 if self.selected_item_listno > 0:

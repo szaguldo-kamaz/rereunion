@@ -701,7 +701,7 @@ class ReReGame:
 
     def update(self, mouse_pos, mouse_buttonstate, mouseevent, mouseevent_buttondown, mouseevent_buttonup):
 
-        screen_action = self.current_screen.get_action()
+        [ screen_action, screen_action_params ] = self.current_screen.get_action()
         screen_changed = False
         if   screen_action == "BACK TO M.SCREEN":
             self.current_screen = self.screens["controlroom"]
