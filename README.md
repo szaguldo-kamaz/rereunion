@@ -39,21 +39,41 @@ Features as of now:
    - slicing up parts (sprites)
  - menu (icons, sfx, labels, scroll)
  - infobar (label, money, date)
- - control room
+ - screens
+   - control room
+   - planet main
+   - research-design
+   - info-buy
+   - ship info
+   - starmap
+   - messages
+ - control room - almost everything
    - render hero/commanders
+   - navigate to other screens
  - planet surface - almost everything
    - render surface with buildings
    - scrolling, selecting building
    - demolish buildings
    - radar view navigation
    - animated surface (flowing river, etc.)
- - switching between screens
-   - control room
-   - planet main
+ - info-buy
+   - browse inventions
+   - show production status
+   - invention info / pic
+ - starmap
+   - show solar systems/planets/moons
+   - navigate between solsystems/planets
+   - go to planet surfaces
+ - research-design
+   - show status of inventions
+   - show scientist skills
+   - some animations
+ - messages
+   - show messages
  - read and process raw data from saved games
-   - inventions, planet and building data, some other game states
+   - inventions, solar systems, planet and building data, fleet data, some other game states
  - read and process raw data from original executable
-   - building definitions, and some other static game data
+   - building definitions, solar systems, names, and some other static game data
 
 ### Contributing
 
