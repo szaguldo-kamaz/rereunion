@@ -52,9 +52,10 @@ class solarsystem:
         #############
         ### planet
         #######
-        def __init__(self, planet_data, gamedata_static, cache):
+        def __init__(self, planet_data, planet_id, gamedata_static, cache):
 
             self.gamedata_static = gamedata_static
+            self.planet_id = planet_id
 
             self.planetname = planet_data["planetname"]
             self.planettype = planet_data["planettype"]
@@ -75,7 +76,7 @@ class solarsystem:
             self.development_level = planet_data["development_level"]
             self.tax_level = planet_data["tax_level"]
             self.mineral_storage = planet_data["mineral_storage"]
-            self.mineral_production = planet_data["mineral_production"]
+            self.mineral_production_base = planet_data["mineral_production"]
             self.deployed_sat_type = planet_data["deployed_sat_type"]
             self.deployed_spy_ship = planet_data["deployed_spy_ship"]
             self.solarsat_count = planet_data["solarsat_count"]
@@ -122,6 +123,13 @@ class solarsystem:
             self.recreate_map_of_buildings()
             self.update_sat_exploration()
             self.update_possible_buildings_list()
+            self.update_mineral_production()
+
+
+        def update_mineral_production(self):
+            self.mineral_production_actual = {}
+            for mineralname in self.mineral_production_base.keys():
+                self.mineral_production_actual[mineralname] = self.mineral_production_base[mineralname] * self.miner_droids // 10
 
 
         def add_moon(self, moon_seqid, moon_id):
@@ -249,6 +257,7 @@ class solarsystem:
             if self.miner_droid_no < 10 and self.storage["miner_droids"] > 0:
                 self.miner_droid_no += 1
                 self.storage["miner_droids"] -= 1
+                self.update_mineral_production()
                 return True
             else:
                 return False
@@ -258,6 +267,7 @@ class solarsystem:
             if self.miner_droid_no > 0:
                 self.miner_droid_no -= 1
                 self.storage["miner_droids"] += 1
+                self.update_mineral_production()
                 return True
             else:
                 return False
@@ -320,7 +330,7 @@ class solarsystem:
             print('planets: FATAL: planet "%s" already added! This should never happen.'%(planet_id))
             sys.exit(1)
 
-        self.planets[planet_id] = self.planet(planet_data, gamedata_static, cache)
+        self.planets[planet_id] = self.planet(planet_data, planet_id, gamedata_static, cache)
 
         if planet_id[2] == 0:
             self.num_of_planets += 1
