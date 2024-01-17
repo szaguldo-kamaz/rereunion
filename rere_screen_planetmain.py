@@ -146,6 +146,10 @@ class screen_planetmain(screen):
                     else:
                         self.sfx_to_play = "X"
                         self.__select_building_by_type(self.planet.buildings[building_no].building_type)
+                        if self.planet.buildings[building_no].building_type == 4:  # mine
+                            self.action = "MINE"
+                            self.action_params = [ self.planet, self.map_position ]
+                            self.sfx_to_play = "MINE"
 
         elif 53 <= mouse_pos[1] <= 196 and 90 <= mouse_pos[0] <= 92:
 

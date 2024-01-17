@@ -54,7 +54,7 @@ class screen_starmap(screen):
                 if mouse_buttonevent[0]:
                     self.sfx_to_play = "SURFACE"
                     self.action = "PLANET MAIN"
-                    self.action_params = self.location + (0, )
+                    self.action_params = [ self.location + (0, ), None ]
                 else:
                     self.mousecursor = "cross"
 
@@ -69,7 +69,7 @@ class screen_starmap(screen):
                         if mouse_buttonevent[0]:
                             self.sfx_to_play = "SURFACE"
                             self.action = "PLANET MAIN"
-                            self.action_params = self.location + (moon_no + 1,)
+                            self.action_params = [ self.location + (moon_no + 1,), None ]
                             break
                         else:
                             self.mousecursor = "cross"

@@ -124,5 +124,5 @@ class screen_controlroom(screen):
             if mouse_buttonevent[0]:  # mouse button pressed
                 self.sfx_to_play = "SURFACE"
                 self.action = "PLANET MAIN"
-                self.action_params = (1, 5, 0)  # New-Earth
+                self.action_params = [ (1, 5, 0), None ]  # New-Earth
 
