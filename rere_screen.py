@@ -98,7 +98,11 @@ class screen:
                             print("activate menuitem: ", self.menu_info["text"][menuicon_pointerover_index])
                             self.action = self.menu_info["text"][menuicon_pointerover_index]
                             if self.action == "PLANET MAIN":
-                                self.action_params = self.current_planet_surface
+                                if hasattr(self, 'preserved_surface_position'):
+                                    preserved_position = self.preserved_surface_position
+                                else:
+                                    preserved_position = None
+                                self.action_params = [ self.current_planet_surface, preserved_position ]
                             self.sfx_to_play = self.menu_info["sfx"][menuicon_pointerover_index]
                     else:
                         self.menuicon_pointerover = ''

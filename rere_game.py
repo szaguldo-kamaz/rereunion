@@ -15,6 +15,7 @@ from rere_screen_controlroom import *
 from rere_screen_infobuy import *
 from rere_screen_ship import *
 from rere_screen_planetmain import *
+from rere_screen_mine import *
 from rere_screen_researchdesign import *
 from rere_screen_starmap import *
 from rere_screen_messages import *
@@ -704,8 +705,16 @@ class ReReGame:
             self.current_screen = self.screens["controlroom"]
             screen_changed = True
         elif screen_action == "PLANET MAIN":
-            self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, self.solarsystems[screen_action_params[0]].planets[screen_action_params])
+            selected_planet = self.solarsystems[screen_action_params[0][0]].planets[screen_action_params[0]]
+            selected_planet_map_position = screen_action_params[1]
+            self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, selected_planet, map_position = selected_planet_map_position)
             self.current_screen = self.screens["planetmain"]
+            screen_changed = True
+        elif screen_action == "MINE":
+            selected_planet = screen_action_params[0]
+            selected_planet_map_position_preserve = screen_action_params[1]
+            self.screens["mine"] = screen_mine(self.gamedata_dynamic, selected_planet, selected_planet_map_position_preserve)
+            self.current_screen = self.screens["mine"]
             screen_changed = True
         elif screen_action == "RESEARCH-DESIGN":
             self.current_screen = self.screens["researchdesign"]

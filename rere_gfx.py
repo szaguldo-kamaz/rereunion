@@ -203,6 +203,8 @@ class ReReGFX:
         for epulet_no in range(1,27):
             PIClist.append("EPULET/EPULET%d.PIC"%(epulet_no))  # Epulet illusztraciok listaja - Building illustrations
 
+        PIClist.append("GRAFIKA/MINER.PIC")  # Banya - Mine
+
         PIClist.append("PLANETS/FANIM1.PIC")  # Felszin animacio - Surface anim (earth-like)
         PIClist.append("PLANETS/FANIM5.PIC")  # Felszin animacio - Surface anim (rocky)
         PIClist.append("PLANETS/FANIM10.PIC")  # Felszin animacio - Surface anim (tropical)
@@ -654,6 +656,8 @@ class ReReGFX:
             return self.render_controlroom(screenobj)
         elif screenobj.screentype == "planetmain":
             return self.render_planetmain(screenobj)
+        elif screenobj.screentype == "mine":
+            return self.render_mine(screenobj)
         elif screenobj.screentype == "researchdesign":
             return self.render_researchdesign(screenobj)
         elif screenobj.screentype == "infobuy":
@@ -1011,6 +1015,36 @@ class ReReGFX:
                                   screenobj_planetmain.radar_viewer_rect_size[0],
                                   screenobj_planetmain.radar_viewer_rect_size[1])
         pygame.draw.rect(self.screen_buffer, (0xff, 0x0c, 0x00), radar_viewer_rect_pos, 1)
+
+        return self.screen_buffer
+
+
+    # mine
+    def render_mine(self, screenobj_mine):
+
+        self.screen_buffer.blit(self.render_menu(screenobj_mine.menu_info), (0, 0))
+        self.screen_buffer.blit(self.render_infobar(screenobj_mine.menu_info), (0, 32))
+
+        # main pic
+        self.screen_buffer.blit(self.PICs["MINER"], (0, 49))
+
+        # mineral production
+        mineral_no = 0
+        for mineral in screenobj_mine.mineral_production.keys():
+            mineral_production = screenobj_mine.mineral_production[mineral]
+            mineral_stock = screenobj_mine.mineral_storage[mineral]
+            if mineral_production == 0:
+                mineral_production_string = ' -'
+            else:
+                mineral_production_string = f"{mineral_production:2}"
+
+            mineral_stock_string = f"{mineral_stock:6}"
+
+            yellow_text_mineral_prod = self.render_text(mineral_production_string, textcolor = 1)
+            yellow_text_mineral_stock = self.render_text(mineral_stock_string, textcolor = 1)
+            self.screen_buffer.blit(yellow_text_mineral_prod, (113, 57 + 8 * mineral_no))
+            self.screen_buffer.blit(yellow_text_mineral_stock, (59, 57 + 8 * mineral_no))
+            mineral_no += 1
 
         return self.screen_buffer
 
