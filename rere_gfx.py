@@ -65,6 +65,7 @@ class ReReGFX:
         self.prepare_starmap()
         self.prepare_felszin()
         self.prepare_planetmain()
+        self.prepare_mine_szamok()
 
         self.menu_full = pygame.Surface((320, 64))
         self.infobar = pygame.Surface((320, 17))
@@ -204,6 +205,7 @@ class ReReGFX:
             PIClist.append("EPULET/EPULET%d.PIC"%(epulet_no))  # Epulet illusztraciok listaja - Building illustrations
 
         PIClist.append("GRAFIKA/MINER.PIC")  # Banya - Mine
+        PIClist.append("GRAFIKA/SZAMOK.PIC")  # Banya/szamok - Mine/numbers
 
         PIClist.append("PLANETS/FANIM1.PIC")  # Felszin animacio - Surface anim (earth-like)
         PIClist.append("PLANETS/FANIM5.PIC")  # Felszin animacio - Surface anim (rocky)
@@ -514,6 +516,19 @@ class ReReGFX:
                         if felszinepulet_x == felszinepuletek_number_of_elements[currfelszinepulet_no][0] * 16:  # epul6 has miner station only
                             self.felszinepuletek[currfelszinepulet_no].append([]*16)  # check todo
                             break
+
+
+    def prepare_mine_szamok(self):
+
+        self.mine_szamok_kicsi = []
+        self.mine_szamok_kozepes = []
+        self.mine_szamok_nagy = []
+
+        for szam in range(10):
+            self.mine_szamok_nagy.append(self.PICs["SZAMOK"].subsurface(pygame.Rect((szam%5)*64, (szam//5)*35, 50, 35)))
+            self.mine_szamok_kozepes.append(self.PICs["SZAMOK"].subsurface(pygame.Rect(1 + 16*szam, 70, 14, 35)))
+            self.mine_szamok_kicsi.append(self.PICs["SZAMOK"].subsurface(pygame.Rect(163 + szam*13, 71, 12, 9)))
+
 
     #################
     ### Render ###
@@ -1035,6 +1050,8 @@ class ReReGFX:
             mineral_stock = screenobj_mine.mineral_storage[mineral]
             if mineral_production == 0:
                 mineral_production_string = ' -'
+            elif mineral_production == -1:
+                mineral_production_string = '--'
             else:
                 mineral_production_string = f"{mineral_production:2}"
 
@@ -1045,6 +1062,17 @@ class ReReGFX:
             self.screen_buffer.blit(yellow_text_mineral_prod, (113, 57 + 8 * mineral_no))
             self.screen_buffer.blit(yellow_text_mineral_stock, (59, 57 + 8 * mineral_no))
             mineral_no += 1
+
+        # number of mines
+        self.screen_buffer.blit(self.mine_szamok_kicsi[screenobj_mine.num_of_mines // 10], (113, 113))
+        self.screen_buffer.blit(self.mine_szamok_kicsi[screenobj_mine.num_of_mines % 10], (126, 113))
+
+        # number of active droids
+        self.screen_buffer.blit(self.mine_szamok_nagy[screenobj_mine.num_of_droids_active], (34, 144))
+
+        # number of droids in stock
+        self.screen_buffer.blit(self.mine_szamok_kozepes[screenobj_mine.num_of_droids_stock // 10], (113, 144))
+        self.screen_buffer.blit(self.mine_szamok_kozepes[screenobj_mine.num_of_droids_stock % 10], (129, 144))
 
         return self.screen_buffer
 
