@@ -110,6 +110,7 @@ class solarsystem:
 
             self.possible_buildings_list = []
             self.buildings = []
+            self.num_of_mines = 0
 
             if "planetsurfaces" not in cache.keys():
                 cache["planetsurfaces"] = {}
@@ -193,6 +194,9 @@ class solarsystem:
 
             self.add_building_to_map_of_buildings(building_no)
 
+            if building_type == 4:  # 4 = mine
+                self.num_of_mines += 1
+
             return 0
 
 
@@ -225,6 +229,10 @@ class solarsystem:
             if self.buildings[building_no].building_type == 1:
                 return False
 
+            # Mine
+            if self.buildings[building_no].building_type == 4:
+                self.num_of_mines -= 1
+
             building_to_del = self.buildings.pop(building_no)
             del building_to_del
 
@@ -254,8 +262,8 @@ class solarsystem:
 
 
         def add_droid(self):
-            if self.miner_droid_no < 10 and self.storage["miner_droids"] > 0:
-                self.miner_droid_no += 1
+            if self.miner_droids < min(self.num_of_mines, 9) and self.storage["miner_droids"] > 0:
+                self.miner_droids += 1
                 self.storage["miner_droids"] -= 1
                 self.update_mineral_production()
                 return True
@@ -264,8 +272,8 @@ class solarsystem:
 
 
         def remove_droid(self):
-            if self.miner_droid_no > 0:
-                self.miner_droid_no -= 1
+            if self.miner_droids > 0:
+                self.miner_droids -= 1
                 self.storage["miner_droids"] += 1
                 self.update_mineral_production()
                 return True
