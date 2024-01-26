@@ -464,10 +464,17 @@ class ReReGFX:
                                         self.PICs["DESIGNER"].subsurface(pygame.Rect( 106, 17, 111,  2)),
                                         self.PICs["DESIGNER"].subsurface(pygame.Rect( 106, 20, 111,  2)) ]
 
-        self.planetmain_horiz_lines = [ self.PICs["DESIGNER"].subsurface(pygame.Rect(  94,  5,  2, 68)),
+        self.planetmain_vert_lines  = [ self.PICs["DESIGNER"].subsurface(pygame.Rect(  94,  5,  2, 68)),
                                         self.PICs["DESIGNER"].subsurface(pygame.Rect(  97,  5,  2, 68)),
                                         self.PICs["DESIGNER"].subsurface(pygame.Rect( 100,  5,  2, 65)),
                                         self.PICs["DESIGNER"].subsurface(pygame.Rect( 103,  5,  2, 65)) ]
+
+        self.planetmain_designer = self.PICs["DESIGNER"].copy()
+        self.planetmain_designer.fill(pygame.Color(0, 0, 0), pygame.Rect(94, 5, 123, 77))
+
+        self.planetmain_epulet_illust = []
+        for epulet_no in range(1,27):
+            self.planetmain_epulet_illust.append(self.PICs[f"EPULET{epulet_no}"].subsurface(pygame.Rect(  2,  2, 86, 68)))
 
 
     # slice up felszin/epulet (surface/building) PICs into 16x16 tiles
@@ -989,7 +996,7 @@ class ReReGFX:
         self.screen_buffer.blit(self.render_infobar(screenobj_planetmain.menu_info), (0, 32))
 
         # main pic
-        self.screen_buffer.blit(self.PICs["DESIGNER"], (0, 49))
+        self.screen_buffer.blit(self.planetmain_designer, (0, 49))
 
         if screenobj_planetmain.planet.colony == 1:
             # build icon
@@ -1008,14 +1015,42 @@ class ReReGFX:
             yellow_text_building_name = self.render_text(
                                             self.gamedata_static["buildings_info"][screenobj_planetmain.selected_building_type]["name"],
                                             textcolor = 1)
-            self.screen_buffer.blit(yellow_text_building_name, (2, 81 + 49))
+            self.screen_buffer.blit(yellow_text_building_name, (3, 81 + 49))
 
-        # surface map
-        planet_surface = self.render_surface_with_buildings(screenobj_planetmain.planet, screenobj_planetmain.anim_states["surface"]["currframe"])
-        planet_surface_cropped = planet_surface.subsurface(pygame.Rect(screenobj_planetmain.map_position[0] * 16,
-                                                                       screenobj_planetmain.map_position[1] * 16,
-                                                                       14*16, 9*16))
-        self.screen_buffer.blit(planet_surface_cropped, (93, 4 + 49))
+            # Invention Info mode (cannot be in this mode if there is no colony anyway)
+            if screenobj_planetmain.screenmode_buildinginfo:
+                self.screen_buffer.blit(yellow_text_building_name, (117, 59))
+                self.screen_buffer.blit(self.render_text("Status     : Active", textcolor = 2), (98, 70))
+                self.screen_buffer.blit(self.render_text("Workers    : 72/72", textcolor = 2), (98, 79))
+                self.screen_buffer.blit(self.render_text("Energy     : 129 kwh", textcolor = 2), (98, 88))
+                self.screen_buffer.blit(self.render_text("Working    : 55%", textcolor = 2), (98, 97))
+
+                self.screen_buffer.blit(self.planetmain_horiz_lines[0], (226,  54))
+                self.screen_buffer.blit(self.planetmain_horiz_lines[1], (226, 124))
+                self.screen_buffer.blit(self.planetmain_vert_lines[0],  (226, 56))
+                self.screen_buffer.blit(self.planetmain_vert_lines[1],  (314, 56))
+
+                self.screen_buffer.blit(self.planetmain_horiz_lines[2], ( 94, 127))
+                self.screen_buffer.blit(self.planetmain_horiz_lines[3], (205, 127))
+                self.screen_buffer.blit(self.planetmain_horiz_lines[4], ( 94, 194))
+                self.screen_buffer.blit(self.planetmain_horiz_lines[5], (205, 194))
+                self.screen_buffer.blit(self.planetmain_vert_lines[2],  ( 94, 129))
+                self.screen_buffer.blit(self.planetmain_vert_lines[3],  (314, 129))
+
+                self.screen_buffer.blit(self.planetmain_epulet_illust[screenobj_planetmain.selected_building_type-1], (228, 56))
+
+                selected_building_description = self.gamedata_static["buildings_desc"][screenobj_planetmain.selected_building_type-1]
+                self.screen_buffer.blit(self.render_text(selected_building_description[0], textcolor = 2), (100, 134))
+                for blgd_desc_index in range(len(selected_building_description)-1):
+                    self.screen_buffer.blit(self.render_text(selected_building_description[blgd_desc_index + 1], textcolor = 1), (100, 148 + blgd_desc_index*9))
+
+        if not screenobj_planetmain.screenmode_buildinginfo:  # Terrain mode
+            # surface map
+            planet_surface = self.render_surface_with_buildings(screenobj_planetmain.planet, screenobj_planetmain.anim_states["surface"]["currframe"])
+            planet_surface_cropped = planet_surface.subsurface(pygame.Rect(screenobj_planetmain.map_position[0] * 16,
+                                                                           screenobj_planetmain.map_position[1] * 16,
+                                                                           14*16, 9*16))
+            self.screen_buffer.blit(planet_surface_cropped, (93, 4 + 49))
 
         # radar yellow frame - kozeppont (45, 168)
         radar_frame_rect_size = (screenobj_planetmain.radar_frame_rect_pos[0][0],

@@ -25,6 +25,8 @@ class screen_planetmain(screen):
         self.anim_states["surface"] = { "currframe" : 0, "frames" : 3, "currtick" : 0, "ticks" : 5, "loop": 1 }
         self.anim_states["builddemolish"] = { "currframe" : 0, "frames" : 2, "currtick" : 0, "ticks" : 5, "loop": 1 }
 
+        self.screenmode_buildinginfo = False
+
         self.planet = planet
         if self.planet.possible_buildings_list != []:
             self.__select_building_by_index(selected_building_index)
@@ -116,82 +118,144 @@ class screen_planetmain(screen):
         horizontal_scroll = 0
         vertical_scroll = 0
 
-        # Terrain
-        if (53 <= mouse_pos[1] <= 196) and (93 <= mouse_pos[0] <= 316):
+        if self.screenmode_buildinginfo:
 
-            self.menu_info["actiontext"] = 'Terrain'
+            if (53 <= mouse_pos[1] <= 199) and (90 <= mouse_pos[0] <= 319) or \
+               (64 <= mouse_pos[1] <= 127) and (12 <= mouse_pos[0] <=  90):
+                self.menu_info["actiontext"] = 'See surface'
+                if mouse_buttonevent[0]:  # mouse button was pressed
+                    self.screenmode_buildinginfo = False
+                    self.sfx_to_play = "X"
 
-            # Scroll over surface map (terrain) using right mouse button
-            if mouse_buttonstate[2]:  # right mouse button is being pressed
 
-                mouse_on_terrain_tile = ( int((mouse_pos[0] - 93) / 16), int((mouse_pos[1] - 53) / 16) )
-                mouse_on_terrain_tile_1d = mouse_on_terrain_tile[0] + mouse_on_terrain_tile[1] * 14
-                [ horizontal_scroll, vertical_scroll ] = self.scroll_vectors[mouse_on_terrain_tile_1d]
+        else:
 
-            # Select building on surface map (terrain)
-            if mouse_buttonevent[0] and mouse_buttonstate[0] and not self.build_mode:  # left mouse button was pressed
+            # Terrain
+            if (53 <= mouse_pos[1] <= 196) and (93 <= mouse_pos[0] <= 316):
 
-                mouse_on_map_pos = ( int((mouse_pos[0] - 93)/16) + 1, int((mouse_pos[1] - 52)/16) + 1 )
-                map_xy_index = self.map_position[0] + mouse_on_map_pos[0] + \
-                               (self.map_position[1] + mouse_on_map_pos[1]) * self.planet.map_terrain.map_size[0]
-                building_no = self.planet.map_buildings[map_xy_index]
+                self.menu_info["actiontext"] = 'Terrain'
 
-                if building_no > -1:  # valid building has been selected ?
-                    if self.demolish_mode:
-                        if self.planet.demolish_building(building_no):
-                            self.sfx_to_play = "DESTRUCT"
+                # Scroll over surface map (terrain) using right mouse button
+                if mouse_buttonstate[2]:  # right mouse button is being pressed
+
+                    mouse_on_terrain_tile = ( int((mouse_pos[0] - 93) / 16), int((mouse_pos[1] - 53) / 16) )
+                    mouse_on_terrain_tile_1d = mouse_on_terrain_tile[0] + mouse_on_terrain_tile[1] * 14
+                    [ horizontal_scroll, vertical_scroll ] = self.scroll_vectors[mouse_on_terrain_tile_1d]
+
+                # Select building on surface map (terrain)
+                if mouse_buttonevent[0] and mouse_buttonstate[0] and not self.build_mode:  # left mouse button was pressed
+
+                    mouse_on_map_pos = ( int((mouse_pos[0] - 93)/16) + 1, int((mouse_pos[1] - 52)/16) + 1 )
+                    map_xy_index = self.map_position[0] + mouse_on_map_pos[0] + \
+                                   (self.map_position[1] + mouse_on_map_pos[1]) * self.planet.map_terrain.map_size[0]
+                    building_no = self.planet.map_buildings[map_xy_index]
+
+                    if building_no > -1:  # valid building has been selected ?
+                        if self.demolish_mode:
+                            if self.planet.demolish_building(building_no):
+                                self.sfx_to_play = "DESTRUCT"
+                            else:
+                                self.sfx_to_play = "X"
+                            self.demolish_mode = False
                         else:
                             self.sfx_to_play = "X"
-                        self.demolish_mode = False
-                    else:
-                        self.sfx_to_play = "X"
-                        if self.planet.buildings[building_no].building_type == 4:  # mine
-                            self.action = "MINE"
-                            self.action_params = [ self.planet, self.map_position ]
-                            self.sfx_to_play = "MINE"
+                            if self.planet.buildings[building_no].building_type == 4:  # mine
+                                self.action = "MINE"
+                                self.action_params = [ self.planet, self.map_position ]
+                                self.sfx_to_play = "MINE"
+                            else:
+                                self.__select_building_by_type(self.planet.buildings[building_no].building_type)
+                                self.screenmode_buildinginfo = True
+
+            elif 53 <= mouse_pos[1] <= 196 and 90 <= mouse_pos[0] <= 92:
+
+                self.menu_info["actiontext"] = 'Left'
+                if mouse_buttonstate[0]:  # left mouse button is being pressed
+                    horizontal_scroll = -1
+
+            elif 53 <= mouse_pos[1] <= 196 and 317 <= mouse_pos[0] <= 319:
+
+                self.menu_info["actiontext"] = 'Right'
+                if mouse_buttonstate[0]:  # left mouse button is being pressed
+                    horizontal_scroll = +1
+
+            elif 50 <= mouse_pos[1] <= 52 and 93 <= mouse_pos[0] <= 316:
+
+                self.menu_info["actiontext"] = 'Up'
+                if mouse_buttonstate[0]:  # left mouse button is being pressed
+                    vertical_scroll = -1
+
+            elif 197 <= mouse_pos[1] <= 199 and 93 <= mouse_pos[0] <= 316:
+
+                self.menu_info["actiontext"] = 'Down'
+                if mouse_buttonstate[0]:  # left mouse button is being pressed
+                    vertical_scroll = +1
+
+            # Radar viewer
+            elif 138 <= mouse_pos[1] <= 200 and 0 <= mouse_pos[0] <= 89:
+
+                self.menu_info["actiontext"] = 'Radar'
+                if any(mouse_buttonstate):  # any mouse button is being pressed
+                    new_radar_viewer_pos = [mouse_pos[0] - self.radar_frame_rect_pos[0][0] - int(self.radar_viewer_rect_size[0] / 2),
+                                            mouse_pos[1] - self.radar_frame_rect_pos[0][1] - int(self.radar_viewer_rect_size[1] / 2)]
+                    new_radar_viewer_pos[0] = max(0, new_radar_viewer_pos[0])
+                    new_radar_viewer_pos[1] = max(0, new_radar_viewer_pos[1])
+                    new_radar_viewer_pos[0] = min(self.planet.map_terrain.map_size[0] - self.radar_viewer_rect_size[0], new_radar_viewer_pos[0])
+                    new_radar_viewer_pos[1] = min(self.planet.map_terrain.map_size[1] - self.radar_viewer_rect_size[1], new_radar_viewer_pos[1])
+
+                    self.set_map_position(new_radar_viewer_pos)
+
+            # Build icon
+            elif 50 <= mouse_pos[1] <= 62 and 0 <= mouse_pos[0] <= 43:
+
+                if self.planet.colony == 0:
+                    self.menu_info["actiontext"] = 'No effect'
+                else:
+                    self.menu_info["actiontext"] = 'Build'
+                    if mouse_buttonevent[0]:  # mouse button pressed
+                        if not self.build_mode:
+                            self.sfx_to_play = "BUILD"
+                            self.build_mode = True
+                            self.demolish_mode = False
+                            self.anim_states["builddemolish"]["currframe"] = 1
+                            self.anim_states["builddemolish"]["currtick"] = 0
                         else:
-                            self.__select_building_by_type(self.planet.buildings[building_no].building_type)
+                            self.sfx_to_play = "X"
+                            self.build_mode = False
 
-        elif 53 <= mouse_pos[1] <= 196 and 90 <= mouse_pos[0] <= 92:
+            # Demolish icon
+            elif 50 <= mouse_pos[1] <= 62 and 45 <= mouse_pos[0] <= 88:
 
-            self.menu_info["actiontext"] = 'Left'
-            if mouse_buttonstate[0]:  # left mouse button is being pressed
-                horizontal_scroll = -1
+                if self.planet.colony == 0:
+                    self.menu_info["actiontext"] = 'No effect'
+                else:
+                    self.menu_info["actiontext"] = 'Destroy'
+                    if mouse_buttonevent[0]:  # mouse button pressed
+                        if not self.demolish_mode:
+                            self.sfx_to_play = "X"
+                            self.build_mode = False
+                            self.demolish_mode = True
+                            self.anim_states["builddemolish"]["currframe"] = 1
+                            self.anim_states["builddemolish"]["currtick"] = 0
+                        else:
+                            self.sfx_to_play = "X"
+                            self.demolish_mode = False
 
-        elif 53 <= mouse_pos[1] <= 196 and 317 <= mouse_pos[0] <= 319:
+            # Invention info
+            elif (64 <= mouse_pos[1] <= 127) and (12 <= mouse_pos[0] <=  88):
+                self.menu_info["actiontext"] = 'Invention Info'
+                if mouse_buttonevent[0]:
+                    self.screenmode_buildinginfo = True
+                    self.sfx_to_play = "X"
 
-            self.menu_info["actiontext"] = 'Right'
-            if mouse_buttonstate[0]:  # left mouse button is being pressed
-                horizontal_scroll = +1
+            if (horizontal_scroll != 0) or (vertical_scroll != 0):
+                self.set_map_position([ self.map_position[0] + horizontal_scroll,
+                                        self.map_position[1] + vertical_scroll ])
 
-        elif 50 <= mouse_pos[1] <= 52 and 93 <= mouse_pos[0] <= 316:
-
-            self.menu_info["actiontext"] = 'Up'
-            if mouse_buttonstate[0]:  # left mouse button is being pressed
-                vertical_scroll = -1
-
-        elif 197 <= mouse_pos[1] <= 199 and 93 <= mouse_pos[0] <= 316:
-
-            self.menu_info["actiontext"] = 'Down'
-            if mouse_buttonstate[0]:  # left mouse button is being pressed
-                vertical_scroll = +1
-
-        # Radar viewer
-        elif 138 <= mouse_pos[1] <= 200 and 0 <= mouse_pos[0] <= 89:
-
-            self.menu_info["actiontext"] = 'Radar'
-            if any(mouse_buttonstate):  # any mouse button is being pressed
-                new_radar_viewer_pos = [mouse_pos[0] - self.radar_frame_rect_pos[0][0] - int(self.radar_viewer_rect_size[0] / 2),
-                                        mouse_pos[1] - self.radar_frame_rect_pos[0][1] - int(self.radar_viewer_rect_size[1] / 2)]
-                new_radar_viewer_pos[0] = max(0, new_radar_viewer_pos[0])
-                new_radar_viewer_pos[1] = max(0, new_radar_viewer_pos[1])
-                new_radar_viewer_pos[0] = min(self.planet.map_terrain.map_size[0] - self.radar_viewer_rect_size[0], new_radar_viewer_pos[0])
-                new_radar_viewer_pos[1] = min(self.planet.map_terrain.map_size[1] - self.radar_viewer_rect_size[1], new_radar_viewer_pos[1])
-
-                self.set_map_position(new_radar_viewer_pos)
+        # Common in Terrain / Building info mode
 
         # Invention up
-        elif 64 <= mouse_pos[1] <= 95 and 0 <= mouse_pos[0] <= 10:
+        if 64 <= mouse_pos[1] <= 95 and 0 <= mouse_pos[0] <= 10:
 
             if self.planet.colony == 0:
                 self.menu_info["actiontext"] = 'No effect'
@@ -217,44 +281,4 @@ class screen_planetmain(screen):
                     self.sfx_to_play = "X"
                     if not self.selected_building_is_last:
                         self.__select_building_by_index(self.selected_building_index + 1)
-
-        # Build icon
-        elif 50 <= mouse_pos[1] <= 62 and 0 <= mouse_pos[0] <= 43:
-
-            if self.planet.colony == 0:
-                self.menu_info["actiontext"] = 'No effect'
-            else:
-                self.menu_info["actiontext"] = 'Build'
-                if mouse_buttonevent[0]:  # mouse button pressed
-                    if not self.build_mode:
-                        self.sfx_to_play = "BUILD"
-                        self.build_mode = True
-                        self.demolish_mode = False
-                        self.anim_states["builddemolish"]["currframe"] = 1
-                        self.anim_states["builddemolish"]["currtick"] = 0
-                    else:
-                        self.sfx_to_play = "X"
-                        self.build_mode = False
-
-        # Demolish icon
-        elif 50 <= mouse_pos[1] <= 62 and 45 <= mouse_pos[0] <= 88:
-
-            if self.planet.colony == 0:
-                self.menu_info["actiontext"] = 'No effect'
-            else:
-                self.menu_info["actiontext"] = 'Destroy'
-                if mouse_buttonevent[0]:  # mouse button pressed
-                    if not self.demolish_mode:
-                        self.sfx_to_play = "X"
-                        self.build_mode = False
-                        self.demolish_mode = True
-                        self.anim_states["builddemolish"]["currframe"] = 1
-                        self.anim_states["builddemolish"]["currtick"] = 0
-                    else:
-                        self.sfx_to_play = "X"
-                        self.demolish_mode = False
-
-        if (horizontal_scroll != 0) or (vertical_scroll != 0):
-            self.set_map_position([ self.map_position[0] + horizontal_scroll,
-                                    self.map_position[1] + vertical_scroll ])
 

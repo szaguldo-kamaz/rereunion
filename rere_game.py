@@ -287,6 +287,22 @@ class ReReGame:
         return inventions
 
 
+    def decode_text(self, encoded_text):
+
+        sentences = encoded_text.split(b'\r\n')
+        decoded_text = []
+
+        for sentence in sentences:
+            decoded_sentence = ''
+            charno = 1
+            for character in sentence:
+                decoded_sentence += chr(((22400 + character - (charno * 79)) % 224) - 32)
+                charno += 1
+            decoded_text.append(decoded_sentence)
+
+        return decoded_text
+
+
     def load_inventionsdesc(self, inventionsdesc_filename = "TEXT/SZ_TALAL.RAW"):
 
         inventionsdesc = open(inventionsdesc_filename, "rb")
@@ -297,6 +313,24 @@ class ReReGame:
         inv_desc = [ inv_desc_alltext[x:x+7] for x in range(0, 35 * 7, 7) ]
 
         return inv_desc
+
+
+    def load_buildingsdesc(self, buildingsdesc_filename = "TEXT/SZ_FELSZ.TXT"):
+
+        buildingsdesc = open(buildingsdesc_filename, "rb")
+        buildingsdesc_encodedtext = buildingsdesc.read(3750)
+        buildingsdesc.close()
+
+        bldg_desc_alltext = self.decode_text(buildingsdesc_encodedtext)
+        bldg_desc = []
+        for bldg_desc_idx in range(25):
+            bldg_desc.append([])
+            for bldg_desc_line in range(6):
+                current_sentence = bldg_desc_alltext[6*bldg_desc_idx + bldg_desc_line].rstrip()
+                if current_sentence != '':
+                    bldg_desc[bldg_desc_idx].append(current_sentence)
+
+        return bldg_desc
 
 
     def process_raw_systemplanetsdata(self, raw_systemplanetsdata):
@@ -678,6 +712,7 @@ class ReReGame:
         [ self.gamedata_dynamic ] = self.load_savegame(savegame_filename)  # needs self.gamedata_static !
 
         self.gamedata_static["inventions_desc"] = self.load_inventionsdesc()
+        self.gamedata_static["buildings_desc"] = self.load_buildingsdesc()
 
         self.__setup_solarsystems(self.gamedata_static, self.gamedata_dynamic)
         self.__setup_buildings_on_planets(self.gamedata_dynamic)
