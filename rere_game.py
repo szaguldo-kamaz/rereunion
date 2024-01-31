@@ -390,9 +390,20 @@ class ReReGame:
         buildingsinfo_imagepos = 0
         buildingsinfo = [ {"name" : "dummy"} ]
 
-        keys1 = [ "name", "required_invention_no", "minimum_developer", "unknown1", "requires_builder_plant", "requires_vehicle_plant" ]
-        keys2 = [ "workers", "power_consumption", "zero1", "zero2", "unknown2", "price",
+        keys1 = [ "name", "required_invention_no", "minimum_developer", "building_typegroup?",
+                  "requires_builder_plant", "requires_vehicle_plant" ]
+        keys2 = [ "workers", "power_consumption", "zero1", "zero2", "production", "price",
                   "power_off_priority", "time_to_build_mean", "building_size_x", "building_size_y" ]
+
+        # "building_typegroup?"
+        # 1 - power production
+        # 2 - mining
+        # 3 - others
+        # 4 - radar
+        # 6 - food production
+        # 7 - living space
+        # 8 - cmdcenter
+        # 9 - miner station
 
         # 25 buildings in total - one entry is 63 bytes
         for building_seqno in range(1, 26):
@@ -684,7 +695,23 @@ class ReReGame:
             pos = ( loc_gamedata_dynamic["buildings_list"][building_no]["pos_x"],
                     loc_gamedata_dynamic["buildings_list"][building_no]["pos_y"] )
 
-            self.solarsystems[solsys_id].planets[planet_id].build_new_building(building_type, pos, force_build = True)
+            time_to_finish = loc_gamedata_dynamic["buildings_list"][building_no]["time_to_finish"]
+            performance = loc_gamedata_dynamic["buildings_list"][building_no]["performance"]
+            active = loc_gamedata_dynamic["buildings_list"][building_no]["active"]
+            workers = loc_gamedata_dynamic["buildings_list"][building_no]["workers"]
+            energy_use = loc_gamedata_dynamic["buildings_list"][building_no]["energy_use"]
+            working = loc_gamedata_dynamic["buildings_list"][building_no]["working"]
+
+            self.solarsystems[solsys_id].planets[planet_id].build_new_building(
+                                building_type,
+                                pos,
+                                force_build = True,
+                                time_to_finish = time_to_finish,
+                                performance = performance,
+                                active = active,
+                                workers = workers,
+                                energy_use = energy_use,
+                                working = working )
 
 
     def __setup_shipgroups(self, loc_gamedata_dynamic):

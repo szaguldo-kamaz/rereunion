@@ -26,6 +26,8 @@ class screen_planetmain(screen):
         self.anim_states["builddemolish"] = { "currframe" : 0, "frames" : 2, "currtick" : 0, "ticks" : 5, "loop": 1 }
 
         self.screenmode_buildinginfo = False
+        self.screenmode_buildinginfo_specific = False
+        self.selected_building_on_map = None
 
         self.planet = planet
         if self.planet.possible_buildings_list != []:
@@ -80,6 +82,7 @@ class screen_planetmain(screen):
 
         self.selected_building_index = building_index
         self.selected_building_type = self.planet.possible_buildings_list[building_index]
+        self.selected_building_typeinfo = self.planet.gamedata_static["buildings_info"][self.selected_building_type]
 
         if self.selected_building_type == 1:
             self.selected_building_is_first = True
@@ -125,6 +128,7 @@ class screen_planetmain(screen):
                 self.menu_info["actiontext"] = 'See surface'
                 if mouse_buttonevent[0]:  # mouse button was pressed
                     self.screenmode_buildinginfo = False
+                    self.screenmode_buildinginfo_specific = False
                     self.sfx_to_play = "X"
 
 
@@ -159,13 +163,15 @@ class screen_planetmain(screen):
                             self.demolish_mode = False
                         else:
                             self.sfx_to_play = "X"
-                            if self.planet.buildings[building_no].building_type == 4:  # mine
+                            self.selected_building_on_map = self.planet.buildings[building_no]
+                            if self.selected_building_on_map.building_type in [ 4, 25 ]:  # mine, miner station
                                 self.action = "MINE"
                                 self.action_params = [ self.planet, self.map_position ]
                                 self.sfx_to_play = "MINE"
                             else:
-                                self.__select_building_by_type(self.planet.buildings[building_no].building_type)
+                                self.__select_building_by_type(self.selected_building_on_map.building_type)
                                 self.screenmode_buildinginfo = True
+                                self.screenmode_buildinginfo_specific = True
 
             elif 53 <= mouse_pos[1] <= 196 and 90 <= mouse_pos[0] <= 92:
 
@@ -246,6 +252,7 @@ class screen_planetmain(screen):
                 self.menu_info["actiontext"] = 'Invention Info'
                 if mouse_buttonevent[0]:
                     self.screenmode_buildinginfo = True
+                    self.screenmode_buildinginfo_specific = False
                     self.sfx_to_play = "X"
 
             if (horizontal_scroll != 0) or (vertical_scroll != 0):
@@ -254,31 +261,32 @@ class screen_planetmain(screen):
 
         # Common in Terrain / Building info mode
 
-        # Invention up
-        if 64 <= mouse_pos[1] <= 95 and 0 <= mouse_pos[0] <= 10:
+        if not self.screenmode_buildinginfo_specific:
+            # Invention up
+            if 64 <= mouse_pos[1] <= 95 and 0 <= mouse_pos[0] <= 10:
 
-            if self.planet.colony == 0:
-                self.menu_info["actiontext"] = 'No effect'
-            else:
-                self.menu_info["actiontext"] = 'Invention up'
-                self.build_mode = False
-                self.demolish_mode = False
-                if mouse_buttonevent[0]:  # mouse button pressed
-                    self.sfx_to_play = "X"
-                    if not self.selected_building_is_first:
-                        self.__select_building_by_index(self.selected_building_index - 1)
+                if self.planet.colony == 0:
+                    self.menu_info["actiontext"] = 'No effect'
+                else:
+                    self.menu_info["actiontext"] = 'Invention up'
+                    self.build_mode = False
+                    self.demolish_mode = False
+                    if mouse_buttonevent[0]:  # mouse button pressed
+                        self.sfx_to_play = "X"
+                        if not self.selected_building_is_first:
+                            self.__select_building_by_index(self.selected_building_index - 1)
 
-        # Invention down
-        elif 97 <= mouse_pos[1] <= 128 and 0 <= mouse_pos[0] <= 10:
+            # Invention down
+            elif 97 <= mouse_pos[1] <= 128 and 0 <= mouse_pos[0] <= 10:
 
-            if self.planet.colony == 0:
-                self.menu_info["actiontext"] = 'No effect'
-            else:
-                self.menu_info["actiontext"] = 'Invention down'
-                self.build_mode = False
-                self.demolish_mode = False
-                if mouse_buttonevent[0]:  # mouse button pressed
-                    self.sfx_to_play = "X"
-                    if not self.selected_building_is_last:
-                        self.__select_building_by_index(self.selected_building_index + 1)
+                if self.planet.colony == 0:
+                    self.menu_info["actiontext"] = 'No effect'
+                else:
+                    self.menu_info["actiontext"] = 'Invention down'
+                    self.build_mode = False
+                    self.demolish_mode = False
+                    if mouse_buttonevent[0]:  # mouse button pressed
+                        self.sfx_to_play = "X"
+                        if not self.selected_building_is_last:
+                            self.__select_building_by_index(self.selected_building_index + 1)
 
