@@ -1020,15 +1020,48 @@ class ReReGFX:
             # Invention Info mode (cannot be in this mode if there is no colony anyway)
             if screenobj_planetmain.screenmode_buildinginfo:
                 self.screen_buffer.blit(yellow_text_building_name, (117, 59))
-                self.screen_buffer.blit(self.render_text("Status     : Active", textcolor = 2), (98, 70))
-                self.screen_buffer.blit(self.render_text("Workers    : 72/72", textcolor = 2), (98, 79))
-                self.screen_buffer.blit(self.render_text("Energy     : 129 kwh", textcolor = 2), (98, 88))
-                self.screen_buffer.blit(self.render_text("Working    : 55%", textcolor = 2), (98, 97))
+                statustext_offset_y = 70
+
+                # building was selected on the map
+                if screenobj_planetmain.screenmode_buildinginfo_specific:
+
+                    curr_bldg = screenobj_planetmain.selected_building_on_map
+                    self.screen_buffer.blit(self.render_text(f"Status     : {['Passive','Active'][curr_bldg.active]}", textcolor = 2), (98, statustext_offset_y))
+                    if curr_bldg.building_data["building_typegroup?"] in [1, 8]:  # power plant/commandcentre
+                        statustext_offset_y += 9
+                        self.screen_buffer.blit(self.render_text(f"Production : {curr_bldg.production} kwh", textcolor = 2), (98, statustext_offset_y))
+                    if curr_bldg.workers != 0:
+                        statustext_offset_y += 9
+                        self.screen_buffer.blit(self.render_text(f"Workers    : {curr_bldg.workers}/{curr_bldg.building_data['workers']}", textcolor = 2), (98, statustext_offset_y))
+                    if curr_bldg.energy_use != 0:
+                        statustext_offset_y += 9
+                        self.screen_buffer.blit(self.render_text(f"Energy     : {curr_bldg.energy_use} kwh", textcolor = 2), (98, statustext_offset_y))
+                    statustext_offset_y += 9
+                    self.screen_buffer.blit(self.render_text(f"Working    : {curr_bldg.working}%", textcolor = 2), (98, statustext_offset_y))
+                    statustext_offset_y += 9
+                    self.screen_buffer.blit(self.render_text(f"Performace : {curr_bldg.performance}%", textcolor = 2), (98, statustext_offset_y))
+
+                else:  # general building info
+
+                    bldg_info = screenobj_planetmain.selected_building_typeinfo
+                    self.screen_buffer.blit(self.render_text(f"Cost       : {bldg_info['price']}", textcolor = 2), (98, statustext_offset_y))
+                    if bldg_info["building_typegroup?"] in [1, 8]:  # power plant/commandcentre
+                        statustext_offset_y += 9
+                        self.screen_buffer.blit(self.render_text(f"Production : {bldg_info['production']} kwh", textcolor = 2), (98, statustext_offset_y))
+                    elif bldg_info["building_typegroup?"] in [2, 9]:  # mine / miner station
+                        statustext_offset_y += 9
+                        self.screen_buffer.blit(self.render_text("Production : mine", textcolor = 2), (98, statustext_offset_y))
+                    if bldg_info['workers'] != 0:
+                        statustext_offset_y += 9
+                        self.screen_buffer.blit(self.render_text(f"Workers    : {bldg_info['workers']}", textcolor = 2), (98, statustext_offset_y))
+                    if bldg_info['power_consumption'] != 0:
+                        statustext_offset_y += 9
+                        self.screen_buffer.blit(self.render_text(f"Energy     : {bldg_info['power_consumption']} kwh", textcolor = 2), (98, statustext_offset_y))
 
                 self.screen_buffer.blit(self.planetmain_horiz_lines[0], (226,  54))
                 self.screen_buffer.blit(self.planetmain_horiz_lines[1], (226, 124))
-                self.screen_buffer.blit(self.planetmain_vert_lines[0],  (226, 56))
-                self.screen_buffer.blit(self.planetmain_vert_lines[1],  (314, 56))
+                self.screen_buffer.blit(self.planetmain_vert_lines[0],  (226,  56))
+                self.screen_buffer.blit(self.planetmain_vert_lines[1],  (314,  56))
 
                 self.screen_buffer.blit(self.planetmain_horiz_lines[2], ( 94, 127))
                 self.screen_buffer.blit(self.planetmain_horiz_lines[3], (205, 127))
@@ -1037,7 +1070,7 @@ class ReReGFX:
                 self.screen_buffer.blit(self.planetmain_vert_lines[2],  ( 94, 129))
                 self.screen_buffer.blit(self.planetmain_vert_lines[3],  (314, 129))
 
-                self.screen_buffer.blit(self.planetmain_epulet_illust[screenobj_planetmain.selected_building_type-1], (228, 56))
+                self.screen_buffer.blit(self.planetmain_epulet_illust[screenobj_planetmain.selected_building_type - 1], (228, 56))
 
                 selected_building_description = self.gamedata_static["buildings_desc"][screenobj_planetmain.selected_building_type-1]
                 self.screen_buffer.blit(self.render_text(selected_building_description[0], textcolor = 2), (100, 134))

@@ -15,16 +15,19 @@ class solarsystem:
 
         class building:
 
-            def __init__(self, building_type, building_type_data, pos):
+
+            def __init__(self, building_type, building_type_data, pos, time_to_finish = 100, performance = 0, active = 0, workers = 0, energy_use = 0, working = 0):
                 self.building_type = building_type
                 self.building_data = building_type_data  # gamestatic["buildings_info"] -bol csak a tipusra vonatkozo
                 self.pos = pos
-                self.time_to_finish = 100 # +- random ? TODO
-                self.performance = 0
-                self.active = 0
-                self.workers = 0
-                self.energy_use = 0
-                self.working = 0
+                self.time_to_finish = time_to_finish # 100 # +- random ? TODO
+                self.performance = performance
+                self.active = active
+                self.workers = workers
+                self.energy_use = energy_use
+                self.working = working
+                self.production = building_type_data["production"] * self.performance // 100
+
                 # used by gfx when rendering on map (calculate here just once, not at every rendering)
                 self.pixelpos = ( (pos[0] - 1) * 16, (pos[1] - 1) * 16 )
 
@@ -172,7 +175,9 @@ class solarsystem:
             self.buildings_update()
 
 
-        def build_new_building(self, building_type, pos, force_build = False):
+        def build_new_building(self, building_type, pos, force_build = False,
+                               time_to_finish = 0, performance = 0, active = 0,
+                               workers = 0, energy_use = 0, working = 0):
 
             building_type_data = self.gamedata_static["buildings_info"][building_type]
 
@@ -188,13 +193,13 @@ class solarsystem:
 
 # TODO: building_type_data["minimum_developer"] vs actual commander
 
-            newbuilding = self.building(building_type, building_type_data, pos)
+            newbuilding = self.building(building_type, building_type_data, pos, time_to_finish, performance, active, workers, energy_use, working)
             self.buildings.append(newbuilding)
             building_no = len(self.buildings) - 1
 
             self.add_building_to_map_of_buildings(building_no)
 
-            if building_type == 4:  # 4 = mine
+            if building_type in [ 4, 25 ]:  # 4 = mine, 25 = miner station
                 self.num_of_mines += 1
 
             return 0
@@ -230,7 +235,7 @@ class solarsystem:
                 return False
 
             # Mine
-            if self.buildings[building_no].building_type == 4:
+            if self.buildings[building_no].building_type in [ 4, 25 ]:
                 self.num_of_mines -= 1
 
             building_to_del = self.buildings.pop(building_no)
