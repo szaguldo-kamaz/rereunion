@@ -22,7 +22,8 @@ class screen_controlroom(screen):
         super().__init__(gamedata_dynamic, [ menu_icons, menu_text, menu_sfx ])
 
         self.anim_exists = True
-        self.anim_states["radarscreen"] = { "currframe" : 0, "frames" : 6, "currtick" : 0, "ticks" : 5, "loop" : 1 }
+        self.anim_states["radarscreen"] = { "currframe" : 0, "frames" : 38, "currtick" : 0, "ticks" : 2, "loop" : 1 }
+        self.anim_states["liftpanel"]   = { "currframe" : 0, "frames" : 10, "currtick" : 0, "ticks" : 2, "loop" : 1 }
 
         self.commander_names = gamedata_static["commander_names"]
         self.current_commanders = self.gamedata_dynamic["commanders"]
