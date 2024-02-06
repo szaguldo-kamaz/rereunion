@@ -58,6 +58,7 @@ class ReReGFX:
         self.prepare_charsets()
         self.prepare_icons()
         self.prepare_mousepointers()
+        self.prepare_controlroom_anims()
         self.prepare_heroes_and_commanders()
         self.prepare_infobuy()
         self.prepare_researchdesign_computer()
@@ -215,10 +216,16 @@ class ReReGFX:
 
         PIClist.append("ICON/ICONMAIN.PIC")  # Ikonok keretei es egermutatok - Icon frames and mouse pointers
 
-        PIClist.append("GRAFIKA/MAIN.PIC")  # Fokepernyo - Main screen
         PIClist.append("GRAFIKA/TEXT.PIC")  # Fokepernyo - gomb funkcioja, penz, datum - Main screen button function, money, date
+
+        PIClist.append("GRAFIKA/MAIN.PIC")  # Fokepernyo - Main screen
         PIClist.append("GRAFIKA/HEROES.PIC")  # Heroes
         PIClist.append("GRAFIKA/MAINFACE.PIC")  # Commanders
+        PIClist.append("GRAFIKA/MAINA1.PIC")  # Fokepernyo animacio 1 - Main screen anim 1
+        PIClist.append("GRAFIKA/MAINA2.PIC")  # Fokepernyo animacio 2 - Main screen anim 2
+        PIClist.append("GRAFIKA/MAINA3.PIC")  # Fokepernyo animacio 3 - Main screen anim 3
+        PIClist.append("GRAFIKA/MAINA4.PIC")  # Fokepernyo animacio 4 - Main screen anim 4
+        PIClist.append("GRAFIKA/MAINA5.PIC")  # Fokepernyo animacio 5 - Main screen anim 5
 
         PIClist.append("GRAFIKA/RESEARCH.PIC")  # Talalmanyok nezet - Research-design
         PIClist.append("GRAFIKA/CDS.PIC")  # Talalmanyok nezet - CD-k
@@ -332,6 +339,42 @@ class ReReGFX:
         for mousepointerpic_name in mousepointerpics.keys():
             mousepointerpics[mousepointerpic_name]["cbmp"].set_colorkey(pygame.Color(0, 0, 0))
             self.mousecursors[mousepointerpic_name] = pygame.cursors.Cursor(mousepointerpics[mousepointerpic_name]["hotspot"], mousepointerpics[mousepointerpic_name]["cbmp"])
+
+
+    def prepare_controlroom_anims(self):
+
+        # slice radar
+        self.controlroom_anim_radar = []
+        for radanim_row in range(3):
+            for radanim_col in range(16):
+                self.controlroom_anim_radar.append(self.PICs["MAINA5"].subsurface(pygame.Rect( radanim_col * 19, 1 + radanim_row * 22, 19, 21)))
+                if radanim_row == 2 and radanim_col == 5:  # last row contains only 6 tiles
+                    break
+
+        # slice lift panel
+        self.controlroom_anim_liftpanel = []
+        for liftpanelanim_col in range(10):
+            self.controlroom_anim_liftpanel.append(self.PICs["MAINA5"].subsurface(pygame.Rect( 115 + liftpanelanim_col * 13, 45, 12, 14)))
+
+        # slice commander door
+        self.controlroom_anim_commanderdoor = []
+        for commanderdooranim_col in range(4):
+            self.controlroom_anim_commanderdoor.append(self.PICs["MAINA2"].subsurface(pygame.Rect( commanderdooranim_col * 18, 0, 18, 89)))
+
+        # slice right door
+        self.controlroom_anim_rightdoor = []
+        for rightdooranim_col in range(6):
+            self.controlroom_anim_rightdoor.append(self.PICs["MAINA1"].subsurface(pygame.Rect( rightdooranim_col * 47, 0, 47, 136)))
+
+        # slice lift door
+        self.controlroom_anim_liftdoor = []
+        for liftdooranim_col in range(4):
+            self.controlroom_anim_liftdoor.append(self.PICs["MAINA3"].subsurface(pygame.Rect( liftdooranim_col * 21, 0, 21, 105)))
+
+        # slice lift door lights
+        self.controlroom_anim_liftlights = []
+        for liftlightsanim_col in range(16):
+            self.controlroom_anim_liftlights.append(self.PICs["MAINA4"].subsurface(pygame.Rect( liftlightsanim_col * 16, 0, 16, 91)))
 
 
     def prepare_heroes_and_commanders(self):
@@ -702,6 +745,12 @@ class ReReGFX:
 
         # control room background
         self.screen_controlroom.blit(self.PICs["MAIN"], (0, 49))
+
+        # radar anim
+        self.screen_controlroom.blit(self.controlroom_anim_radar[screenobj_controlroom.anim_states["radarscreen"]["currframe"]], (37, 49))
+
+        # liftpanel anim
+        self.screen_controlroom.blit(self.controlroom_anim_liftpanel[screenobj_controlroom.anim_states["liftpanel"]["currframe"]], (226, 32 + 49))
 
         # hero
         self.screen_controlroom.blit(self.heroes[1], (131, 50 + 49) )
