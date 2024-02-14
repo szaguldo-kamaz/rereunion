@@ -965,74 +965,75 @@ class ReReGFX:
 
         # draw selected forces data text
 
-        curgrp = screenobj_ship.current_shipgroup[screenobj_ship.selected_group_no_current]
-        [ sysname, planetname, moonname ] = screenobj_ship.selected_group_location_names
+        if screenobj_ship.selected_group_no_current > 0:
+            curgrp = screenobj_ship.current_shipgroup[screenobj_ship.selected_group_no_current]
+            [ sysname, planetname, moonname ] = screenobj_ship.selected_group_location_names
 
-        if curgrp.type in [1, 5]:
-            shiplist = [ "Hunter", "Fighter", "Destroyer", "Cruiser" ]
-#            vehiclelist = [ "Trooper", "Tank", "Aircraft", "Miss Tank" ]
-            vehiclelist = [ "Trooper", "Tank", "Aircraft", "Launcher" ]
+            if curgrp.type in [1, 5]:
+                shiplist = [ "Hunter", "Fighter", "Destroyer", "Cruiser" ]
+#                vehiclelist = [ "Trooper", "Tank", "Aircraft", "Miss Tank" ]
+                vehiclelist = [ "Trooper", "Tank", "Aircraft", "Launcher" ]
 
-        elif curgrp.type == 2:
-            shiplist = [ "Sloop", "Trade ship", "Piracy ship", "Galleon" ]
-            vehiclelist = []
+            elif curgrp.type == 2:
+                shiplist = [ "Sloop", "Trade ship", "Piracy ship", "Galleon" ]
+                vehiclelist = []
 
-        elif curgrp.type == 4:
-            shiplist = [ "Sat Carr" ]
-            vehiclelist = [ "Satellite", "Spy Sat", "Spy Ship", "Solar Plant" ]
+            elif curgrp.type == 4:
+                shiplist = [ "Sat Carr" ]
+                vehiclelist = [ "Satellite", "Spy Sat", "Spy Ship", "Solar Plant" ]
 
-        yellow_text_colon = self.render_text(":", textcolor = 1)
+            yellow_text_colon = self.render_text(":", textcolor = 1)
 
-        allvehiclescount = 0
-        horizoffset = 0
-        vertoffset = 0
-        for vehicletype in shiplist + vehiclelist:
-            allvehiclescount += 1
-            if curgrp.fleet[vehicletype] > 0:
-                yellow_text_vehicletype_name = self.render_text(f"{vehicletype}", textcolor = 1)
-                red_text_vehicletype_name = self.render_text(f"{curgrp.fleet[vehicletype]:3}", textcolor = 2)
-                self.screen_buffer.blit(yellow_text_vehicletype_name, (204 + horizoffset, 116 + vertoffset))
-                self.screen_buffer.blit(yellow_text_colon, (274, 116 + vertoffset))
-                self.screen_buffer.blit(red_text_vehicletype_name, (280, 116 + vertoffset))
-                vertoffset += 9
-            if allvehiclescount == 4 and curgrp.type != 4:
-                vertoffset += 3
-            if curgrp.type == 4 and vehicletype == "Sat Carr":
-                horizoffset = 4
-                vertoffset += 3
+            allvehiclescount = 0
+            horizoffset = 0
+            vertoffset = 0
+            for vehicletype in shiplist + vehiclelist:
+                allvehiclescount += 1
+                if curgrp.fleet[vehicletype] > 0:
+                    yellow_text_vehicletype_name = self.render_text(f"{vehicletype}", textcolor = 1)
+                    red_text_vehicletype_name = self.render_text(f"{curgrp.fleet[vehicletype]:3}", textcolor = 2)
+                    self.screen_buffer.blit(yellow_text_vehicletype_name, (204 + horizoffset, 116 + vertoffset))
+                    self.screen_buffer.blit(yellow_text_colon, (274, 116 + vertoffset))
+                    self.screen_buffer.blit(red_text_vehicletype_name, (280, 116 + vertoffset))
+                    vertoffset += 9
+                if allvehiclescount == 4 and curgrp.type != 4:
+                    vertoffset += 3
+                if curgrp.type == 4 and vehicletype == "Sat Carr":
+                    horizoffset = 4
+                    vertoffset += 3
 
-        # group name
-        red_text_group_name = self.render_text(curgrp.name, textcolor = 2)
+            # group name
+            red_text_group_name = self.render_text(curgrp.name, textcolor = 2)
 
-        # location
-        if curgrp.type == 5:
-            locbasetext = "Base on:  "
-        else:
-            if 4 <= curgrp.orbit_status <= 6:
-                locbasetext = "Destination:"
+            # location
+            if curgrp.type == 5:
+                locbasetext = "Base on:  "
             else:
-                locbasetext = "Currently on:"
+                if 4 <= curgrp.orbit_status <= 6:
+                    locbasetext = "Destination:"
+                else:
+                    locbasetext = "Currently on:"
 
-        yellow_text_group_loc_basetext = self.render_text(f"{locbasetext}", textcolor = 1)
-        yellow_text_group_loc_sysname = self.render_text(f"{sysname}", textcolor = 1)
-        yellow_text_group_loc_planetname = self.render_text(f"{planetname}", textcolor = 1)
-        self.screen_buffer.blit(red_text_group_name, (202, 60))
-        self.screen_buffer.blit(yellow_text_group_loc_basetext, (202, 70))
+            yellow_text_group_loc_basetext = self.render_text(f"{locbasetext}", textcolor = 1)
+            yellow_text_group_loc_sysname = self.render_text(f"{sysname}", textcolor = 1)
+            yellow_text_group_loc_planetname = self.render_text(f"{planetname}", textcolor = 1)
+            self.screen_buffer.blit(red_text_group_name, (202, 60))
+            self.screen_buffer.blit(yellow_text_group_loc_basetext, (202, 70))
 
-        if screenobj_ship.currentview == 0:  # space forces
-            self.screen_buffer.blit(yellow_text_group_loc_sysname, (282, 70))
-        else:  # ground forces
-            self.screen_buffer.blit(yellow_text_group_loc_sysname, (258, 70))
+            if screenobj_ship.currentview == 0:  # space forces
+                self.screen_buffer.blit(yellow_text_group_loc_sysname, (282, 70))
+            else:  # ground forces
+                self.screen_buffer.blit(yellow_text_group_loc_sysname, (258, 70))
 
-        self.screen_buffer.blit(yellow_text_group_loc_planetname, (211, 79))
-        if moonname != None:
-            yellow_text_group_loc_moonname = self.render_text(f"{moonname}", textcolor = 1)
-            self.screen_buffer.blit(yellow_text_group_loc_moonname, (220, 89))
+            self.screen_buffer.blit(yellow_text_group_loc_planetname, (211, 79))
+            if moonname != None:
+                yellow_text_group_loc_moonname = self.render_text(f"{moonname}", textcolor = 1)
+                self.screen_buffer.blit(yellow_text_group_loc_moonname, (220, 89))
 
-        # when flying
-        if 4 <= curgrp.orbit_status <= 6:
-            yellow_text_time_remaining = self.render_text(f"Time remaining:{curgrp.remaining_flight_time}", textcolor = 1)
-            self.screen_buffer.blit(yellow_text_time_remaining, (202, 100))
+            # when flying
+            if 4 <= curgrp.orbit_status <= 6:
+                yellow_text_time_remaining = self.render_text(f"Time remaining:{curgrp.remaining_flight_time}", textcolor = 1)
+                self.screen_buffer.blit(yellow_text_time_remaining, (202, 100))
 
 
         return self.screen_buffer
