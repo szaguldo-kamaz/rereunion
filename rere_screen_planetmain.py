@@ -22,8 +22,8 @@ class screen_planetmain(screen):
         super().__init__(gamedata_dynamic, [ menu_icons, menu_text, menu_sfx ])
 
         self.anim_exists = True
-        self.anim_states["surface"] = { "currframe" : 0, "frames" : 3, "currtick" : 0, "ticks" : 5, "loop": 1 }
-        self.anim_states["builddemolish"] = { "currframe" : 0, "frames" : 2, "currtick" : 0, "ticks" : 5, "loop": 1 }
+        self.anim_states["surface"]       = { "currframe" : 0, "frames" : 3, "currtick" : 0, "ticks" : 5, "loop": 1, "backwards": False }
+        self.anim_states["builddemolish"] = { "currframe" : 0, "frames" : 2, "currtick" : 0, "ticks" : 5, "loop": 1, "backwards": False }
 
         self.screenmode_buildinginfo = False
         self.screenmode_buildinginfo_specific = False

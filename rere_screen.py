@@ -5,12 +5,16 @@
 # github.com/szaguldo-kamaz/rereunion
 #
 
+import random
+
 
 class screen:
 
-    def __init__(self, gamedata_dynamic, menu_data):
+    def __init__(self, gamedata_dynamic, menu_data, tickspersec = 10):
 
         self.gamedata_dynamic = gamedata_dynamic
+
+        self.tickspersec = tickspersec
 
         self.anim_exists = False
         self.anim_states = {}
@@ -65,13 +69,52 @@ class screen:
         if not self.anim_exists:
             return
 
+        # loop == 0: no looping
+        # loop == 1: loop forever
+        # loop == 2: loop forever, but pause between repeats (delay)
+        # loop == 3: loop forever and change direction (forward/backward) after each loop
+        # loop == 4: loop forever, but pause between repeats (delay) and change direction (forward/backward) after each loop
+
         for curr_state_id in self.anim_states.keys():
-            self.anim_states[curr_state_id]["currtick"] += 1
-            if self.anim_states[curr_state_id]["currtick"] == self.anim_states[curr_state_id]["ticks"]:
-                self.anim_states[curr_state_id]["currtick"] = 0
-                self.anim_states[curr_state_id]["currframe"] += 1
-                if self.anim_states[curr_state_id]["currframe"] == self.anim_states[curr_state_id]["frames"]:
-                    self.anim_states[curr_state_id]["currframe"] = 0
+            animstate = self.anim_states[curr_state_id]
+
+            if animstate["loop"] in [1, 3] or (animstate["loop"] in [2, 4] and animstate["active"] == 1):
+
+                animstate["currtick"] += 1
+
+                if animstate["currtick"] == animstate["ticks"]:
+
+                    animstate["currtick"] = 0
+                    loopend = False
+
+                    if animstate["backwards"]:
+                        animstate["currframe"] -= 1
+                        if animstate["currframe"] == -1:
+                            loopend = True
+                            if animstate["loop"] in [3, 4]:  # change direction to forward
+                                animstate["backwards"] = False
+                                animstate["currframe"] = 0
+                            else:
+                                animstate["currframe"] = animstate["frames"] - 1
+
+                    else:  # forward
+                        animstate["currframe"] += 1
+                        if animstate["currframe"] == animstate["frames"]:
+                            loopend = True
+                            if animstate["loop"] in [3, 4]:  # change direction to backwards
+                                animstate["currframe"] = animstate["frames"] - 1
+                                animstate["backwards"] = True
+                            else:
+                                animstate["currframe"] = 0
+
+                    if loopend and animstate["loop"] in [2, 4]:
+                        animstate["active"] = 0
+                        animstate["delay"] = int(animstate["delaymin"] + random.random() * (animstate["delaymax"] - animstate["delaymin"]))
+
+            if animstate["loop"] in [2, 4] and animstate["active"] == 0:
+                animstate["delay"] -= 1
+                if animstate["delay"] == 0:
+                    animstate["active"] = 1
 
 
     def update_menu(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):

@@ -22,8 +22,8 @@ class screen_researchdesign(screen):
         super().__init__(gamedata_dynamic, [ menu_icons, menu_text, menu_sfx ])
 
         self.anim_exists = True
-        self.anim_states["vumeter"] = { "currframe" : 0, "frames" : 9, "currtick": 0, "ticks": 2, "loop" : 1 }
-        self.anim_states["cdtray"]  = { "currframe" : 0, "frames" : 9, "currtick": 0, "ticks": 5, "loop" : 0 }
+        self.anim_states["vumeter"] = { "currframe" : 0, "frames" : 9, "currtick": 0, "ticks": 2, "loop" : 1, "backwards": False }
+        self.anim_states["cdtray"]  = { "currframe" : 0, "frames" : 9, "currtick": 0, "ticks": 5, "loop" : 0, "backwards": False }
 
         self.developer_names = gamedata_static["commander_names"][3]
         self.reset(gamedata_dynamic)
