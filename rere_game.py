@@ -217,7 +217,7 @@ class ReReGame:
         return planetsdata
 
 
-    def process_raw_groupdata(self, raw_groupdata):
+    def process_raw_groupdata(self, raw_groupdata, num_of_groups):
 
         group_imagepos = 0
         groups = {}
@@ -241,7 +241,10 @@ class ReReGame:
                  "Transfer_Laser cannon", "Transfer_Twin Laser gun", "Transfer_Missile", "Transfer_Plasma gun?",
                  "Transfer_Miner droid", "Transfer_unknown4" ]
 
-        for groupno in range(24):
+        if num_of_groups > 24:
+            print(f"FATAL: number of groups larger than 24 ({num_of_groups})")
+            exit(1)  # TODO
+        for groupno in range(num_of_groups):  # 24 groups max
             unpacklist = struct.unpack_from("<B18pBBBBHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHIIIIIIHHHHHHHHHHHHHH", raw_groupdata, group_imagepos)
             group_imagepos += 161
             groups[groupno] = dict(zip(keys, unpacklist))
@@ -628,8 +631,10 @@ class ReReGame:
         savegame["groups_numofgroups"]     = struct.unpack_from("<HHH", savegame_fileimage, savegamepos_groups_numofgroups)
         savegame["groups_selectedgroupno"] = struct.unpack_from("<HHH", savegame_fileimage, savegamepos_groups_selectedgroupno)
         savegame["groups_currentview"]     = struct.unpack_from("<H", savegame_fileimage, savegamepos_groups_currentview)[0]
-        savegame["groups_spacegroups"]     = self.process_raw_groupdata(savegame_fileimage[savegamepos_groups_spacegroups:savegamepos_groups_spacegroups + savegamepos_groups_spacegroups_len])
-        savegame["groups_planetforces"]    = self.process_raw_groupdata(savegame_fileimage[savegamepos_groups_planetforces:savegamepos_groups_planetforces + savegamepos_groups_planetforces_len])
+        if savegame["groups_numofgroups"][1] > 0:
+            savegame["groups_spacegroups"]     = self.process_raw_groupdata(savegame_fileimage[savegamepos_groups_spacegroups:savegamepos_groups_spacegroups + savegamepos_groups_spacegroups_len], savegame["groups_numofgroups"][1])
+        if savegame["groups_numofgroups"][2] > 0:
+            savegame["groups_planetforces"]    = self.process_raw_groupdata(savegame_fileimage[savegamepos_groups_planetforces:savegamepos_groups_planetforces + savegamepos_groups_planetforces_len], savegame["groups_numofgroups"][2])
 
         savegame["numberofbuildings"] = struct.unpack_from("<H", savegame_fileimage, savegamepos_buildings_count)[0]
         savegame["buildings_list"] = self.process_raw_buildingslistdata(savegame["numberofbuildings"], savegame_fileimage[savegamepos_buildings_list:savegamepos_buildings_list + savegame["numberofbuildings"]*14])
