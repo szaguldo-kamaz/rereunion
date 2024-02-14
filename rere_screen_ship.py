@@ -32,8 +32,11 @@ class screen_ship(screen):
         self.shipgroups_spaceforces = shipgroups_spaceforces
         self.shipgroups_planetforces = shipgroups_planetforces
         self.current_shipgroup = self.shipgroups_spaceforces
-        self.__set_location_names()
-        self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
+        self.numofgroups_spaceforces = gamedata_dynamic["groups_numofgroups"][1]
+        self.numofgroups_planetforces = gamedata_dynamic["groups_numofgroups"][2]
+        if self.currentview == 0 and self.numofgroups_spaceforces > 0:
+            self.__set_location_names()
+            self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
 
         self.update(gamedata_dynamic, (0,0), [0,0,0], [0,0,0])
 
@@ -61,14 +64,15 @@ class screen_ship(screen):
         if self.currentview == 0:
 
             self.current_shipgroup = self.shipgroups_spaceforces
-            if self.current_shipgroup[self.selected_group_no_current].type == 2:  # trade
-                self.menu_icons = [ "BACK TO M.SCREEN", "CONTROL PANEL", "GROUP", "NEW GROUP", "TRANSFER", "PLANET MAIN" ]
-                self.menu_text  = [ "BACK TO M.SCREEN", "CONTROL PANEL", "GROUP", "NEW UNIT",  "TRANSFER", "PLANET MAIN" ]
-                self.menu_sfx   = [ "BACK", "CONTROLL", "GROUP", "GROUPNEW", "TRANSFER", "PLANET" ]
-            else:
-                self.menu_icons = [ "BACK TO M.SCREEN", "CONTROL PANEL", "GROUP", "NEW GROUP", "PLANET MAIN" ]
-                self.menu_text  = [ "BACK TO M.SCREEN", "CONTROL PANEL", "GROUP", "NEW UNIT",  "PLANET MAIN" ]
-                self.menu_sfx   = [ "BACK", "CONTROLL", "GROUP", "GROUPNEW", "PLANET" ]
+            if self.numofgroups_spaceforces > 0:
+                if self.current_shipgroup[self.selected_group_no_current].type == 2:  # trade
+                    self.menu_icons = [ "BACK TO M.SCREEN", "CONTROL PANEL", "GROUP", "NEW GROUP", "TRANSFER", "PLANET MAIN" ]
+                    self.menu_text  = [ "BACK TO M.SCREEN", "CONTROL PANEL", "GROUP", "NEW UNIT",  "TRANSFER", "PLANET MAIN" ]
+                    self.menu_sfx   = [ "BACK", "CONTROLL", "GROUP", "GROUPNEW", "TRANSFER", "PLANET" ]
+                else:
+                    self.menu_icons = [ "BACK TO M.SCREEN", "CONTROL PANEL", "GROUP", "NEW GROUP", "PLANET MAIN" ]
+                    self.menu_text  = [ "BACK TO M.SCREEN", "CONTROL PANEL", "GROUP", "NEW UNIT",  "PLANET MAIN" ]
+                    self.menu_sfx   = [ "BACK", "CONTROLL", "GROUP", "GROUPNEW", "PLANET" ]
 
         else:
             self.current_shipgroup = self.shipgroups_planetforces
@@ -115,5 +119,6 @@ class screen_ship(screen):
                 self.currentview = int(not self.currentview)
                 self.selected_group_no_current = self.selected_group_no[self.currentview]
                 self.update(gamedata_dynamic, mouse_pos, [0,0,0], [0,0,0])
-                self.__set_location_names(bool(self.currentview))
-                self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
+                if self.currentview == 0 and self.numofgroups_spaceforces > 0:
+                    self.__set_location_names(bool(self.currentview))
+                    self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
