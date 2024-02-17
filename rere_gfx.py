@@ -376,6 +376,10 @@ class ReReGFX:
         for liftlightsanim_col in range(16):
             self.controlroom_anim_liftlights.append(self.PICs["MAINA4"].subsurface(pygame.Rect( liftlightsanim_col * 16, 0, 16, 91)))
 
+        self.controlroom_anim_liftlights_up = self.controlroom_anim_liftlights[:7]
+        self.controlroom_anim_liftlights_dn = self.controlroom_anim_liftlights[-10:]
+        self.controlroom_anim_liftlights_dn.reverse()
+
 
     def prepare_heroes_and_commanders(self):
 
@@ -747,10 +751,34 @@ class ReReGFX:
         self.screen_controlroom.blit(self.PICs["MAIN"], (0, 49))
 
         # radar anim
-        self.screen_controlroom.blit(self.controlroom_anim_radar[screenobj_controlroom.anim_states["radarscreen"]["currframe"]], (37, 49))
+        self.screen_controlroom.blit(self.controlroom_anim_radar[screenobj_controlroom.animstates["radarscreen"].currframe], (37, 49))
 
         # liftpanel anim
-        self.screen_controlroom.blit(self.controlroom_anim_liftpanel[screenobj_controlroom.anim_states["liftpanel"]["currframe"]], (226, 32 + 49))
+        self.screen_controlroom.blit(self.controlroom_anim_liftpanel[screenobj_controlroom.animstates["liftpanel"].currframe], (226, 32 + 49))
+
+        # lift lights anim
+        if screenobj_controlroom.animstates["liftlights"].active > 0:
+            self.screen_controlroom.blit(self.controlroom_anim_liftlights[screenobj_controlroom.animstates["liftlights"].currframe], (205, 21 + 49))
+
+        # lift lights up anim
+        if screenobj_controlroom.animstates["liftlights_up"].active > 0:
+            self.screen_controlroom.blit(self.controlroom_anim_liftlights_up[screenobj_controlroom.animstates["liftlights_up"].currframe], (205, 21 + 49))
+
+        # lift lights down anim
+        if screenobj_controlroom.animstates["liftlights_dn"].active > 0:
+            self.screen_controlroom.blit(self.controlroom_anim_liftlights_dn[screenobj_controlroom.animstates["liftlights_dn"].currframe], (205, 21 + 49))
+
+        # lift door
+        if screenobj_controlroom.animstates["liftdoor"].active > 0:
+            self.screen_controlroom.blit(self.controlroom_anim_liftdoor[screenobj_controlroom.animstates["liftdoor"].currframe], (202, 7 + 49))
+
+        # rightdoor (info-buy)
+        if screenobj_controlroom.animstates["rightdoor"].active > 0:
+            self.screen_controlroom.blit(self.controlroom_anim_rightdoor[screenobj_controlroom.animstates["rightdoor"].currframe], (273, 8 + 49))
+
+        # commanderdoor
+        if screenobj_controlroom.animstates["commanderdoor"].active > 0:
+            self.screen_controlroom.blit(self.controlroom_anim_commanderdoor[screenobj_controlroom.animstates["commanderdoor"].currframe], (172, 49))
 
         # hero
         self.screen_controlroom.blit(self.heroes[1], (131, 50 + 49) )
@@ -841,7 +869,7 @@ class ReReGFX:
             if cd_state == -1:
                 continue
             if cd_state == 4:  # under analysis
-                cd_to_blit = self.researchdesign_invention_cds_anim[cd_state][screenobj_researchdesign.anim_states["vumeter"]["currframe"]]
+                cd_to_blit = self.researchdesign_invention_cds_anim[cd_state][screenobj_researchdesign.animstates["vumeter"].currframe]
             else:
             # TODO
                 cd_to_blit = self.researchdesign_invention_cds_init[cd_state]
@@ -1050,10 +1078,10 @@ class ReReGFX:
 
         if screenobj_planetmain.planet.colony == 1:
             # build icon
-            buildicon_state = screenobj_planetmain.anim_states["builddemolish"]["currframe"] and screenobj_planetmain.build_mode
+            buildicon_state = screenobj_planetmain.animstates["builddemolish"].currframe and screenobj_planetmain.build_mode
             self.screen_buffer.blit(self.planetmain_buildicon[buildicon_state], (0, 1 + 49))
             # demolish icon
-            demolishicon_state = screenobj_planetmain.anim_states["builddemolish"]["currframe"] and screenobj_planetmain.demolish_mode
+            demolishicon_state = screenobj_planetmain.animstates["builddemolish"].currframe and screenobj_planetmain.demolish_mode
             self.screen_buffer.blit(self.planetmain_demolishicon[demolishicon_state], (45, 1 + 49))
             # building - invention up
             self.screen_buffer.blit(self.planetmain_arrowup[int(screenobj_planetmain.selected_building_is_first)], (0, 15 + 49))
@@ -1129,7 +1157,7 @@ class ReReGFX:
 
         if not screenobj_planetmain.screenmode_buildinginfo:  # Terrain mode
             # surface map
-            planet_surface = self.render_surface_with_buildings(screenobj_planetmain.planet, screenobj_planetmain.anim_states["surface"]["currframe"])
+            planet_surface = self.render_surface_with_buildings(screenobj_planetmain.planet, screenobj_planetmain.animstates["surface"].currframe)
             planet_surface_cropped = planet_surface.subsurface(pygame.Rect(screenobj_planetmain.map_position[0] * 16,
                                                                            screenobj_planetmain.map_position[1] * 16,
                                                                            14*16, 9*16))

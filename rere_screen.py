@@ -10,6 +10,106 @@ import random
 
 class screen:
 
+    class screen_anim:
+
+        # loop == 0: no looping
+        # loop == 1: loop forever
+        # loop == 2: loop forever, but pause between repeats (delay)
+        # loop == 3: loop forever and change direction (forward/backward) after each loop
+        # loop == 4: loop forever, but pause between repeats (delay) and change direction (forward/backward) after each loop
+
+        def __init__(self, frames, ticks, loop, backwards = False, active = 0, delay = 0, delaymin = 0, delaymax = 0, tickspersec = 10):
+
+            self.frames = frames
+            self.ticks = ticks
+            self.loop = loop
+            self.backwards = backwards
+            self.active = active
+
+            self.delaymin = delaymin * tickspersec
+            self.delaymax = delaymax * tickspersec
+            if delay == -1:
+                self.delay = self.__gen_delay()
+            else:
+                self.delay = delay
+
+            self.currframe = 0
+            self.currtick = 0
+
+
+        def __gen_delay(self):
+            return int(self.delaymin + random.random() * (self.delaymax - self.delaymin))
+
+
+        def activate(self, activestate):
+            self.active = activestate
+
+
+        def resettick(self):
+            self.currtick = 0
+
+
+        def setframe(self, newframeno):
+            self.currframe = newframeno
+
+
+        def update(self):
+
+            anim_ended = False
+
+            if self.loop in [1, 3] or (self.loop in [0, 2, 4] and self.active == 1):
+
+                self.currtick += 1
+
+                if self.currtick == self.ticks:
+
+                    self.currtick = 0
+                    loopend = False
+
+                    if self.backwards:
+                        self.currframe -= 1
+                        if self.currframe == -1:
+                            loopend = True
+                            if self.loop in [0, 3, 4]:  # change direction to forward
+                                self.currframe = 0
+                                if self.loop in [3, 4]:
+                                    self.backwards = False
+                            else:
+                                self.currframe = self.frames - 1
+
+                    else:  # forward
+                        self.currframe += 1
+                        if self.currframe == self.frames:
+                            loopend = True
+                            if self.loop in [0, 3, 4]:  # change direction to backwards
+                                self.currframe = self.frames - 1
+                                if self.loop in [3, 4]:
+                                    self.backwards = True
+                            else:
+                                self.currframe = 0
+
+                    if loopend and self.loop in [0, 2, 4]:
+                        if self.loop in [2, 4]:
+                            self.active = 0  # inactive
+                            self.delay = self.__gen_delay()
+                        elif self.loop == 0:
+                            self.active = 2  # inactive, finished
+                            # anim ended, maybe it triggers and action
+                            anim_ended = True
+
+            if self.loop in [2, 4] and self.active == 0:
+                self.delay -= 1
+                if self.delay == 0:
+                    self.active = 1
+
+            return anim_ended
+
+
+    def add_anim(self, name, frames, ticks, loop, backwards = False, active = 0, delay = 0, delaymin = 0, delaymax = 0, tickspersec = 10):
+
+        self.animstates[name] = self.screen_anim(frames, ticks, loop, backwards, active, delay, delaymin, delaymax, tickspersec)
+
+
     def __init__(self, gamedata_dynamic, menu_data, tickspersec = 10):
 
         self.gamedata_dynamic = gamedata_dynamic
@@ -17,7 +117,8 @@ class screen:
         self.tickspersec = tickspersec
 
         self.anim_exists = False
-        self.anim_states = {}
+        self.animstates = {}
+        self.waitingforanim = None
 
         self.action = None
         self.action_params = None
@@ -64,57 +165,15 @@ class screen:
             return None
 
 
-    def tick_anim(self):
+    def update_anims(self):
 
         if not self.anim_exists:
             return
 
-        # loop == 0: no looping
-        # loop == 1: loop forever
-        # loop == 2: loop forever, but pause between repeats (delay)
-        # loop == 3: loop forever and change direction (forward/backward) after each loop
-        # loop == 4: loop forever, but pause between repeats (delay) and change direction (forward/backward) after each loop
-
-        for curr_state_id in self.anim_states.keys():
-            animstate = self.anim_states[curr_state_id]
-
-            if animstate["loop"] in [1, 3] or (animstate["loop"] in [2, 4] and animstate["active"] == 1):
-
-                animstate["currtick"] += 1
-
-                if animstate["currtick"] == animstate["ticks"]:
-
-                    animstate["currtick"] = 0
-                    loopend = False
-
-                    if animstate["backwards"]:
-                        animstate["currframe"] -= 1
-                        if animstate["currframe"] == -1:
-                            loopend = True
-                            if animstate["loop"] in [3, 4]:  # change direction to forward
-                                animstate["backwards"] = False
-                                animstate["currframe"] = 0
-                            else:
-                                animstate["currframe"] = animstate["frames"] - 1
-
-                    else:  # forward
-                        animstate["currframe"] += 1
-                        if animstate["currframe"] == animstate["frames"]:
-                            loopend = True
-                            if animstate["loop"] in [3, 4]:  # change direction to backwards
-                                animstate["currframe"] = animstate["frames"] - 1
-                                animstate["backwards"] = True
-                            else:
-                                animstate["currframe"] = 0
-
-                    if loopend and animstate["loop"] in [2, 4]:
-                        animstate["active"] = 0
-                        animstate["delay"] = int(animstate["delaymin"] + random.random() * (animstate["delaymax"] - animstate["delaymin"]))
-
-            if animstate["loop"] in [2, 4] and animstate["active"] == 0:
-                animstate["delay"] -= 1
-                if animstate["delay"] == 0:
-                    animstate["active"] = 1
+        for curr_anim_state_id in self.animstates.keys():
+            anim_ended = self.animstates[curr_anim_state_id].update()
+            if anim_ended:  # maybe there is an action to be set
+                self.update(self.gamedata_dynamic, (0,0), [0,0,0], [0,0,0])
 
 
     def update_menu(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):

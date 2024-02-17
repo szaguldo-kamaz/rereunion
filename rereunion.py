@@ -69,7 +69,7 @@ while run:
     if sfx_to_play != None:
         rereunion_sfx.play_effect(sfx_to_play)
 
-    rereunion_game.tick_anim()
+    rereunion_game.update_anims()
 
     pygame.display.update()
 

@@ -22,9 +22,14 @@ class screen_controlroom(screen):
         super().__init__(gamedata_dynamic, [ menu_icons, menu_text, menu_sfx ])
 
         self.anim_exists = True
-        self.anim_states["radarscreen"] = { "currframe" : 0, "frames" : 38, "currtick" : 0, "ticks" : 2, "loop" : 1, "backwards": False }
-        self.anim_states["liftpanel"]   = { "currframe" : 0, "frames" : 10, "currtick" : 0, "ticks" : 2, "loop" : 1, "backwards": False }
-        self.anim_states["liftlights"]  = { "currframe" : 0, "frames" : 16, "currtick" : 0, "ticks" : 2, "loop" : 4, "backwards": False, "active" : 0, "delay" : 20, "delaymin" : 4 * self.tickspersec, "delaymax" : 16 * self.tickspersec }
+        self.add_anim("radarscreen",   38, 2, 1)
+        self.add_anim("liftpanel",     10, 2, 1)
+        self.add_anim("liftlights",    16, 2, 4, delay = -1, delaymin = 4, delaymax = 16)
+        self.add_anim("liftlights_up",  7, 2, 0)
+        self.add_anim("liftlights_dn", 10, 2, 0)
+        self.add_anim("liftdoor",       4, 2, 0)
+        self.add_anim("rightdoor",      6, 2, 0)
+        self.add_anim("commanderdoor",  4, 2, 0)
 
         self.commander_names = gamedata_static["commander_names"]
         self.current_commanders = self.gamedata_dynamic["commanders"]
@@ -32,6 +37,26 @@ class screen_controlroom(screen):
 
 
     def update(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):
+
+        if self.waitingforanim != None:
+
+            if self.animstates[self.waitingforanim].active == 2:
+
+                if self.waitingforanim == "rightdoor":
+                    self.action = "INFO-BUY"
+                    self.action_params = []
+                elif self.waitingforanim in [ "liftlights_dn", "liftlights_up" ]:
+                    self.waitingforanim = "liftdoor"
+                    self.animstates["liftdoor"].activate(1)
+                elif self.waitingforanim == "liftdoor":
+                    self.action = "SHIP INFO"
+                    self.action_params = []
+                elif self.waitingforanim == "commanderdoor":
+#                    self.action = "COMMANDERS"
+                    self.action = "BACK TO M.SCREEN"
+                    self.action_params = []
+
+            return
 
         self.update_menu(gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent)
 
@@ -104,6 +129,8 @@ class screen_controlroom(screen):
             self.menu_info["actiontext"] = 'COMMANDERS'
             if mouse_buttonevent[0]:  # mouse button pressed
                 self.sfx_to_play = "DOOR1"
+                self.waitingforanim = "commanderdoor"
+                self.animstates["commanderdoor"].activate(1)
 
         # Ship info door
         elif 0+49 <= mouse_pos[1] <= 82+49 and 196 <= mouse_pos[0] <= 247:
@@ -111,6 +138,12 @@ class screen_controlroom(screen):
             self.menu_info["actiontext"] = 'SHIP INFO'
             if mouse_buttonevent[0]:  # mouse button pressed
                 self.sfx_to_play = "DOOR3"
+                if self.animstates["liftlights"].backwards:
+                    liftlights_direction = "liftlights_dn"
+                else:
+                    liftlights_direction = "liftlights_up"
+                self.waitingforanim = liftlights_direction
+                self.animstates[liftlights_direction].activate(1)
 
         # Info-buy door
         elif 0+49 <= mouse_pos[1] <= 88+49 and 256 <= mouse_pos[0] <= 319:
@@ -118,6 +151,8 @@ class screen_controlroom(screen):
             self.menu_info["actiontext"] = 'INFO-BUY'
             if mouse_buttonevent[0]:  # mouse button pressed
                 self.sfx_to_play = "DOOR2"
+                self.waitingforanim = "rightdoor"
+                self.animstates["rightdoor"].activate(1)
 
         # Planet main
         elif 108+49 <= mouse_pos[1] <= 151+49 and 76 <= mouse_pos[0] <= 260:

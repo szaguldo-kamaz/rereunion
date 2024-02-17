@@ -22,8 +22,8 @@ class screen_planetmain(screen):
         super().__init__(gamedata_dynamic, [ menu_icons, menu_text, menu_sfx ])
 
         self.anim_exists = True
-        self.anim_states["surface"]       = { "currframe" : 0, "frames" : 3, "currtick" : 0, "ticks" : 5, "loop": 1, "backwards": False }
-        self.anim_states["builddemolish"] = { "currframe" : 0, "frames" : 2, "currtick" : 0, "ticks" : 5, "loop": 1, "backwards": False }
+        self.add_anim("surface",       3, 5, 1)
+        self.add_anim("builddemolish", 2, 5, 1)
 
         self.screenmode_buildinginfo = False
         self.screenmode_buildinginfo_specific = False
@@ -223,8 +223,8 @@ class screen_planetmain(screen):
                             self.sfx_to_play = "BUILD"
                             self.build_mode = True
                             self.demolish_mode = False
-                            self.anim_states["builddemolish"]["currframe"] = 1
-                            self.anim_states["builddemolish"]["currtick"] = 0
+                            self.animstates["builddemolish"].setframe(1)
+                            self.animstates["builddemolish"].resettick()
                         else:
                             self.sfx_to_play = "X"
                             self.build_mode = False
@@ -241,8 +241,8 @@ class screen_planetmain(screen):
                             self.sfx_to_play = "X"
                             self.build_mode = False
                             self.demolish_mode = True
-                            self.anim_states["builddemolish"]["currframe"] = 1
-                            self.anim_states["builddemolish"]["currtick"] = 0
+                            self.animstates["builddemolish"].setframe(1)
+                            self.animstates["builddemolish"].resettick()
                         else:
                             self.sfx_to_play = "X"
                             self.demolish_mode = False

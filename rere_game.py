@@ -769,6 +769,7 @@ class ReReGame:
         [ screen_action, screen_action_params ] = self.current_screen.get_action()
         screen_changed = False
         if   screen_action == "BACK TO M.SCREEN":
+            self.screens["controlroom"] = screen_controlroom(self.gamedata_static, self.gamedata_dynamic)
             self.current_screen = self.screens["controlroom"]
             screen_changed = True
         elif screen_action == "PLANET MAIN":
@@ -809,8 +810,8 @@ class ReReGame:
             self.current_screen.update(self.gamedata_dynamic, mouse_pos, mouse_buttonstate, [ mouseevent_buttondown, mouseevent_buttonup ])
 
 
-    def tick_anim(self):
-        self.current_screen.tick_anim()
+    def update_anims(self):
+        self.current_screen.update_anims()
 
 
     def get_sfx(self):
