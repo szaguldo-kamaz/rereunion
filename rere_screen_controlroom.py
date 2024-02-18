@@ -30,6 +30,8 @@ class screen_controlroom(screen):
         self.add_anim("liftdoor",       4, 2, 0)
         self.add_anim("rightdoor",      6, 2, 0)
         self.add_anim("commanderdoor",  4, 2, 0)
+        self.add_anim("messagescomputer", 20, 1, 0)
+        self.add_anim("researchcomputer", 26, 1, 0)
 
         self.commander_names = gamedata_static["commander_names"]
         self.current_commanders = self.gamedata_dynamic["commanders"]
@@ -55,6 +57,13 @@ class screen_controlroom(screen):
 #                    self.action = "COMMANDERS"
                     self.action = "BACK TO M.SCREEN"
                     self.action_params = []
+                elif self.waitingforanim == "messagescomputer":
+                    self.action = "MESSAGES"
+                    self.action_params = []
+                elif self.waitingforanim == "researchcomputer":
+                    self.action = "RESEARCH-DESIGN"
+                    self.action_params = []
+
 
             return
 
@@ -107,6 +116,8 @@ class screen_controlroom(screen):
             self.menu_info["actiontext"] = 'MESSAGE'
             if mouse_buttonevent[0]:  # mouse button pressed
                 self.sfx_to_play = "MESSAGES"
+                self.waitingforanim = "messagescomputer"
+                self.animstates["messagescomputer"].activate(1)
 
         # Research
         elif 23+49 <= mouse_pos[1] <= 98+49 and 41 <= mouse_pos[0] <= 80:
@@ -114,7 +125,8 @@ class screen_controlroom(screen):
             self.menu_info["actiontext"] = 'RESEARCH-DESIGN'
             if mouse_buttonevent[0]:  # mouse button pressed
                 self.sfx_to_play = "RESEARCH"
-                self.action = "RESEARCH-DESIGN"
+                self.waitingforanim = "researchcomputer"
+                self.animstates["researchcomputer"].activate(1)
 
         # Local
         elif 0+49 <= mouse_pos[1] <= 46+49 and 83 <= mouse_pos[0] <= 128:

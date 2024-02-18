@@ -54,6 +54,8 @@ class ReReGFX:
         self.PICs = self.load_allPICs()
         # load ICON.ALL
         self.ICONALL = self.loadICONALL()
+        # load all of the ANIs
+        self.ANIs = self.load_allANIs()
 
         self.prepare_charsets()
         self.prepare_icons()
@@ -139,6 +141,70 @@ class ReReGFX:
         return bytes(PCXdata_uncompressed_RGB)
 
 
+    def decode_rawANIframe(self, PCXdata_compressed_raw, imagesize, palette, previous_uncompressed_frame = None, PCXdata_pointer_compressed_raw = 0):
+
+        PCXdata_pointer_uncompressed_RGB = 0
+        PCXdata_uncompressed_RGB = bytearray(imagesize)
+
+        compressed_size = len(PCXdata_compressed_raw)
+
+        while PCXdata_pointer_compressed_raw < compressed_size:
+
+            if PCXdata_compressed_raw[PCXdata_pointer_compressed_raw] < 0x80:
+
+                palette_pos = PCXdata_compressed_raw[PCXdata_pointer_compressed_raw] * 3
+
+    #            PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB:PCXdata_pointer_uncompressed_RGB+3] = palette[ palette_pos: palette_pos+3 ]
+    #            PCXdata_pointer_uncompressed_RGB += 3
+    # this is faster... :
+                PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB] = palette[ palette_pos ]
+                PCXdata_pointer_uncompressed_RGB += 1
+                PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB] = palette[ palette_pos + 1 ]
+                PCXdata_pointer_uncompressed_RGB += 1
+                PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB] = palette[ palette_pos + 2 ]
+                PCXdata_pointer_uncompressed_RGB += 1
+
+            else:
+
+                currPCXdata = PCXdata_compressed_raw[PCXdata_pointer_compressed_raw]
+
+                if currPCXdata in [ 0x80, 0xC0 ]:
+                    repeat = struct.unpack_from("<H", PCXdata_compressed_raw, PCXdata_pointer_compressed_raw + 1)[0]
+                    PCXdata_pointer_compressed_raw += 2
+                else:
+                    repeat = currPCXdata & 0x3F
+
+                # copy from previous frame
+                if currPCXdata < 0xC0:
+
+                    for subpixcounter in range(repeat*3):
+                        PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB] = previous_uncompressed_frame[PCXdata_pointer_uncompressed_RGB]
+                        PCXdata_pointer_uncompressed_RGB += 1
+
+                # repeat current pixel
+                else:
+
+                    PCXdata_pointer_compressed_raw += 1
+                    palette_pos = PCXdata_compressed_raw[PCXdata_pointer_compressed_raw] * 3
+
+                    for minoroffset in range(repeat):
+                        if PCXdata_pointer_uncompressed_RGB >= imagesize:  # e.g. INFO26
+                            break
+        #                PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB:PCXdata_pointer_uncompressed_RGB+3] = palette[ palette_pos: palette_pos+3 ];
+        #                PCXdata_pointer_uncompressed_RGB += 3
+        # this is faster... :
+                        PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB] = palette[ palette_pos ]
+                        PCXdata_pointer_uncompressed_RGB += 1
+                        PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB] = palette[ palette_pos + 1 ]
+                        PCXdata_pointer_uncompressed_RGB += 1
+                        PCXdata_uncompressed_RGB[PCXdata_pointer_uncompressed_RGB] = palette[ palette_pos + 2 ]
+                        PCXdata_pointer_uncompressed_RGB += 1
+
+            PCXdata_pointer_compressed_raw += 1
+
+        return bytes(PCXdata_uncompressed_RGB)
+
+
     def loadPIC(self, PICfilename):
 
         # PIC files are actually PCX files with headers stripped
@@ -163,6 +229,45 @@ class ReReGFX:
         PICdata_uncompressed_RGB = self.decode_rawPCX(PICdata_compressed_raw, PICimagesize, palette)
 
         return [ PICdata_uncompressed_RGB, [ width, height ] ]
+
+
+    def loadANI(self, ANIfilename, palettePICfilename):
+
+        palettePICfile = open(palettePICfilename, 'rb')
+        palettePICrawdata = palettePICfile.read()
+        palettePICfile.close()
+
+        palette = palettePICrawdata[-768:]
+
+        ANIfile = open(ANIfilename, 'rb')
+        ANIdata_compressed_raw = ANIfile.read()
+        ANIfile.close()
+        ANIlength = len(ANIdata_compressed_raw)
+
+        ANIframes_uncompressed_RGB = []
+        currframe_start_pointer = 0
+        previous_uncompressed_frame = None
+
+        while currframe_start_pointer < ANIlength:
+
+            ANIheader = struct.unpack_from("<H9sHH", ANIdata_compressed_raw, currframe_start_pointer)
+            if ANIheader[1] != b'SpidyAnim':
+                print('Error in ANI file (magic id string mismatch): ', ANIfilename)
+                return [ None, [ 0, 0 ] ]
+            framelen = ANIheader[0]
+            width = ANIheader[2]
+            height = ANIheader[3]
+            ANIimagesize = width * height * 3
+
+            currframe_start_pointer += 15
+            compressed_framedata = ANIdata_compressed_raw[currframe_start_pointer:currframe_start_pointer + framelen]
+            uncompressed_framedata = self.decode_rawANIframe(compressed_framedata, ANIimagesize, palette, previous_uncompressed_frame)
+            ANIframes_uncompressed_RGB.append(uncompressed_framedata)
+            previous_uncompressed_frame = uncompressed_framedata
+
+            currframe_start_pointer += framelen
+
+        return [ ANIframes_uncompressed_RGB, [ width, height ] ]
 
 
     # load 68 icons from ICON.ALL
@@ -272,6 +377,39 @@ class ReReGFX:
         return PICs
 
 
+    def load_allANIs(self):
+
+        ANIlist = [ ]
+
+        # ani file, pic file to use for paletta, colorkey, trim 1 pixel border
+        ANIlist.append([ "ANIM/MAIN1.ANI", "GRAFIKA/MAIN.PIC", (0x17, 0, 0), True ])  # control room: space local ajton at nezve #1 feny csillan 1
+        ANIlist.append([ "ANIM/MAIN2.ANI", "GRAFIKA/MAIN.PIC", (0x17, 0, 0), True ])  # control room: space local ajton at nezve #2 urhajo elsuhan 1
+        ANIlist.append([ "ANIM/MAIN3.ANI", "GRAFIKA/MAIN.PIC", (0x17, 0, 0), True ])  # control room: space local ajton at nezve #3 urhajo elsuhan 2
+        ANIlist.append([ "ANIM/MAIN4.ANI", "GRAFIKA/MAIN.PIC", (0x17, 0, 0), True ])  # control room: space local ajton at nezve #4 urhajo elsuhan 3
+        ANIlist.append([ "ANIM/MAIN5.ANI", "GRAFIKA/MAIN.PIC", (0x17, 0, 0), True ])  # control room: space local ajton at nezve #5 urhajo elsuhan 4
+        ANIlist.append([ "ANIM/MAIN6.ANI", "GRAFIKA/MAIN.PIC", (0x17, 0, 0), True ])  # control room: space local ajton at nezve #6 feny csillan 2
+
+        ANIlist.append([ "ANIM/MAIN11.ANI", "GRAFIKA/MAIN.PIC", None, True ])          # control room: research-design kepernyo bekapcs
+        ANIlist.append([ "ANIM/MAIN12.ANI", "GRAFIKA/MAIN.PIC", (0x17, 0, 0), True ])  # control room: messages kepernyo bekapcs
+
+        ANIs = {}
+
+        for ANIpath, palettefilename, ANIcolorkey, trimborder in ANIlist:
+            [ ANIframes, ANIsize ] = self.loadANI(ANIpath, palettefilename)
+            ANIname = ANIpath[:-4]
+            ANIs[ANIname] = []
+            for ANIframe in ANIframes:
+                aniframe_pyimage = pygame.image.frombytes(ANIframe, ANIsize, 'RGB')
+                if trimborder:
+                    aniframe_pyimage = aniframe_pyimage.subsurface(pygame.Rect(1, 1, ANIsize[0] - 2, ANIsize[1] - 2))
+
+                ANIs[ANIname].append(aniframe_pyimage)
+                if ANIcolorkey != None:
+                    ANIs[ANIname][-1].set_colorkey(pygame.Color(ANIcolorkey[0], ANIcolorkey[1], ANIcolorkey[2]))
+
+        return ANIs
+
+
     ######################
     ### Prepare GFX ###
     ################
@@ -379,6 +517,9 @@ class ReReGFX:
         self.controlroom_anim_liftlights_up = self.controlroom_anim_liftlights[:7]
         self.controlroom_anim_liftlights_dn = self.controlroom_anim_liftlights[-10:]
         self.controlroom_anim_liftlights_dn.reverse()
+
+        self.controlroom_anim_researchcomputer = self.ANIs["ANIM/MAIN11"]
+        self.controlroom_anim_messagescomputer = self.ANIs["ANIM/MAIN12"]
 
 
     def prepare_heroes_and_commanders(self):
@@ -779,6 +920,14 @@ class ReReGFX:
         # commanderdoor
         if screenobj_controlroom.animstates["commanderdoor"].active > 0:
             self.screen_controlroom.blit(self.controlroom_anim_commanderdoor[screenobj_controlroom.animstates["commanderdoor"].currframe], (172, 49))
+
+        # messages computer
+        if screenobj_controlroom.animstates["messagescomputer"].active > 0:
+            self.screen_controlroom.blit(self.controlroom_anim_messagescomputer[screenobj_controlroom.animstates["messagescomputer"].currframe], (14, 73))
+
+        # research computer
+        if screenobj_controlroom.animstates["researchcomputer"].active > 0:
+            self.screen_controlroom.blit(self.controlroom_anim_researchcomputer[screenobj_controlroom.animstates["researchcomputer"].currframe], (40, 73))
 
         # hero
         self.screen_controlroom.blit(self.heroes[1], (131, 50 + 49) )
