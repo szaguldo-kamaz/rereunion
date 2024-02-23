@@ -69,6 +69,7 @@ class ReReGFX:
         self.prepare_felszin()
         self.prepare_planetmain()
         self.prepare_mine_szamok()
+        self.prepare_kocsma_anims()
 
         self.menu_full = pygame.Surface((320, 64))
         self.infobar = pygame.Surface((320, 17))
@@ -358,6 +359,9 @@ class ReReGFX:
         PIClist.append("GRAFIKA/SHIP1.PIC")  # Ship Groups - space forces background
         PIClist.append("GRAFIKA/SHIP2.PIC")  # Ship Groups - planet forces background
         PIClist.append("GRAFIKA/SHIP3.PIC")  # Ship Groups - sprites
+
+        PIClist.append("GRAFIKA/KOCSMA.PIC")  # Kocsma - Space local background
+        PIClist.append("GRAFIKA/KOCSMAAN.PIC")  # Kocsma animaciok - Space local anims
 
         # Nagy
         #for nagy_no in range(13):
@@ -725,6 +729,61 @@ class ReReGFX:
             self.mine_szamok_kicsi.append(self.PICs["SZAMOK"].subsurface(pygame.Rect(163 + szam*13, 71, 12, 9)))
 
 
+    def prepare_kocsma_anims(self):
+
+        self.kocsma_anim_greenlights = []
+        self.kocsma_anim_kartyazoszormok = []
+        self.kocsma_anim_hatsoatjaro = []
+        self.kocsma_anim_lavalampa = []
+        self.kocsma_anim_kisasztal1 = []
+        self.kocsma_anim_kisasztal2 = []
+        self.kocsma_anim_rosszlampa = []
+        self.kocsma_anim_rossztv = []
+        self.kocsma_anim_zagyva = []
+        self.kocsma_anim_nagyasztal = []
+        self.kocsma_anim_knightrider = []
+
+        for frameidx in range(21):
+            self.kocsma_anim_greenlights.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect((frameidx%13)*23, (frameidx//13)*8, 23, 7)))
+
+        for frameidx in range(5):
+            self.kocsma_anim_lavalampa.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*11 + 24, 54, 11, 13)))
+            self.kocsma_anim_lavalampa[-1].set_colorkey(pygame.Color(0, 0, 0))
+
+        for frameidx in range(14):
+            self.kocsma_anim_kartyazoszormok.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect((frameidx%13)*24, 16 + (frameidx//13)*26, 24, 25)))
+            self.kocsma_anim_kartyazoszormok[-1].set_colorkey(pygame.Color(0, 0, 0))
+
+        for frameidx in range(13):
+            self.kocsma_anim_hatsoatjaro.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*22 + 24, 44, 22, 9)))
+
+        for frameidx in range(14):
+            self.kocsma_anim_kisasztal1.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*16 + 90, 58, 16, 9)))
+#            self.kocsma_anim_kisasztal1[-1].set_colorkey(pygame.Color(0, 0, 0))
+
+        for frameidx in range(15):
+            self.kocsma_anim_kisasztal2.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*15 + 22, 116, 15, 10)))
+#            self.kocsma_anim_kisasztal2[-1].set_colorkey(pygame.Color(0, 0, 0))
+
+        for frameidx in range(12):
+            self.kocsma_anim_rosszlampa.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*4, 68, 4, 36)))
+
+        for frameidx in range(5):
+            self.kocsma_anim_rossztv.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*22 + 48, 72, 22, 32)))
+            self.kocsma_anim_rossztv[-1].set_colorkey(pygame.Color(0, 0, 0))
+
+        for frameidx in range(15):
+            self.kocsma_anim_zagyva.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect((frameidx%14)*22, 105 + (frameidx//14)*11, 22, 10)))
+            self.kocsma_anim_zagyva[-1].set_colorkey(pygame.Color(0, 0, 0))
+
+        for frameidx in range(32):
+            self.kocsma_anim_nagyasztal.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect((frameidx%20)*16, 127 + (frameidx//20)*18, 16, 17)))
+            self.kocsma_anim_nagyasztal[-1].set_colorkey(pygame.Color(0, 0, 0))
+
+        for frameidx in range(18):
+            self.kocsma_anim_knightrider.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*9, 163, 9, 1)))
+
+
     #################
     ### Render ###
     ###########
@@ -878,6 +937,8 @@ class ReReGFX:
             return self.render_starmap(screenobj)
         elif screenobj.screentype == "messages":
             return self.render_messages(screenobj)
+        elif screenobj.screentype == "spacelocal":
+            return self.render_spacelocal(screenobj)
 
 
     # current_commanders <- gamedata_dynamic["commanders"]
@@ -1387,6 +1448,53 @@ class ReReGFX:
         for msg_no in range(len(screenobj_messages.messages)):
             msgbitmap = self.render_text(screenobj_messages.messages[msg_no][0], textcolor = screenobj_messages.messages[msg_no][1])
             self.screen_buffer.blit(msgbitmap, (10, 57 + msg_no * 9))
+
+        return self.screen_buffer
+
+
+    # space local
+    def render_spacelocal(self, screenobj_spacelocal):
+
+        self.screen_buffer.blit(self.render_menu(screenobj_spacelocal.menu_info), (0, 0))
+        self.screen_buffer.blit(self.render_infobar(screenobj_spacelocal.menu_info), (0, 32))
+
+        animstate = 0
+
+        # main pic
+        self.screen_buffer.blit(self.PICs["KOCSMA"], (0, 49))
+
+        # greenlights anim
+        self.screen_buffer.blit(self.kocsma_anim_greenlights[screenobj_spacelocal.animstates["greenlights"].currframe], (166, 49 + 3))
+
+        # lavalampa anim
+        self.screen_buffer.blit(self.kocsma_anim_lavalampa[screenobj_spacelocal.animstates["lavalampa"].currframe], (78, 49 + 28))
+
+        # kartyazoszormok anim
+        self.screen_buffer.blit(self.kocsma_anim_kartyazoszormok[screenobj_spacelocal.animstates["kartyazoszormok"].currframe], (210, 49 + 29))
+
+        # hatsoatjaro anim
+        self.screen_buffer.blit(self.kocsma_anim_hatsoatjaro[screenobj_spacelocal.animstates["hatsoatjaro"].currframe], (210, 49 + 8))
+
+        # kisasztal1 anim
+        self.screen_buffer.blit(self.kocsma_anim_kisasztal1[screenobj_spacelocal.animstates["kisasztal1"].currframe], (161, 49 + 29))
+
+        # kisasztal2 anim
+#        self.screen_buffer.blit(self.kocsma_anim_kisasztal2[screenobj_spacelocal.animstates["kisasztal2"].currframe], (160, 49 + 28))
+
+        # rosszlampa anim
+        self.screen_buffer.blit(self.kocsma_anim_rosszlampa[screenobj_spacelocal.animstates["rosszlampa"].currframe], (233, 49))
+
+        # rossztv anim
+        self.screen_buffer.blit(self.kocsma_anim_rossztv[screenobj_spacelocal.animstates["rossztv"].currframe], (114, 49))
+
+        # zagyva anim
+        self.screen_buffer.blit(self.kocsma_anim_zagyva[screenobj_spacelocal.animstates["zagyva"].currframe], (269, 49 + 7))
+
+        # nagyasztal anim
+        self.screen_buffer.blit(self.kocsma_anim_nagyasztal[screenobj_spacelocal.animstates["nagyasztal"].currframe], (181, 49 + 33))
+
+        # knightrider anim
+        self.screen_buffer.blit(self.kocsma_anim_knightrider[screenobj_spacelocal.animstates["knightrider"].currframe], (267, 49 + 39))
 
         return self.screen_buffer
 
