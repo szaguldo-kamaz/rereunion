@@ -109,6 +109,8 @@ class screen_controlroom(screen):
             self.menu_info["actiontext"] = 'STARMAP'
             if mouse_buttonevent[0]:  # mouse button pressed
                 self.sfx_to_play = "STARMAP"
+                self.action = "GALACTIC MAP"
+                self.action_params = [ ]
 
         # Messages
         elif 23+49 <= mouse_pos[1] <= 98+49 and 0 <= mouse_pos[0] <= 40:
@@ -134,6 +136,8 @@ class screen_controlroom(screen):
             self.menu_info["actiontext"] = 'SPACE LOCAL'
             if mouse_buttonevent[0]:  # mouse button pressed
                 self.sfx_to_play = "LOCAL"
+                self.action = "SPACE LOCAL"
+                self.action_params = [ ]
 
         # Commanders door
         elif 0+49 <= mouse_pos[1] <= 55+49 and 164 <= mouse_pos[0] <= 195:
