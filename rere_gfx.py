@@ -509,45 +509,37 @@ class ReReGFX:
 
     def prepare_controlroom_anims(self):
 
-        # slice radar
-        self.controlroom_anim_radar = []
-        for radanim_row in range(3):
-            for radanim_col in range(16):
-                self.controlroom_anim_radar.append(self.PICs["MAINA5"].subsurface(pygame.Rect( radanim_col * 19, 1 + radanim_row * 22, 19, 21)))
-                if radanim_row == 2 and radanim_col == 5:  # last row contains only 6 tiles
-                    break
+        self.controlroom_anims_pasteposes = {
+            "rightdoor"        : (273,  8 + 49),
+            "commanderdoor"    : (172,      49),
+            "liftdoor"         : (202,  7 + 49),
+            "liftlights"       : (205, 21 + 49),
+            "liftlights_up"    : (205, 21 + 49),
+            "liftlights_dn"    : (205, 21 + 49),
+            "radarscreen"      : ( 37,      49),
+            "liftpanel"        : (226, 32 + 49),
+            "researchcomputer" : ( 40,      73),
+            "messagescomputer" : ( 14,      73)
+        }
 
-        # slice lift panel
-        self.controlroom_anim_liftpanel = []
-        for liftpanelanim_col in range(10):
-            self.controlroom_anim_liftpanel.append(self.PICs["MAINA5"].subsurface(pygame.Rect( 115 + liftpanelanim_col * 13, 45, 12, 14)))
+        self.controlroom_anim_defs = {
+            # name                  PICsurface       nf  fr   w   h   wo   ho cs rs  colorkey
+            "rightdoor"     : [ self.PICs["MAINA1"],  6,  6, 47, 136,   0,   0, 0, 0, None ],
+            "commanderdoor" : [ self.PICs["MAINA2"],  4,  4, 18,  89,   0,   0, 0, 0, None ],
+            "liftdoor"      : [ self.PICs["MAINA3"],  4,  4, 21, 105,   0,   0, 0, 0, None ],
+            "liftlights"    : [ self.PICs["MAINA4"], 16, 16, 16,  91,   0,   0, 0, 0, None ],
+            "radarscreen"   : [ self.PICs["MAINA5"], 48, 16, 19,  21,   0,   1, 0, 1, None ],
+            "liftpanel"     : [ self.PICs["MAINA5"], 10, 10, 12,  14, 115,  45, 1, 0, None ],
+        }
 
-        # slice commander door
-        self.controlroom_anim_commanderdoor = []
-        for commanderdooranim_col in range(4):
-            self.controlroom_anim_commanderdoor.append(self.PICs["MAINA2"].subsurface(pygame.Rect( commanderdooranim_col * 18, 0, 18, 89)))
+        self.controlroom_anims = self.slice_picsequence(self.controlroom_anim_defs)
 
-        # slice right door
-        self.controlroom_anim_rightdoor = []
-        for rightdooranim_col in range(6):
-            self.controlroom_anim_rightdoor.append(self.PICs["MAINA1"].subsurface(pygame.Rect( rightdooranim_col * 47, 0, 47, 136)))
+        self.controlroom_anims["liftlights_up"] = self.controlroom_anims["liftlights"][:7]
+        self.controlroom_anims["liftlights_dn"] = self.controlroom_anims["liftlights"][-10:]
+        self.controlroom_anims["liftlights_dn"].reverse()
 
-        # slice lift door
-        self.controlroom_anim_liftdoor = []
-        for liftdooranim_col in range(4):
-            self.controlroom_anim_liftdoor.append(self.PICs["MAINA3"].subsurface(pygame.Rect( liftdooranim_col * 21, 0, 21, 105)))
-
-        # slice lift door lights
-        self.controlroom_anim_liftlights = []
-        for liftlightsanim_col in range(16):
-            self.controlroom_anim_liftlights.append(self.PICs["MAINA4"].subsurface(pygame.Rect( liftlightsanim_col * 16, 0, 16, 91)))
-
-        self.controlroom_anim_liftlights_up = self.controlroom_anim_liftlights[:7]
-        self.controlroom_anim_liftlights_dn = self.controlroom_anim_liftlights[-10:]
-        self.controlroom_anim_liftlights_dn.reverse()
-
-        self.controlroom_anim_researchcomputer = self.ANIs["ANIM/MAIN11"]
-        self.controlroom_anim_messagescomputer = self.ANIs["ANIM/MAIN12"]
+        self.controlroom_anims["researchcomputer"] = self.ANIs["ANIM/MAIN11"]
+        self.controlroom_anims["messagescomputer"] = self.ANIs["ANIM/MAIN12"]
 
 
     def prepare_heroes_and_commanders(self):
@@ -755,6 +747,20 @@ class ReReGFX:
 
     def prepare_kocsma_anims(self):
 
+        self.kocsma_anims_pasteposes = {
+            "greenlights"     : (166, 49 +  3),
+            "lavalampa"       : ( 78, 49 + 28),
+            "kartyazoszormok" : (210, 49 + 29),
+            "hatsoatjaro"     : (210, 49 +  8),
+            "kisasztal1"      : (161, 49 + 29),
+#            "kisasztal2"      : (160, 49 + 28),
+            "rosszlampa"      : (233, 49 +  0),
+            "rossztv"         : (114, 49 +  0),
+            "zagyva"          : (269, 49 +  7),
+            "nagyasztal"      : (181, 49 + 33),
+            "knightrider"     : (267, 49 + 39)
+        }
+
         self.kocsma_anim_defs = {
             # name                     PICsurface        nf  rf   w   h  wo   ho cs rs  colorkey
             "greenlights"     : [ self.PICs["KOCSMAAN"], 21, 13, 23,  7,  0,   0, 0, 1,    None ],
@@ -774,6 +780,16 @@ class ReReGFX:
 
 
     def prepare_kocsmatoltelekek(self):
+
+        self.kocsmatoltelekek_pasteposes = {
+            "undorling"    : (258, 49 + 12),
+            "spy"          : (235, 49 + 41),
+            "treasonable"  : (199, 49 +  0),
+            "morgrul"      : (106, 49 +  5),
+            "lenyzold"     : (144, 49 + 21),
+            "bountyhunter" : (163, 49 + 32),
+            "eran"         : ( 71, 49 + 81)
+        }
 
         self.kocsmatoltelekek = {
             "bountyhunter" : self.PICs["PIRATES"].subsurface(pygame.Rect(  1,  1, 56, 118)),
@@ -946,6 +962,16 @@ class ReReGFX:
             return self.render_spacelocal(screenobj)
 
 
+    def __render_anims_helper(self, anims, animstates, pasteposes, blitscreen):
+
+        for animname in pasteposes.keys():
+            if animstates[animname].active > 0:
+                frames = anims[animname]
+                currframe_no = animstates[animname].currframe
+                pastepos = pasteposes[animname]
+                blitscreen.blit(frames[currframe_no], pastepos)
+
+
     # current_commanders <- gamedata_dynamic["commanders"]
     def render_controlroom(self, screenobj_controlroom):
 
@@ -957,43 +983,7 @@ class ReReGFX:
         # control room background
         self.screen_controlroom.blit(self.PICs["MAIN"], (0, 49))
 
-        # radar anim
-        self.screen_controlroom.blit(self.controlroom_anim_radar[screenobj_controlroom.animstates["radarscreen"].currframe], (37, 49))
-
-        # liftpanel anim
-        self.screen_controlroom.blit(self.controlroom_anim_liftpanel[screenobj_controlroom.animstates["liftpanel"].currframe], (226, 32 + 49))
-
-        # lift lights anim
-        if screenobj_controlroom.animstates["liftlights"].active > 0:
-            self.screen_controlroom.blit(self.controlroom_anim_liftlights[screenobj_controlroom.animstates["liftlights"].currframe], (205, 21 + 49))
-
-        # lift lights up anim
-        if screenobj_controlroom.animstates["liftlights_up"].active > 0:
-            self.screen_controlroom.blit(self.controlroom_anim_liftlights_up[screenobj_controlroom.animstates["liftlights_up"].currframe], (205, 21 + 49))
-
-        # lift lights down anim
-        if screenobj_controlroom.animstates["liftlights_dn"].active > 0:
-            self.screen_controlroom.blit(self.controlroom_anim_liftlights_dn[screenobj_controlroom.animstates["liftlights_dn"].currframe], (205, 21 + 49))
-
-        # lift door
-        if screenobj_controlroom.animstates["liftdoor"].active > 0:
-            self.screen_controlroom.blit(self.controlroom_anim_liftdoor[screenobj_controlroom.animstates["liftdoor"].currframe], (202, 7 + 49))
-
-        # rightdoor (info-buy)
-        if screenobj_controlroom.animstates["rightdoor"].active > 0:
-            self.screen_controlroom.blit(self.controlroom_anim_rightdoor[screenobj_controlroom.animstates["rightdoor"].currframe], (273, 8 + 49))
-
-        # commanderdoor
-        if screenobj_controlroom.animstates["commanderdoor"].active > 0:
-            self.screen_controlroom.blit(self.controlroom_anim_commanderdoor[screenobj_controlroom.animstates["commanderdoor"].currframe], (172, 49))
-
-        # messages computer
-        if screenobj_controlroom.animstates["messagescomputer"].active > 0:
-            self.screen_controlroom.blit(self.controlroom_anim_messagescomputer[screenobj_controlroom.animstates["messagescomputer"].currframe], (14, 73))
-
-        # research computer
-        if screenobj_controlroom.animstates["researchcomputer"].active > 0:
-            self.screen_controlroom.blit(self.controlroom_anim_researchcomputer[screenobj_controlroom.animstates["researchcomputer"].currframe], (40, 73))
+        self.__render_anims_helper(self.controlroom_anims, screenobj_controlroom.animstates, self.controlroom_anims_pasteposes, self.screen_controlroom)
 
         # hero
         self.screen_controlroom.blit(self.heroes[1], (131, 50 + 49) )
@@ -1008,7 +998,7 @@ class ReReGFX:
         if current_commanders[0] != 0:
             self.screen_controlroom.blit(self.commanders["pilots"][current_commanders[0]], (245, 54 + 49) )
 
-        # TODO: anim
+        # TODO: space local door anim
 
         return self.screen_controlroom
 
@@ -1444,8 +1434,6 @@ class ReReGFX:
         self.screen_buffer.blit(self.render_menu(screenobj_messages.menu_info), (0, 0))
         self.screen_buffer.blit(self.render_infobar(screenobj_messages.menu_info), (0, 32))
 
-        animstate = 0
-
         # main pic
         self.screen_buffer.blit(self.PICs["UZENET"], (0, 49))
 
@@ -1463,41 +1451,10 @@ class ReReGFX:
         self.screen_buffer.blit(self.render_menu(screenobj_spacelocal.menu_info), (0, 0))
         self.screen_buffer.blit(self.render_infobar(screenobj_spacelocal.menu_info), (0, 32))
 
-        animstate = 0
-
         # main pic
         self.screen_buffer.blit(self.PICs["KOCSMA"], (0, 49))
 
-        self.kocsma_anims_pasteposes = {
-            "greenlights"     : (166, 49 +  3),
-            "lavalampa"       : ( 78, 49 + 28),
-            "kartyazoszormok" : (210, 49 + 29),
-            "hatsoatjaro"     : (210, 49 +  8),
-            "kisasztal1"      : (161, 49 + 29),
-#            "kisasztal2"      : (160, 49 + 28),
-            "rosszlampa"      : (233, 49 +  0),
-            "rossztv"         : (114, 49 +  0),
-            "zagyva"          : (269, 49 +  7),
-            "nagyasztal"      : (181, 49 + 33),
-            "knightrider"     : (267, 49 + 39)
-        }
-
-        self.kocsmatoltelekek_pasteposes = {
-            "undorling"    : (258, 49 + 12),
-            "spy"          : (235, 49 + 41),
-            "treasonable"  : (199, 49 +  0),
-            "morgrul"      : (106, 49 +  5),
-            "lenyzold"     : (144, 49 + 21),
-            "bountyhunter" : (163, 49 + 32),
-            "eran"         : ( 71, 49 + 81)
-        }
-
-        for animname in self.kocsma_anims_pasteposes.keys():
-            if screenobj_spacelocal.animstates[animname].active > 0:
-                frames = self.kocsma_anims[animname]
-                currframe_no = screenobj_spacelocal.animstates[animname].currframe
-                pastepos = self.kocsma_anims_pasteposes[animname]
-                self.screen_buffer.blit(frames[currframe_no], pastepos)
+        self.__render_anims_helper(self.kocsma_anims, screenobj_spacelocal.animstates, self.kocsma_anims_pasteposes, self.screen_buffer)
 
         # kocsmatoltelekek
         ##################
