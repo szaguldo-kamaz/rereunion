@@ -416,6 +416,28 @@ class ReReGFX:
         return ANIs
 
 
+    def slice_picsequence(self, picsequence_def):
+
+        frames_dict = {}
+
+        for seqname in picsequence_def.keys():
+
+            frames_dict[seqname] = []
+
+            [ PICsurface, number_of_frames, number_of_frames_in_a_row, width, height, width_offset, height_offset, colspacer, rowspacer, colorkey ] = picsequence_def[seqname]
+            colspace = width + colspacer
+            rowspace = height + rowspacer
+
+            for frameidx in range(number_of_frames):
+                x = (frameidx % number_of_frames_in_a_row) * colspace + width_offset
+                y = (frameidx // number_of_frames_in_a_row) * rowspace + height_offset
+                frames_dict[seqname].append(PICsurface.subsurface(pygame.Rect(x, y, width, height)))
+                if colorkey != None:
+                    frames_dict[seqname][-1].set_colorkey(pygame.Color(colorkey))
+
+        return frames_dict
+
+
     ######################
     ### Prepare GFX ###
     ################
@@ -721,76 +743,41 @@ class ReReGFX:
 
     def prepare_mine_szamok(self):
 
-        self.mine_szamok_kicsi = []
-        self.mine_szamok_kozepes = []
-        self.mine_szamok_nagy = []
+        self.mine_szamok_defs = {
+            # name            PICsurface       nf  rf   w   h   wo   ho  cs rs  colorkey
+            "nagy"    : [ self.PICs["SZAMOK"], 10,  5, 50, 35,   0,   0, 14, 0, None ],
+            "kozepes" : [ self.PICs["SZAMOK"], 10, 10, 14, 35,   1,  70,  2, 0, None ],
+            "kicsi"   : [ self.PICs["SZAMOK"], 10, 10, 12,  9, 163,  71,  1, 0, None ],
+        }
 
-        for szam in range(10):
-            self.mine_szamok_nagy.append(self.PICs["SZAMOK"].subsurface(pygame.Rect((szam%5)*64, (szam//5)*35, 50, 35)))
-            self.mine_szamok_kozepes.append(self.PICs["SZAMOK"].subsurface(pygame.Rect(1 + 16*szam, 70, 14, 35)))
-            self.mine_szamok_kicsi.append(self.PICs["SZAMOK"].subsurface(pygame.Rect(163 + szam*13, 71, 12, 9)))
+        self.mine_szamok = self.slice_picsequence(self.mine_szamok_defs)
 
 
     def prepare_kocsma_anims(self):
 
-        self.kocsma_anim_greenlights = []
-        self.kocsma_anim_kartyazoszormok = []
-        self.kocsma_anim_hatsoatjaro = []
-        self.kocsma_anim_lavalampa = []
-        self.kocsma_anim_kisasztal1 = []
-        self.kocsma_anim_kisasztal2 = []
-        self.kocsma_anim_rosszlampa = []
-        self.kocsma_anim_rossztv = []
-        self.kocsma_anim_zagyva = []
-        self.kocsma_anim_nagyasztal = []
-        self.kocsma_anim_knightrider = []
+        self.kocsma_anim_defs = {
+            # name                     PICsurface        nf  rf   w   h  wo   ho cs rs  colorkey
+            "greenlights"     : [ self.PICs["KOCSMAAN"], 21, 13, 23,  7,  0,   0, 0, 1,    None ],
+            "lavalampa"       : [ self.PICs["KOCSMAAN"],  5,  5, 11, 13, 24,  54, 0, 0, (0,0,0) ],
+            "kartyazoszormok" : [ self.PICs["KOCSMAAN"], 14, 13, 24, 25,  0,  16, 0, 1, (0,0,0) ],
+            "hatsoatjaro"     : [ self.PICs["KOCSMAAN"], 13, 13, 22,  9, 24,  44, 0, 0,    None ],
+            "kisasztal1"      : [ self.PICs["KOCSMAAN"], 14, 14, 16,  9, 90,  58, 0, 0,    None ],
+            "kisasztal2"      : [ self.PICs["KOCSMAAN"], 15, 15, 15, 10, 22, 116, 0, 0,    None ],
+            "rosszlampa"      : [ self.PICs["KOCSMAAN"], 12, 12,  4, 36,  0,  68, 0, 0,    None ],
+            "rossztv"         : [ self.PICs["KOCSMAAN"],  5,  5, 22, 32, 48,  72, 0, 0, (0,0,0) ],
+            "zagyva"          : [ self.PICs["KOCSMAAN"], 15, 14, 22, 10,  0, 105, 0, 1, (0,0,0) ],
+            "nagyasztal"      : [ self.PICs["KOCSMAAN"], 32, 20, 16, 17,  0, 127, 0, 1,    None ],
+            "knightrider"     : [ self.PICs["KOCSMAAN"], 18, 18,  9,  1,  0, 163, 0, 0,    None ]
+        }
 
-        for frameidx in range(21):
-            self.kocsma_anim_greenlights.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect((frameidx%13)*23, (frameidx//13)*8, 23, 7)))
-
-        for frameidx in range(5):
-            self.kocsma_anim_lavalampa.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*11 + 24, 54, 11, 13)))
-            self.kocsma_anim_lavalampa[-1].set_colorkey(pygame.Color(0, 0, 0))
-
-        for frameidx in range(14):
-            self.kocsma_anim_kartyazoszormok.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect((frameidx%13)*24, 16 + (frameidx//13)*26, 24, 25)))
-            self.kocsma_anim_kartyazoszormok[-1].set_colorkey(pygame.Color(0, 0, 0))
-
-        for frameidx in range(13):
-            self.kocsma_anim_hatsoatjaro.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*22 + 24, 44, 22, 9)))
-
-        for frameidx in range(14):
-            self.kocsma_anim_kisasztal1.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*16 + 90, 58, 16, 9)))
-#            self.kocsma_anim_kisasztal1[-1].set_colorkey(pygame.Color(0, 0, 0))
-
-        for frameidx in range(15):
-            self.kocsma_anim_kisasztal2.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*15 + 22, 116, 15, 10)))
-#            self.kocsma_anim_kisasztal2[-1].set_colorkey(pygame.Color(0, 0, 0))
-
-        for frameidx in range(12):
-            self.kocsma_anim_rosszlampa.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*4, 68, 4, 36)))
-
-        for frameidx in range(5):
-            self.kocsma_anim_rossztv.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*22 + 48, 72, 22, 32)))
-            self.kocsma_anim_rossztv[-1].set_colorkey(pygame.Color(0, 0, 0))
-
-        for frameidx in range(15):
-            self.kocsma_anim_zagyva.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect((frameidx%14)*22, 105 + (frameidx//14)*11, 22, 10)))
-            self.kocsma_anim_zagyva[-1].set_colorkey(pygame.Color(0, 0, 0))
-
-        for frameidx in range(32):
-            self.kocsma_anim_nagyasztal.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect((frameidx%20)*16, 127 + (frameidx//20)*18, 16, 17)))
-            self.kocsma_anim_nagyasztal[-1].set_colorkey(pygame.Color(0, 0, 0))
-
-        for frameidx in range(18):
-            self.kocsma_anim_knightrider.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*9, 163, 9, 1)))
+        self.kocsma_anims = self.slice_picsequence(self.kocsma_anim_defs)
 
 
     def prepare_kocsmatoltelekek(self):
 
         self.kocsmatoltelekek = {
             "bountyhunter" : self.PICs["PIRATES"].subsurface(pygame.Rect(  1,  1, 56, 118)),
-            "leny"         : self.PICs["PIRATES"].subsurface(pygame.Rect( 59,  1, 44, 107)),
+            "lenyzold"     : self.PICs["PIRATES"].subsurface(pygame.Rect( 59,  1, 44, 107)),
             "undorling"    : self.PICs["PIRATES"].subsurface(pygame.Rect(105,  1, 28,  97)),
             "spy"          : self.PICs["PIRATES"].subsurface(pygame.Rect(135,  1, 45,  93)),
             "eran"         : self.PICs["PIRATES"].subsurface(pygame.Rect(182,  1, 92,  69)),
@@ -1438,15 +1425,15 @@ class ReReGFX:
             mineral_no += 1
 
         # number of mines
-        self.screen_buffer.blit(self.mine_szamok_kicsi[screenobj_mine.num_of_mines // 10], (113, 113))
-        self.screen_buffer.blit(self.mine_szamok_kicsi[screenobj_mine.num_of_mines % 10], (126, 113))
+        self.screen_buffer.blit(self.mine_szamok["kicsi"][screenobj_mine.num_of_mines // 10], (113, 113))
+        self.screen_buffer.blit(self.mine_szamok["kicsi"][screenobj_mine.num_of_mines % 10], (126, 113))
 
         # number of active droids
-        self.screen_buffer.blit(self.mine_szamok_nagy[screenobj_mine.num_of_droids_active], (34, 144))
+        self.screen_buffer.blit(self.mine_szamok["nagy"][screenobj_mine.num_of_droids_active], (34, 144))
 
         # number of droids in stock
-        self.screen_buffer.blit(self.mine_szamok_kozepes[screenobj_mine.num_of_droids_stock // 10], (113, 144))
-        self.screen_buffer.blit(self.mine_szamok_kozepes[screenobj_mine.num_of_droids_stock % 10], (129, 144))
+        self.screen_buffer.blit(self.mine_szamok["kozepes"][screenobj_mine.num_of_droids_stock // 10], (113, 144))
+        self.screen_buffer.blit(self.mine_szamok["kozepes"][screenobj_mine.num_of_droids_stock % 10], (129, 144))
 
         return self.screen_buffer
 
@@ -1481,61 +1468,43 @@ class ReReGFX:
         # main pic
         self.screen_buffer.blit(self.PICs["KOCSMA"], (0, 49))
 
-        # greenlights anim
-        self.screen_buffer.blit(self.kocsma_anim_greenlights[screenobj_spacelocal.animstates["greenlights"].currframe], (166, 49 + 3))
+        self.kocsma_anims_pasteposes = {
+            "greenlights"     : (166, 49 +  3),
+            "lavalampa"       : ( 78, 49 + 28),
+            "kartyazoszormok" : (210, 49 + 29),
+            "hatsoatjaro"     : (210, 49 +  8),
+            "kisasztal1"      : (161, 49 + 29),
+#            "kisasztal2"      : (160, 49 + 28),
+            "rosszlampa"      : (233, 49 +  0),
+            "rossztv"         : (114, 49 +  0),
+            "zagyva"          : (269, 49 +  7),
+            "nagyasztal"      : (181, 49 + 33),
+            "knightrider"     : (267, 49 + 39)
+        }
 
-        # lavalampa anim
-        self.screen_buffer.blit(self.kocsma_anim_lavalampa[screenobj_spacelocal.animstates["lavalampa"].currframe], (78, 49 + 28))
+        self.kocsmatoltelekek_pasteposes = {
+            "undorling"    : (258, 49 + 12),
+            "spy"          : (235, 49 + 41),
+            "treasonable"  : (199, 49 +  0),
+            "morgrul"      : (106, 49 +  5),
+            "lenyzold"     : (144, 49 + 21),
+            "bountyhunter" : (163, 49 + 32),
+            "eran"         : ( 71, 49 + 81)
+        }
 
-        # kartyazoszormok anim
-        self.screen_buffer.blit(self.kocsma_anim_kartyazoszormok[screenobj_spacelocal.animstates["kartyazoszormok"].currframe], (210, 49 + 29))
-
-        # hatsoatjaro anim
-        self.screen_buffer.blit(self.kocsma_anim_hatsoatjaro[screenobj_spacelocal.animstates["hatsoatjaro"].currframe], (210, 49 + 8))
-
-        # kisasztal1 anim
-        self.screen_buffer.blit(self.kocsma_anim_kisasztal1[screenobj_spacelocal.animstates["kisasztal1"].currframe], (161, 49 + 29))
-
-        # kisasztal2 anim
-#        self.screen_buffer.blit(self.kocsma_anim_kisasztal2[screenobj_spacelocal.animstates["kisasztal2"].currframe], (160, 49 + 28))
-
-        # rosszlampa anim
-        self.screen_buffer.blit(self.kocsma_anim_rosszlampa[screenobj_spacelocal.animstates["rosszlampa"].currframe], (233, 49))
-
-        # rossztv anim
-        self.screen_buffer.blit(self.kocsma_anim_rossztv[screenobj_spacelocal.animstates["rossztv"].currframe], (114, 49))
-
-        # zagyva anim
-        self.screen_buffer.blit(self.kocsma_anim_zagyva[screenobj_spacelocal.animstates["zagyva"].currframe], (269, 49 + 7))
-
-        # nagyasztal anim
-        self.screen_buffer.blit(self.kocsma_anim_nagyasztal[screenobj_spacelocal.animstates["nagyasztal"].currframe], (181, 49 + 33))
-
-        # knightrider anim
-        self.screen_buffer.blit(self.kocsma_anim_knightrider[screenobj_spacelocal.animstates["knightrider"].currframe], (267, 49 + 39))
+        for animname in self.kocsma_anims_pasteposes.keys():
+            if screenobj_spacelocal.animstates[animname].active > 0:
+                frames = self.kocsma_anims[animname]
+                currframe_no = screenobj_spacelocal.animstates[animname].currframe
+                pastepos = self.kocsma_anims_pasteposes[animname]
+                self.screen_buffer.blit(frames[currframe_no], pastepos)
 
         # kocsmatoltelekek
         ##################
 
-        # undorling
-        self.screen_buffer.blit(self.kocsmatoltelekek["undorling"], (258, 49 + 12))
-        # spy
-        self.screen_buffer.blit(self.kocsmatoltelekek["spy"], (235, 49 + 41))
+        for kocsmatoltelek in self.kocsmatoltelekek_pasteposes.keys():
+            self.screen_buffer.blit(self.kocsmatoltelekek[kocsmatoltelek], self.kocsmatoltelekek_pasteposes[kocsmatoltelek])
 
-        # treasonable
-        self.screen_buffer.blit(self.kocsmatoltelekek["treasonable"], (199, 49))
-
-        # morgrul
-        self.screen_buffer.blit(self.kocsmatoltelekek["morgrul"], (106, 49 + 5))
-
-        # leny
-        self.screen_buffer.blit(self.kocsmatoltelekek["leny"], (144, 49 + 21))
-
-        # bountyhunter
-        self.screen_buffer.blit(self.kocsmatoltelekek["bountyhunter"], (163, 49 + 32))
-
-        # eran
-        self.screen_buffer.blit(self.kocsmatoltelekek["eran"], (71, 49 + 81))
 
         return self.screen_buffer
 
