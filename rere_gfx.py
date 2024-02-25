@@ -70,6 +70,7 @@ class ReReGFX:
         self.prepare_planetmain()
         self.prepare_mine_szamok()
         self.prepare_kocsma_anims()
+        self.prepare_kocsmatoltelekek()
 
         self.menu_full = pygame.Surface((320, 64))
         self.infobar = pygame.Surface((320, 17))
@@ -362,6 +363,7 @@ class ReReGFX:
 
         PIClist.append("GRAFIKA/KOCSMA.PIC")  # Kocsma - Space local background
         PIClist.append("GRAFIKA/KOCSMAAN.PIC")  # Kocsma animaciok - Space local anims
+        PIClist.append("GRAFIKA/PIRATES.PIC")  # Kocsmatoltelekek - Space local guests
 
         # Nagy
         #for nagy_no in range(13):
@@ -782,6 +784,22 @@ class ReReGFX:
 
         for frameidx in range(18):
             self.kocsma_anim_knightrider.append(self.PICs["KOCSMAAN"].subsurface(pygame.Rect(frameidx*9, 163, 9, 1)))
+
+
+    def prepare_kocsmatoltelekek(self):
+
+        self.kocsmatoltelekek = {
+            "bountyhunter" : self.PICs["PIRATES"].subsurface(pygame.Rect(  1,  1, 56, 118)),
+            "leny"         : self.PICs["PIRATES"].subsurface(pygame.Rect( 59,  1, 44, 107)),
+            "undorling"    : self.PICs["PIRATES"].subsurface(pygame.Rect(105,  1, 28,  97)),
+            "spy"          : self.PICs["PIRATES"].subsurface(pygame.Rect(135,  1, 45,  93)),
+            "eran"         : self.PICs["PIRATES"].subsurface(pygame.Rect(182,  1, 92,  69)),
+            "morgrul"      : self.PICs["PIRATES"].subsurface(pygame.Rect(182, 71, 69,  68)),
+            "treasonable"  : self.PICs["PIRATES"].subsurface(pygame.Rect(276,  1, 40,  37))
+        }
+
+        for kocsmatoltelek in self.kocsmatoltelekek.keys():
+            self.kocsmatoltelekek[kocsmatoltelek].set_colorkey(pygame.Color(0, 0, 0xFF))
 
 
     #################
@@ -1495,6 +1513,29 @@ class ReReGFX:
 
         # knightrider anim
         self.screen_buffer.blit(self.kocsma_anim_knightrider[screenobj_spacelocal.animstates["knightrider"].currframe], (267, 49 + 39))
+
+        # kocsmatoltelekek
+        ##################
+
+        # undorling
+        self.screen_buffer.blit(self.kocsmatoltelekek["undorling"], (258, 49 + 12))
+        # spy
+        self.screen_buffer.blit(self.kocsmatoltelekek["spy"], (235, 49 + 41))
+
+        # treasonable
+        self.screen_buffer.blit(self.kocsmatoltelekek["treasonable"], (199, 49))
+
+        # morgrul
+        self.screen_buffer.blit(self.kocsmatoltelekek["morgrul"], (106, 49 + 5))
+
+        # leny
+        self.screen_buffer.blit(self.kocsmatoltelekek["leny"], (144, 49 + 21))
+
+        # bountyhunter
+        self.screen_buffer.blit(self.kocsmatoltelekek["bountyhunter"], (163, 49 + 32))
+
+        # eran
+        self.screen_buffer.blit(self.kocsmatoltelekek["eran"], (71, 49 + 81))
 
         return self.screen_buffer
 
