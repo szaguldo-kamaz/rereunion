@@ -18,13 +18,19 @@ class screen:
         # loop == 3: loop forever and change direction (forward/backward) after each loop
         # loop == 4: loop forever, but pause between repeats (delay) and change direction (forward/backward) after each loop
 
-        def __init__(self, frames, ticks, loop, backwards = False, active = 0, delay = 0, delaymin = 0, delaymax = 0, tickspersec = 10):
+        def __init__(self, frames, ticks, loop, backwards = False, active = -1, delay = 0, delaymin = 0, delaymax = 0, tickspersec = 10):
 
             self.frames = frames
             self.ticks = ticks
             self.loop = loop
             self.backwards = backwards
-            self.active = active
+            if active == -1:
+                if self.loop == 1:
+                    self.active = 1
+                else:
+                    self.active = 0
+            else:
+                self.active = active
 
             self.delaymin = delaymin * tickspersec
             self.delaymax = delaymax * tickspersec
@@ -105,7 +111,7 @@ class screen:
             return anim_ended
 
 
-    def add_anim(self, name, frames, ticks, loop, backwards = False, active = 0, delay = 0, delaymin = 0, delaymax = 0, tickspersec = 10):
+    def add_anim(self, name, frames, ticks, loop, backwards = False, active = -1, delay = 0, delaymin = 0, delaymax = 0, tickspersec = 10):
 
         self.animstates[name] = self.screen_anim(frames, ticks, loop, backwards, active, delay, delaymin, delaymax, tickspersec)
 
