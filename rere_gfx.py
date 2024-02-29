@@ -592,14 +592,25 @@ class ReReGFX:
 
     def prepare_researchdesign_computer(self):
 
-        self.researchdesign_invention_cds_anim = []
-        self.researchdesign_invention_cds_init = []
+        self.cd_anim_defs = {
+            # name                PICsurface     nf  rf   w   h  wo   ho cs rs  colorkey
+            "normaltray"   : [ self.PICs["CDS"], 10, 10, 32, 15,  0,   0, 0, 1, None ],
+            "?starttray"   : [ self.PICs["CDS"], 10, 10, 32, 15,  0,  16, 0, 1, None ],
+            "?nostarttray" : [ self.PICs["CDS"], 10, 10, 32, 15,  0,  32, 0, 1, None ],
+            "emptytray"    : [ self.PICs["CDS"], 10, 10, 32, 15,  0,  48, 0, 1, None ],
+            "spectrum"     : [ self.PICs["CDS"], 10, 10, 32, 15,  0,  64, 0, 1, None ]
+        }
 
-        for cd_y in range(0, 5):
-            self.researchdesign_invention_cds_anim.append([])
-            for cd_x in range(0, 320, 32):
-                self.researchdesign_invention_cds_anim[cd_y].append( self.PICs["CDS"].subsurface(pygame.Rect( cd_x, cd_y * 16, 32, 15)) )
-            self.researchdesign_invention_cds_init.append(self.researchdesign_invention_cds_anim[cd_y].pop(0))
+        self.cd_anims = self.slice_picsequence(self.cd_anim_defs)
+
+        self.cd_animname_map = [
+            "",
+            "?starttray",
+            "",
+            "emptytray",
+            "",
+            "normaltray"
+        ]
 
         self.researchdesign_computer_txt = ( self.PICs["CDS"].subsurface(pygame.Rect( 18, 79, 11, 5)),
                                              self.PICs["CDS"].subsurface(pygame.Rect(  0, 79, 11, 5)) )
@@ -1062,23 +1073,47 @@ class ReReGFX:
         self.screen_buffer.blit(self.render_menu(screenobj_researchdesign.menu_info), (0, 0))
         self.screen_buffer.blit(self.render_infobar(screenobj_researchdesign.menu_info), (0, 32))
 
-        # TODO
-        animstate = 0
-
         # main pic
         self.screen_buffer.blit(self.PICs["RESEARCH"], (0, 49))
 
         # CDs
         for invention_no in range(0,35):
-            cd_state = screenobj_researchdesign.iconstates[invention_no]
-            if cd_state == -1:
+
+            thisoneisselected = (screenobj_researchdesign.project_selected_cd_no == invention_no)
+            research_state = screenobj_researchdesign.researchstates[invention_no]
+
+            # research state 0 - unavailable (not shown) - no CD
+            if research_state == 0:
                 continue
-            if cd_state == 4:  # under analysis
-                cd_to_blit = self.researchdesign_invention_cds_anim[cd_state][screenobj_researchdesign.animstates["vumeter"].currframe]
+
+            # research state 2 - tray with "?" CD - in research
+            # research state 4 - tray without CD - in research
+            elif research_state in [ 2, 4 ]:  # under analysis
+                cd_to_blit = self.cd_anims["spectrum"][screenobj_researchdesign.animstates["spectrum"].currframe]
+
+            # research state 1 - tray with "?" CD
+            # research state 3 - tray without CD
+            # research state 5 - done
+            elif research_state in [ 1, 3, 5 ]:
+                animname = self.cd_animname_map[research_state]
+
+                if screenobj_researchdesign.animstates[animname + "open"].active > 0:
+                    cdanimname = animname + "open"
+                else:
+                    cdanimname = animname + "close"
+
+                if thisoneisselected:
+                    frameno = screenobj_researchdesign.animstates[cdanimname].currframe
+                else:
+                    frameno = 0
+
+                cd_to_blit = self.cd_anims[animname][frameno]
+
             else:
-            # TODO
-                cd_to_blit = self.researchdesign_invention_cds_init[cd_state]
-            cd_pos = (0 + (invention_no % 5) * 32, 49 + 4 + int(invention_no / 5) * 16)
+                print(f"Invalid research_state {research_state}! This should not happen!")
+                exit(1)
+
+            cd_pos = (0 + (invention_no % 5) * 32, 49 + 4 + int(invention_no // 5) * 16)
             self.screen_buffer.blit(cd_to_blit, cd_pos)
 
         # Project name / status
@@ -1087,9 +1122,16 @@ class ReReGFX:
             self.screen_buffer.blit(self.render_text(screenobj_researchdesign.project_selected_name, textcolor = 1), (200, 88))
             self.screen_buffer.blit(self.render_text(screenobj_researchdesign.project_selected_status, textcolor = 1), (190, 100))
             if screenobj_researchdesign.project_selected_requiredskills != None:
-                print("puzomajom", screenobj_researchdesign.project_selected_requiredskills[0])
+                self.screen_buffer.blit(self.render_text("Math :", textcolor = 1), (189, 139))
+                self.screen_buffer.blit(self.render_text("Elect:", textcolor = 1), (189, 149))
+                self.screen_buffer.blit(self.render_text("Physics:", textcolor = 1), (235, 139))
+                self.screen_buffer.blit(self.render_text("A.Int  :", textcolor = 1), (235, 149))
+                self.screen_buffer.blit(self.render_text(screenobj_researchdesign.project_selected_requiredskills[0], textcolor = 2), (224, 139))
+                self.screen_buffer.blit(self.render_text(screenobj_researchdesign.project_selected_requiredskills[2], textcolor = 2), (224, 149))
+                self.screen_buffer.blit(self.render_text(screenobj_researchdesign.project_selected_requiredskills[1], textcolor = 2), (282, 139))
+                self.screen_buffer.blit(self.render_text(screenobj_researchdesign.project_selected_requiredskills[3], textcolor = 2), (282, 149))
             if screenobj_researchdesign.project_selected_completionratio != None:
-                print("puzomajom2", screenobj_researchdesign.project_selected_completionratio)
+                self.screen_buffer.blit(self.render_text(f"Completed: {screenobj_researchdesign.project_selected_completionratio}%", textcolor = 1), (190, 112))
 
         # computer state - on/off text
         self.screen_buffer.blit(self.researchdesign_computer_txt[screenobj_researchdesign.computer_state], ( 76, 170))

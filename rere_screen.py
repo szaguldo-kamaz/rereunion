@@ -24,13 +24,14 @@ class screen:
             self.ticks = ticks
             self.loop = loop
             self.backwards = backwards
+
             if active == -1:
                 if self.loop == 1:
-                    self.active = 1
+                    self.activate(1)
                 else:
-                    self.active = 0
+                    self.activate(0)
             else:
-                self.active = active
+                self.activate(active)
 
             self.delaymin = delaymin * tickspersec
             self.delaymax = delaymax * tickspersec
@@ -39,16 +40,21 @@ class screen:
             else:
                 self.delay = delay
 
-            self.currframe = 0
-            self.currtick = 0
-
 
         def __gen_delay(self):
             return int(self.delaymin + random.random() * (self.delaymax - self.delaymin))
 
 
         def activate(self, activestate):
+
             self.active = activestate
+
+            if self.backwards:
+                self.setframe(self.frames - 1)
+            else:
+                self.setframe(0)
+
+            self.resettick()
 
 
         def resettick(self):
@@ -76,9 +82,9 @@ class screen:
                         self.currframe -= 1
                         if self.currframe == -1:
                             loopend = True
-                            if self.loop in [0, 3, 4]:  # change direction to forward
+                            if self.loop in [0, 3, 4]:
                                 self.currframe = 0
-                                if self.loop in [3, 4]:
+                                if self.loop in [3, 4]:   # change direction to forward
                                     self.backwards = False
                             else:
                                 self.currframe = self.frames - 1
@@ -87,9 +93,9 @@ class screen:
                         self.currframe += 1
                         if self.currframe == self.frames:
                             loopend = True
-                            if self.loop in [0, 3, 4]:  # change direction to backwards
+                            if self.loop in [0, 3, 4]:
                                 self.currframe = self.frames - 1
-                                if self.loop in [3, 4]:
+                                if self.loop in [3, 4]:   # change direction to backwards
                                     self.backwards = True
                             else:
                                 self.currframe = 0
@@ -129,6 +135,8 @@ class screen:
         self.action = None
         self.action_params = None
         self.sfx_to_play = None
+
+        self.last_mouse_pos = None
 
         if menu_data == None:
             self.has_menu = False
@@ -179,7 +187,7 @@ class screen:
         for curr_anim_state_id in self.animstates.keys():
             anim_ended = self.animstates[curr_anim_state_id].update()
             if anim_ended:  # maybe there is an action to be set
-                self.update(self.gamedata_dynamic, (0,0), [0,0,0], [0,0,0])
+                self.update(self.gamedata_dynamic, None, [0,0,0], [0,0,0])
 
 
     def update_menu(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):
