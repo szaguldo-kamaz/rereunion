@@ -20,6 +20,7 @@ from rere_screen_researchdesign import *
 from rere_screen_starmap import *
 from rere_screen_messages import *
 from rere_screen_spacelocal import *
+from rere_screen_commanders import *
 
 
 class ReReGame:
@@ -763,6 +764,7 @@ class ReReGame:
         self.screens["starmap"] = screen_starmap(self.gamedata_static, self.gamedata_dynamic, self.solarsystems)
         self.screens["messages"] = screen_messages(self.gamedata_dynamic)
         self.screens["spacelocal"] = screen_spacelocal(self.gamedata_dynamic)
+        self.screens["commanders"] = screen_commanders(self.gamedata_dynamic)
 
         self.current_screen = self.screens["controlroom"]
 
@@ -807,6 +809,9 @@ class ReReGame:
             screen_changed = True
         elif screen_action == "SPACE LOCAL":
             self.current_screen = self.screens["spacelocal"]
+            screen_changed = True
+        elif screen_action == "COMMANDERS":
+            self.current_screen = self.screens["commanders"]
             screen_changed = True
 
         if screen_changed:

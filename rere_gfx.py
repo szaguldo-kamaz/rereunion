@@ -327,7 +327,7 @@ class ReReGFX:
 
         PIClist.append("GRAFIKA/MAIN.PIC")  # Fokepernyo - Main screen
         PIClist.append("GRAFIKA/HEROES.PIC")  # Heroes
-        PIClist.append("GRAFIKA/MAINFACE.PIC")  # Commanders
+        PIClist.append("GRAFIKA/MAINFACE.PIC")  # Commanders in Control room
         PIClist.append("GRAFIKA/MAINA1.PIC")  # Fokepernyo animacio 1 - Main screen anim 1
         PIClist.append("GRAFIKA/MAINA2.PIC")  # Fokepernyo animacio 2 - Main screen anim 2
         PIClist.append("GRAFIKA/MAINA3.PIC")  # Fokepernyo animacio 3 - Main screen anim 3
@@ -364,6 +364,12 @@ class ReReGFX:
         PIClist.append("GRAFIKA/KOCSMA.PIC")  # Kocsma - Space local background
         PIClist.append("GRAFIKA/KOCSMAAN.PIC")  # Kocsma animaciok - Space local anims
         PIClist.append("GRAFIKA/PIRATES.PIC")  # Kocsmatoltelekek - Space local guests
+
+        PIClist.append("GRAFIKA/FACES.PIC")  # Commanders main
+        PIClist.append("GRAFIKA/FACES1.PIC")  # Commanders Pilots
+        PIClist.append("GRAFIKA/FACES2.PIC")  # Commanders Builders
+        PIClist.append("GRAFIKA/FACES3.PIC")  # Commanders Fighters
+        PIClist.append("GRAFIKA/FACES4.PIC")  # Commanders Developers
 
         # Nagy
         #for nagy_no in range(13):
@@ -551,7 +557,7 @@ class ReReGFX:
         self.heroes[1].set_colorkey(pygame.Color(0, 0, 0xFF))
 
         # slice commanders
-        self.commanders = {
+        self.controlroom_commanders = {
                "developers": [
                    0,
                    self.PICs["MAINFACE"].subsurface(pygame.Rect(  1, 1, 49, 95)),
@@ -578,9 +584,9 @@ class ReReGFX:
 
              }
 
-        for commander_type in self.commanders.keys():
+        for commander_type in self.controlroom_commanders.keys():
             for commander_no in range(1,4):
-                self.commanders[commander_type][commander_no].set_colorkey(pygame.Color(0, 0, 0xFF))
+                self.controlroom_commanders[commander_type][commander_no].set_colorkey(pygame.Color(0, 0, 0xFF))
 
 
     def prepare_infobuy(self):
@@ -971,6 +977,8 @@ class ReReGFX:
             return self.render_messages(screenobj)
         elif screenobj.screentype == "spacelocal":
             return self.render_spacelocal(screenobj)
+        elif screenobj.screentype == "commanders":
+            return self.render_commanders(screenobj)
 
 
     def __render_anims_helper(self, anims, animstates, pasteposes, blitscreen):
@@ -1001,13 +1009,13 @@ class ReReGFX:
 
         # commanders - pilot builder figther developer
         if current_commanders[1] != 0:
-            self.screen_controlroom.blit(self.commanders["builders"][current_commanders[1]], (200, 51 + 49) )
+            self.screen_controlroom.blit(self.controlroom_commanders["builders"][current_commanders[1]], (200, 51 + 49) )
         if current_commanders[2] != 0:
-            self.screen_controlroom.blit(self.commanders["fighters"][current_commanders[2]], (77, 38 + 49) )
+            self.screen_controlroom.blit(self.controlroom_commanders["fighters"][current_commanders[2]], (77, 38 + 49) )
         if current_commanders[3] != 0:
-            self.screen_controlroom.blit(self.commanders["developers"][current_commanders[3]], (43, 56 + 49) )
+            self.screen_controlroom.blit(self.controlroom_commanders["developers"][current_commanders[3]], (43, 56 + 49) )
         if current_commanders[0] != 0:
-            self.screen_controlroom.blit(self.commanders["pilots"][current_commanders[0]], (245, 54 + 49) )
+            self.screen_controlroom.blit(self.controlroom_commanders["pilots"][current_commanders[0]], (245, 54 + 49) )
 
         # TODO: space local door anim
 
@@ -1504,6 +1512,27 @@ class ReReGFX:
         for kocsmatoltelek in self.kocsmatoltelekek_pasteposes.keys():
             self.screen_buffer.blit(self.kocsmatoltelekek[kocsmatoltelek], self.kocsmatoltelekek_pasteposes[kocsmatoltelek])
 
+
+        return self.screen_buffer
+
+
+    # commanders
+    def render_commanders(self, screenobj_commanders):
+
+        self.screen_buffer.blit(self.render_menu(screenobj_commanders.menu_info), (0, 0))
+        self.screen_buffer.blit(self.render_infobar(screenobj_commanders.menu_info), (0, 32))
+
+        # main pic
+        self.screen_buffer.blit(self.PICs["FACES"], (0, 49))
+
+        if   screenobj_commanders.current_commanders == "PILOTS":
+            self.screen_buffer.blit(self.PICs["FACES1"], (0, 49))
+        elif screenobj_commanders.current_commanders == "BUILDERS":
+            self.screen_buffer.blit(self.PICs["FACES2"], (0, 49))
+        elif screenobj_commanders.current_commanders == "FIGHTERS":
+            self.screen_buffer.blit(self.PICs["FACES3"], (0, 49))
+        elif screenobj_commanders.current_commanders == "DEVELOPERS":
+            self.screen_buffer.blit(self.PICs["FACES4"], (0, 49))
 
         return self.screen_buffer
 
