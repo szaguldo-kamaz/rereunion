@@ -83,9 +83,11 @@ class screen_infobuy(screen):
                 self.action = menuaction
 
         # Select from list
-        if (54 <= mouse_pos[1] <= 172) and (16 <= mouse_pos[0] <= 110):
+        if (54 <= mouse_pos[1] <= 170) and (16 <= mouse_pos[0] <= 110):
             if mouse_buttonevent[0]:
                 self.selected_item_listno = self.scroll_start + int((mouse_pos[1] - 54)/9)
+                if self.selected_item_listno >= self.invention_item_list_len:
+                    self.selected_item_listno = self.invention_item_list_len - 1
 
         # Scroll up
         if (49 <= mouse_pos[1] <= 66) and ( (0 <= mouse_pos[0] <= 11) or (115 <= mouse_pos[0] <= 126) ):
