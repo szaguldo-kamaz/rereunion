@@ -56,8 +56,7 @@ class screen_controlroom(screen):
                     self.action = "SHIP INFO"
                     self.action_params = []
                 elif self.waitingforanim == "commanderdoor":
-#                    self.action = "COMMANDERS"
-                    self.action = "BACK TO M.SCREEN"
+                    self.action = "COMMANDERS"
                     self.action_params = []
                 elif self.waitingforanim == "messagescomputer":
                     self.action = "MESSAGES"
