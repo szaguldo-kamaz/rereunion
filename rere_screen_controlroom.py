@@ -48,9 +48,9 @@ class screen_controlroom(screen):
                     self.action = "INFO-BUY"
                     self.action_params = []
                 elif self.waitingforanim in [ "liftlights_dn", "liftlights_up" ]:
+                    self.animstates[self.waitingforanim].activate(0)
+                    self.animstates["liftlights"].activate(0)
                     self.waitingforanim = "liftdoor"
-                    self.animstates["liftlights_dn"].activate(0)
-                    self.animstates["liftlights_up"].activate(0)
                     self.animstates["liftdoor"].activate(1)
                 elif self.waitingforanim == "liftdoor":
                     self.action = "SHIP INFO"
