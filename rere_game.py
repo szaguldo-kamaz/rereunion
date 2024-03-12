@@ -308,16 +308,38 @@ class ReReGame:
         return decoded_text
 
 
+    def load_rawtext(self, rawtext_filename, stringlength, num_of_entries, groupby, strip_right = True, omit_empty = True):
+
+        rawtextfile = open(rawtext_filename, "rb")
+        rawtext = rawtextfile.read()
+        rawtextfile.close()
+
+        alltext = struct.unpack("<" + f"{stringlength}p" * groupby * num_of_entries, rawtext)
+
+        grouped_text = []
+        for idx in range(num_of_entries):
+            grouped_text.append([])
+            for text_line in range(groupby):
+                current_sentence = alltext[groupby*idx + text_line].decode('ascii')
+                if strip_right:
+                    current_sentence = current_sentence.rstrip()
+                if omit_empty:
+                    if current_sentence != '':
+                        grouped_text[idx].append(current_sentence)
+                else:
+                    grouped_text[idx].append(current_sentence)
+
+        return grouped_text
+
+
     def load_inventionsdesc(self, inventionsdesc_filename = "TEXT/SZ_TALAL.RAW"):
+        inventionsdesc = self.load_rawtext(inventionsdesc_filename, 31, 35, 7, omit_empty = False)
+        return inventionsdesc
 
-        inventionsdesc = open(inventionsdesc_filename, "rb")
-        inventionsdesc_image = inventionsdesc.read(7595)
-        inventionsdesc.close()
 
-        inv_desc_alltext = struct.unpack("<" + "31p" * 7 * 35, inventionsdesc_image)
-        inv_desc = [ inv_desc_alltext[x:x+7] for x in range(0, 35 * 7, 7) ]
-
-        return inv_desc
+    def load_commandersdesc(self, commandersdesc_filename = "TEXT/SZ_FACE.RAW"):
+        commandersdesc = self.load_rawtext(commandersdesc_filename, 41, 12, 4)
+        return commandersdesc
 
 
     def load_buildingsdesc(self, buildingsdesc_filename = "TEXT/SZ_FELSZ.TXT"):
@@ -747,6 +769,7 @@ class ReReGame:
 
         self.gamedata_static["inventions_desc"] = self.load_inventionsdesc()
         self.gamedata_static["buildings_desc"] = self.load_buildingsdesc()
+        self.gamedata_static["commanders_desc"] = self.load_commandersdesc()
 
         self.__setup_solarsystems(self.gamedata_static, self.gamedata_dynamic)
         self.__setup_buildings_on_planets(self.gamedata_dynamic)
