@@ -11,18 +11,28 @@ from rere_screen import screen
 
 class screen_commanders(screen):
 
-    def __init__(self, gamedata_dynamic):
+    def __init__(self, gamedata_static, gamedata_dynamic):
 
         self.screentype = "commanders"
 
-        menu_icons = [ "BACK TO M.SCREEN", "PILOTS", "BUILDERS", "FIGHTERS", "DEVELOPERS", "HIRE MAN" ]
-        menu_text  = [ "BACK TO M.SCREEN", "PILOTS", "BUILDERS", "FIGHTERS", "DEVELOPERS", "HIRE MAN" ]
-        menu_sfx   = [ "BACK", "PILOTS", "BUILDERS", "FIGHTERS", "DEVELOPE", "WELCOME" ]
+        self.menu_icons = [ "BACK TO M.SCREEN", "PILOTS", "BUILDERS", "FIGHTERS", "DEVELOPERS", "HIRE MAN" ]
+        self.menu_text  = [ "BACK TO M.SCREEN", "", "BUILDERS", "FIGHTERS", "DEVELOPERS", "HIRE MAN" ]
+        self.menu_sfx   = [ "BACK", None, "BUILDERS", "FIGHTERS", "DEVELOPE", "WELCOME" ]
 
-        super().__init__(gamedata_dynamic, [ menu_icons, menu_text, menu_sfx ])
+        super().__init__(gamedata_dynamic, [ self.menu_icons, self.menu_text, self.menu_sfx ])
+
+        self.gamedata_static = gamedata_static
 
         self.anim_exists = False
-        self.current_commanders = 'PILOTS'
+
+        self.commander_names = gamedata_static["commander_names"]
+        self.commandertypes = [ "PILOTS", "BUILDERS", "FIGHTERS", "DEVELOPERS" ]
+        self.name_to_idno_map = dict(zip(self.commandertypes, range(len(self.commandertypes))))
+        self.shown_commander_type = 'PILOTS'
+        self.shown_commander_type_id = 0
+        self.selected_commander_no = None
+        self.commander_says = None
+        self.canbehired = None
 
 
     def update(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):
@@ -31,14 +41,72 @@ class screen_commanders(screen):
 
         [ menuaction, _ ] = self.get_action()
         if menuaction != None:
-            if menuaction in [ "PILOTS", "BUILDERS", "FIGHTERS", "DEVELOPERS" ]:
-                self.current_commanders = menuaction
+            if menuaction in self.commandertypes:
+                if self.shown_commander_type != menuaction:
+                    self.shown_commander_type = menuaction
+                    self.shown_commander_type_id = self.name_to_idno_map[self.shown_commander_type]
+                    self.commander_says = None
+                    self.selected_commander_no = None
+                    self.menu_text  = [ "" if x == self.shown_commander_type else x for x in [ "BACK TO M.SCREEN", "PILOTS", "BUILDERS", "FIGHTERS", "DEVELOPERS", "HIRE MAN" ] ]
+                    self.menu_sfx   = [ None if x == self.shown_commander_type else x[:8] for x in [ "BACK", "PILOTS", "BUILDERS", "FIGHTERS", "DEVELOPERS", "X" ] ]
+                    self.define_menu([ self.menu_icons, self.menu_text, self.menu_sfx])
+
+            elif menuaction == "HIRE MAN":
+                if self.canbehired:
+                    choosen_commander_salary = self.gamedata_static["commander_salaries"][self.shown_commander_type_id][self.selected_commander_no]
+                    if choosen_commander_salary <= self.gamedata_dynamic["money"]:
+                        self.sfx_to_play = "WELCOME"
+                        #hire man
+                    else:
+                        self.sfx_to_play = "HIBA"
+                else:
+                    self.sfx_to_play = "HIBA"
+
             else:
                 self.action = menuaction
 
-        # Level 1 commander
-        if 49 <= mouse_pos[1] <= 49+96 and 0 <= mouse_pos[0] <= 102:
+        self.current_commanders = gamedata_dynamic["commanders"]
 
-            self.menu_info["actiontext"] = "L1 commander"
+        # p b f d
+        mouse_over_commander_no = None
+
+        # Level 1-2-3 commander
+        if   49 <= mouse_pos[1] <= 49+110 and   4 <= mouse_pos[0] <= 104:
+            mouse_over_commander_no = 0
+        elif 49 <= mouse_pos[1] <= 49+110 and 109 <= mouse_pos[0] <= 209:
+            mouse_over_commander_no = 1
+        elif 49 <= mouse_pos[1] <= 49+110 and 215 <= mouse_pos[0] <= 315:
+            mouse_over_commander_no = 2
+
+        if mouse_over_commander_no != None:
+            self.menu_info["actiontext"] = self.commander_names[self.shown_commander_type_id][mouse_over_commander_no]
             if mouse_buttonevent[0]:  # mouse button pressed
-                self.sfx_to_play = "TALK"
+                self.selected_commander_no = mouse_over_commander_no
+                self.commander_says = self.gamedata_static["commanders_desc"][self.shown_commander_type_id*3 + self.selected_commander_no][:2]
+                selected_commander_level = self.selected_commander_no + 1
+                hired_commander_level = self.gamedata_dynamic["commanders"][self.shown_commander_type_id]
+
+                if selected_commander_level == hired_commander_level:
+                    if self.shown_commander_type_id == 3:
+                        sk = self.gamedata_dynamic['developer_skills']
+                        self.commander_says.append(f"Level:  Math: {sk[0]}  Physics: {sk[1]}  Elect: {sk[2]}  A.Int: {sk[3]}")
+                    else:
+                        sl = self.gamedata_dynamic['commander_level'][self.shown_commander_type_id]
+                        self.commander_says.append(f"My scholarly level: {sl:3}")
+                    self.commander_says.append("I work for you")
+                    self.canbehired = False
+
+                else:
+                    if self.shown_commander_type_id == 3:
+                        sk = self.gamedata_dynamic['developers_skills'][self.selected_commander_no]
+                        self.commander_says.append(f"Level:  Math: {sk[0]}  Physics: {sk[1]}  Elect: {sk[2]}  A.Int: {sk[3]}")
+                    else:
+                        sl = self.gamedata_dynamic['commanders_levels'][self.shown_commander_type_id][mouse_over_commander_no]
+                        self.commander_says.append(f"My scholarly level: {sl:3}")
+                        self.canbehired = True
+
+                    if selected_commander_level < hired_commander_level:
+                        self.commander_says.append("I'm no better than your advisor")
+                        self.canbehired = False
+                    else:  # Salary
+                        self.commander_says.append(self.gamedata_static["commanders_desc"][self.shown_commander_type_id*3 + self.selected_commander_no][2])
