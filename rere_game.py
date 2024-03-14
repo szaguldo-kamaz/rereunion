@@ -515,7 +515,14 @@ class ReReGame:
         exepos_spacelocal_guest    = 0x3F42A  # len: 10 * 27
         exepos_planets_system1     = 0x40D8C  # System 1 planets in reunion.prg
         exepos_systemplanets       = 0x43AC6  # 8*8
-        exepos_money               = 0x44A94  # (4bytes)
+        exepos_commander_salaries  = 0x44A8C  # 12 * int (32bit)
+# TODO
+        exepos_commander_levels    = 0x44ABC  # 4*3*short int (16bit)
+        exepos_commander_levelsmax = 0x44AD4  # 4*3*char
+        exepos_developer_skills    = 0x44AE0  # 3*4*char
+        exepos_developer_skillsmax = 0x44AEC  # 3*4*char
+# TODO eddig
+        # 0x44AF8 .. 0x44B33 unknown
         exepos_commandernames      = 0x44B34  # len + string (mind 18 char) (pilot, builder, fighter, developer) 18*12
         exepos_shipnames_ground    = 0x44CE4  # 4
         exepos_vehiclenames_ground = 0x44D0C  # 4
@@ -536,6 +543,8 @@ class ReReGame:
         buildings_info = self.process_raw_buildingsinfodata(reunionexe_image[exepos_buildings_info:exepos_buildings_info + 25*63])
         planettype_names_from_exe = self.extract_dynamic_strings(reunionexe_image, exepos_planettypenames, 10)
         planettype_names = [ "" ] + planettype_names_from_exe + [ "Artificial" ]
+        commander_salaries = struct.unpack_from("<"+"I"*12, reunionexe_image, exepos_commander_salaries)
+        commander_salaries_processed = [ commander_salaries[0:3], commander_salaries[3:6], commander_salaries[6:9], commander_salaries[9:12] ]
         commander_names   = list(map(lambda x:x.decode("ascii"), struct.unpack_from("19p"*12, reunionexe_image, exepos_commandernames)))
         commander_names_processed = [ commander_names[0:3], commander_names[3:6], commander_names[6:9], commander_names[9:12] ]
         mineral_names     = list(map(lambda x:x.decode("ascii"), struct.unpack_from( "9p"*6,  reunionexe_image, exepos_mineralnames)))
@@ -552,6 +561,7 @@ class ReReGame:
         gamedata_static = {
                 "buildings_info": buildings_info,
                 "planettype_names": planettype_names,
+                "commander_salaries": commander_salaries_processed,
                 "commander_names": commander_names_processed,
                 "mineral_names": mineral_names,
                 "race_names": race_names,
@@ -570,7 +580,13 @@ class ReReGame:
         #0xa283-84 az idovel csokken (oraneknt)
         savegamepos_savename              = 0x0000
         savegamepos_savename_len          = 20
-        #0x0014 .. 0x0039 unknown
+
+        savegamepos_pilots_levels         = 0x0014  # 3x short
+        savegamepos_builders_levels       = 0x001A  # 3x short
+        savegamepos_developers_levels     = 0x0020  # 3x short
+        savegamepos_fighters_levels       = 0x0026  # 3x short
+        savegamepos_developers_skills     = 0x002C  # 3x4x char
+#        savegamepos_messages_hdr          = 0x0038  # 0x63 'c' 0x00 color (0x63 piros, 0x02 sarga)
         savegamepos_messages              = 0x003A
         savegamepos_message_count         = 0x0353
         savegamepos_message_len           = 53
@@ -602,9 +618,16 @@ class ReReGame:
         savegamepos_inventions      = 0x312F
         savegamepos_inventions_len  = 53 * 35  # 35 inventions
 
-        savegamepos_developer_level = 0x387A  # 4*short math/phys/elect/AI
-        savegamepos_commanders      = 0x3884  # 1-1-1-1 short / pilot builder figther developer
-        savegamepos_money           = 0x388c  # (int 4bytes)
+        # 0x386E ... 0x3871 unknown  (all zeroes)
+
+        savegamepos_commander_level = 0x3872  # 4x short (pbfd)
+#        savegamepos_pilot_level     = 0x3872  # short
+#        savegamepos_builder_level   = 0x3874  # short
+#        savegamepos_fighter_level   = 0x3876  # short
+#        savegamepos_developer_level = 0x3878  # short
+        savegamepos_developer_skills = 0x387A  # 4*short math/phys/elect/AI
+        savegamepos_commanders      = 0x3884  # 1-1-1-1 short / pilot builder fighter developer
+        savegamepos_money           = 0x388C  # (int 4bytes)
         savegamepos_minerals_main   = 0x3890  # (6*int 6*4bytes)
         savegamepos_date            = 0x38A8  # (4*short 4*2bytes)
 
@@ -637,12 +660,24 @@ class ReReGame:
         #self.process_raw_racedata(savegame_fileimage[savegamepos_races:savegamepos_races+savegamepos_races_len])
 
         savegame["name"]              = struct.unpack_from("20p", savegame_fileimage, savegamepos_savename)[0].decode("ascii")
+        savegame["commanders_levels"] = [ struct.unpack_from("<HHH", savegame_fileimage, savegamepos_pilots_levels),
+                                          struct.unpack_from("<HHH", savegame_fileimage, savegamepos_builders_levels),
+                                          struct.unpack_from("<HHH", savegame_fileimage, savegamepos_fighters_levels),
+                                          struct.unpack_from("<HHH", savegame_fileimage, savegamepos_developers_levels) ]
+        savegame["developers_skills"] = [ struct.unpack_from("BBBB", savegame_fileimage, savegamepos_developers_skills),
+                                          struct.unpack_from("BBBB", savegame_fileimage, savegamepos_developers_skills + 4),
+                                          struct.unpack_from("BBBB", savegame_fileimage, savegamepos_developers_skills + 8) ]
         savegame["message_count"]     = struct.unpack_from("<H", savegame_fileimage, savegamepos_message_count)[0]
         savegame["messages"]          = list(map(lambda x:x.decode("ascii"), struct.unpack_from("53p" * savegame["message_count"], savegame_fileimage, savegamepos_messages)))
         savegame["date"]              = struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_date)
         savegame["money"]             = struct.unpack_from("<I", savegame_fileimage, savegamepos_money)[0]
+        savegame["commander_level"]   = struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_commander_level)  # pbfd
+#        savegame["commander_level"]   = [ struct.unpack_from("<H", savegame_fileimage, savegamepos_pilot_level)[0],
+#                                          struct.unpack_from("<H", savegame_fileimage, savegamepos_builder_level)[0],
+#                                          struct.unpack_from("<H", savegame_fileimage, savegamepos_developer_level)[0],
+#                                          struct.unpack_from("<H", savegame_fileimage, savegamepos_fighter_level)[0] ]
+        savegame["developer_skills"]  = struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_developer_skills)
         savegame["commanders"]        = struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_commanders)
-        savegame["developer_level"]   = struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_developer_level)
         savegame["minerals_main"]     = dict(zip(self.gamedata_static["mineral_names"], struct.unpack_from("<IIIIII", savegame_fileimage, savegamepos_minerals_main)))
         savegame["inventions"]        = self.process_raw_inventionsdata(savegame_fileimage[savegamepos_inventions:savegamepos_inventions + savegamepos_inventions_len])
         savegame["systems_available"] = struct.unpack_from("bbbbbbbb", savegame_fileimage, savegamepos_systemsavailable)
@@ -787,7 +822,7 @@ class ReReGame:
         self.screens["starmap"] = screen_starmap(self.gamedata_static, self.gamedata_dynamic, self.solarsystems)
         self.screens["messages"] = screen_messages(self.gamedata_dynamic)
         self.screens["spacelocal"] = screen_spacelocal(self.gamedata_dynamic)
-        self.screens["commanders"] = screen_commanders(self.gamedata_dynamic)
+        self.screens["commanders"] = screen_commanders(self.gamedata_static, self.gamedata_dynamic)
 
         self.current_screen = self.screens["controlroom"]
 
