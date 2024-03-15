@@ -512,6 +512,13 @@ class ReReGame:
 
         exepos_planettypenames     = 0x2A4AE  # len + string (es tenyleg csak olyan hosszu) 10 db
         exepos_cannotbuy_reasons   = 0x28DEE  # len + string (es tenyleg csak olyan hosszu) 6+1 db
+
+# TODO
+        exepos_commanderhire_okhired = 0x34D0B
+        exepos_commanderhire_nomoney = 0x34D6E
+        exepos_commanderhire_already = 0x34DE7
+        exepos_commanderhire_noskill = 0x34E4D
+
         exepos_spacelocal_guest    = 0x3F42A  # len: 10 * 27
         exepos_planets_system1     = 0x40D8C  # System 1 planets in reunion.prg
         exepos_systemplanets       = 0x43AC6  # 8*8
