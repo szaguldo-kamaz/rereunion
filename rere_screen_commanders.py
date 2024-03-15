@@ -14,11 +14,11 @@ class screen_commanders(screen):
     def __init__(self, gamedata_static, gamedata_dynamic):
 
         self.screentype = "commanders"
+        self.all_sfx    = [ "BACK", "PILOTS", "BUILDERS", "FIGHTERS", "DEVELOPE", "WELCOME" ]
 
         self.menu_icons = [ "BACK TO M.SCREEN", "PILOTS", "BUILDERS", "FIGHTERS", "DEVELOPERS", "HIRE MAN" ]
-        self.menu_text  = [ "BACK TO M.SCREEN", "", "BUILDERS", "FIGHTERS", "DEVELOPERS", "HIRE MAN" ]
+        self.menu_text  = [ "BACK TO M.SCREEN", "PILOTS", "BUILDERS", "FIGHTERS", "DEVELOPERS", "HIRE MAN" ]
         self.menu_sfx   = [ "BACK", None, "BUILDERS", "FIGHTERS", "DEVELOPE", "WELCOME" ]
-
         super().__init__(gamedata_dynamic, [ self.menu_icons, self.menu_text, self.menu_sfx ])
 
         self.gamedata_static = gamedata_static
@@ -41,15 +41,19 @@ class screen_commanders(screen):
 
         [ menuaction, _ ] = self.get_action()
         if menuaction != None:
+
             if menuaction in self.commandertypes:
                 if self.shown_commander_type != menuaction:
                     self.shown_commander_type = menuaction
                     self.shown_commander_type_id = self.name_to_idno_map[self.shown_commander_type]
                     self.commander_says = None
                     self.selected_commander_no = None
-                    self.menu_text  = [ "" if x == self.shown_commander_type else x for x in [ "BACK TO M.SCREEN", "PILOTS", "BUILDERS", "FIGHTERS", "DEVELOPERS", "HIRE MAN" ] ]
-                    self.menu_sfx   = [ None if x == self.shown_commander_type else x[:8] for x in [ "BACK", "PILOTS", "BUILDERS", "FIGHTERS", "DEVELOPERS", "X" ] ]
-                    self.define_menu([ self.menu_icons, self.menu_text, self.menu_sfx])
+                    self.canbehired = False
+                    self.menu_sfx = self.all_sfx[:]
+                    self.menu_sfx[self.shown_commander_type_id + 1] = None
+                    self.define_menu([ self.menu_icons, self.menu_text, self.menu_sfx ])
+                    self.update_menu(gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent)
+                    self.sfx_to_play = self.all_sfx[self.shown_commander_type_id + 1]
 
             elif menuaction == "HIRE MAN":
                 if self.canbehired:
@@ -59,11 +63,13 @@ class screen_commanders(screen):
                         #hire man
                     else:
                         self.sfx_to_play = "HIBA"
+                elif self.selected_commander_no == None:
+                    self.sfx_to_play = "X"
                 else:
                     self.sfx_to_play = "HIBA"
 
             else:
-                self.action = menuaction
+                self.action = [ menuaction, None ]
 
         self.current_commanders = gamedata_dynamic["commanders"]
 
@@ -103,10 +109,10 @@ class screen_commanders(screen):
                     else:
                         sl = self.gamedata_dynamic['commanders_levels'][self.shown_commander_type_id][mouse_over_commander_no]
                         self.commander_says.append(f"My scholarly level: {sl:3}")
-                        self.canbehired = True
 
                     if selected_commander_level < hired_commander_level:
                         self.commander_says.append("I'm no better than your advisor")
                         self.canbehired = False
                     else:  # Salary
                         self.commander_says.append(self.gamedata_static["commanders_desc"][self.shown_commander_type_id*3 + self.selected_commander_no][2])
+                        self.canbehired = True
