@@ -1150,14 +1150,14 @@ class ReReGFX:
         yellow_text_developer_name = self.render_text(screenobj_researchdesign.developer_name, textcolor = 1)
         self.screen_buffer.blit(yellow_text_developer_name, (8, 188))
         # developer level
-        yellow_text_developer_level_math  = self.render_text(str(screenobj_researchdesign.developer_level[0]), textcolor = 1)
-        yellow_text_developer_level_phys  = self.render_text(str(screenobj_researchdesign.developer_level[1]), textcolor = 1)
-        yellow_text_developer_level_elect = self.render_text(str(screenobj_researchdesign.developer_level[2]), textcolor = 1)
-        yellow_text_developer_level_AI    = self.render_text(str(screenobj_researchdesign.developer_level[3]), textcolor = 1)
-        self.screen_buffer.blit(yellow_text_developer_level_math,  (136, 188))
-        self.screen_buffer.blit(yellow_text_developer_level_phys,  (203, 188))
-        self.screen_buffer.blit(yellow_text_developer_level_elect, (259, 188))
-        self.screen_buffer.blit(yellow_text_developer_level_AI,    (296, 188))
+        yellow_text_developer_skill_math  = self.render_text(str(screenobj_researchdesign.developer_skills[0]), textcolor = 1)
+        yellow_text_developer_skill_phys  = self.render_text(str(screenobj_researchdesign.developer_skills[1]), textcolor = 1)
+        yellow_text_developer_skill_elect = self.render_text(str(screenobj_researchdesign.developer_skills[2]), textcolor = 1)
+        yellow_text_developer_skill_AI    = self.render_text(str(screenobj_researchdesign.developer_skills[3]), textcolor = 1)
+        self.screen_buffer.blit(yellow_text_developer_skill_math,  (136, 188))
+        self.screen_buffer.blit(yellow_text_developer_skill_phys,  (203, 188))
+        self.screen_buffer.blit(yellow_text_developer_skill_elect, (259, 188))
+        self.screen_buffer.blit(yellow_text_developer_skill_AI,    (296, 188))
 
         return self.screen_buffer
 
@@ -1525,14 +1525,25 @@ class ReReGFX:
         # main pic
         self.screen_buffer.blit(self.PICs["FACES"], (0, 49))
 
-        if   screenobj_commanders.current_commanders == "PILOTS":
+        if   screenobj_commanders.shown_commander_type == "PILOTS":
             self.screen_buffer.blit(self.PICs["FACES1"], (0, 49))
-        elif screenobj_commanders.current_commanders == "BUILDERS":
+        elif screenobj_commanders.shown_commander_type == "BUILDERS":
             self.screen_buffer.blit(self.PICs["FACES2"], (0, 49))
-        elif screenobj_commanders.current_commanders == "FIGHTERS":
+        elif screenobj_commanders.shown_commander_type == "FIGHTERS":
             self.screen_buffer.blit(self.PICs["FACES3"], (0, 49))
-        elif screenobj_commanders.current_commanders == "DEVELOPERS":
+        elif screenobj_commanders.shown_commander_type == "DEVELOPERS":
             self.screen_buffer.blit(self.PICs["FACES4"], (0, 49))
 
-        return self.screen_buffer
+        # draw purple frame if commander was selected
+        if screenobj_commanders.selected_commander_no != None:
+            selected_commander_rect_size = ([4, 109, 215][screenobj_commanders.selected_commander_no], 49, 101, 111)
+            pygame.draw.rect(self.screen_buffer, (0x6d, 0x00, 0xff), selected_commander_rect_size, 1)
 
+        # display text if commander was selected
+        if screenobj_commanders.commander_says != None:
+            textcounter = 0
+            for commander_says_text in screenobj_commanders.commander_says:
+                self.screen_buffer.blit( self.render_text(commander_says_text, textcolor = 1), (10, 164 + textcounter*8))
+                textcounter += 1
+
+        return self.screen_buffer
