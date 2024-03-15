@@ -1005,7 +1005,7 @@ class ReReGFX:
         self.__render_anims_helper(self.controlroom_anims, screenobj_controlroom.animstates, self.controlroom_anims_pasteposes, self.screen_controlroom)
 
         # hero
-        self.screen_controlroom.blit(self.heroes[1], (131, 50 + 49) )
+        self.screen_controlroom.blit(self.heroes[screenobj_controlroom.herotype], (131, 50 + 49) )
 
         # commanders - pilot builder figther developer
         if current_commanders[1] != 0:

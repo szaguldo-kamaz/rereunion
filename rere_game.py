@@ -620,8 +620,9 @@ class ReReGame:
         savegamepos_systemplanets_len = 64
         savegamepos_systemsavailable  = 0x30EF  # 8 byte - (1 planets known, 0 planet unknown, -1 system not available)
 
-        # 0x30F7 ... 0x312E unknown
-
+        # 0x30F7 ... 0x312A unknown
+        savegamepos_herotype        = 0x312B   # short
+        # 0x312D ... 0x312E unknown
         savegamepos_inventions      = 0x312F
         savegamepos_inventions_len  = 53 * 35  # 35 inventions
 
@@ -687,6 +688,7 @@ class ReReGame:
         savegame["commanders"]        = struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_commanders)
         savegame["minerals_main"]     = dict(zip(self.gamedata_static["mineral_names"], struct.unpack_from("<IIIIII", savegame_fileimage, savegamepos_minerals_main)))
         savegame["inventions"]        = self.process_raw_inventionsdata(savegame_fileimage[savegamepos_inventions:savegamepos_inventions + savegamepos_inventions_len])
+        savegame["herotype"]          = struct.unpack_from("<H", savegame_fileimage, savegamepos_herotype)[0]
         savegame["systems_available"] = struct.unpack_from("bbbbbbbb", savegame_fileimage, savegamepos_systemsavailable)
 
         savegame["systems"] = [ 0 ]  # 0 dummy
