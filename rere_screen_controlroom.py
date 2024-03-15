@@ -33,6 +33,7 @@ class screen_controlroom(screen):
         self.add_anim("messagescomputer", 20, 1, 0)
         self.add_anim("researchcomputer", 26, 1, 0)
 
+        self.herotype = int(gamedata_dynamic["herotype"] == 1)
         self.commander_names = gamedata_static["commander_names"]
         self.current_commanders = self.gamedata_dynamic["commanders"]
         self.current_planet_surface = (1, 5, 0)  # New-Earth
