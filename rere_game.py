@@ -554,6 +554,12 @@ class ReReGame:
         commander_salaries_processed = [ commander_salaries[0:3], commander_salaries[3:6], commander_salaries[6:9], commander_salaries[9:12] ]
         commander_names   = list(map(lambda x:x.decode("ascii"), struct.unpack_from("19p"*12, reunionexe_image, exepos_commandernames)))
         commander_names_processed = [ commander_names[0:3], commander_names[3:6], commander_names[6:9], commander_names[9:12] ]
+        commander_hire_txt = {
+                'ok': self.extract_dynamic_strings(reunionexe_image, exepos_commanderhire_okhired, 1)[0],
+                'nomoney': self.extract_dynamic_strings(reunionexe_image, exepos_commanderhire_nomoney, 1)[0],
+                'already': self.extract_dynamic_strings(reunionexe_image, exepos_commanderhire_already, 1)[0],
+                'noskill': self.extract_dynamic_strings(reunionexe_image, exepos_commanderhire_noskill, 1)[0]
+            }
         mineral_names     = list(map(lambda x:x.decode("ascii"), struct.unpack_from( "9p"*6,  reunionexe_image, exepos_mineralnames)))
         race_names        = list(map(lambda x:x.decode("ascii"), struct.unpack_from("10p"*12, reunionexe_image, exepos_racenames)))
         skill_names       = list(map(lambda x:x.decode("ascii"), struct.unpack_from( "8p"*4,  reunionexe_image, exepos_skillnames)))
@@ -570,6 +576,7 @@ class ReReGame:
                 "planettype_names": planettype_names,
                 "commander_salaries": commander_salaries_processed,
                 "commander_names": commander_names_processed,
+                "commander_hire_txt": commander_hire_txt,
                 "mineral_names": mineral_names,
                 "race_names": race_names,
                 "skill_names": skill_names,
@@ -679,13 +686,9 @@ class ReReGame:
         savegame["messages"]          = list(map(lambda x:x.decode("ascii"), struct.unpack_from("53p" * savegame["message_count"], savegame_fileimage, savegamepos_messages)))
         savegame["date"]              = struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_date)
         savegame["money"]             = struct.unpack_from("<I", savegame_fileimage, savegamepos_money)[0]
-        savegame["commander_level"]   = struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_commander_level)  # pbfd
-#        savegame["commander_level"]   = [ struct.unpack_from("<H", savegame_fileimage, savegamepos_pilot_level)[0],
-#                                          struct.unpack_from("<H", savegame_fileimage, savegamepos_builder_level)[0],
-#                                          struct.unpack_from("<H", savegame_fileimage, savegamepos_developer_level)[0],
-#                                          struct.unpack_from("<H", savegame_fileimage, savegamepos_fighter_level)[0] ]
-        savegame["developer_skills"]  = struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_developer_skills)
-        savegame["commanders"]        = struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_commanders)
+        savegame["commander_level"]   = list(struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_commander_level))  # pbfd
+        savegame["developer_skills"]  = list(struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_developer_skills))
+        savegame["commanders"]        = list(struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_commanders))
         savegame["minerals_main"]     = dict(zip(self.gamedata_static["mineral_names"], struct.unpack_from("<IIIIII", savegame_fileimage, savegamepos_minerals_main)))
         savegame["inventions"]        = self.process_raw_inventionsdata(savegame_fileimage[savegamepos_inventions:savegamepos_inventions + savegamepos_inventions_len])
         savegame["herotype"]          = struct.unpack_from("<H", savegame_fileimage, savegamepos_herotype)[0]
@@ -878,6 +881,7 @@ class ReReGame:
             self.current_screen = self.screens["spacelocal"]
             screen_changed = True
         elif screen_action == "COMMANDERS":
+            self.screens["commanders"] = screen_commanders(self.gamedata_static, self.gamedata_dynamic)
             self.current_screen = self.screens["commanders"]
             screen_changed = True
 
