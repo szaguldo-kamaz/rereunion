@@ -33,6 +33,8 @@ class screen_commanders(screen):
         self.selected_commander_no = None
         self.commander_says = None
         self.canbehired = None
+        self.selected_commander_level = None
+        self.hired_commander_level = None
 
 
     def update(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):
@@ -56,20 +58,44 @@ class screen_commanders(screen):
                     self.sfx_to_play = self.all_sfx[self.shown_commander_type_id + 1]
 
             elif menuaction == "HIRE MAN":
+
                 if self.canbehired:
                     choosen_commander_salary = self.gamedata_static["commander_salaries"][self.shown_commander_type_id][self.selected_commander_no]
                     if choosen_commander_salary <= self.gamedata_dynamic["money"]:
-                        self.sfx_to_play = "WELCOME"
                         #hire man
+                        self.gamedata_dynamic["money"] -= choosen_commander_salary
+                        self.gamedata_dynamic["commanders"][self.shown_commander_type_id] = self.selected_commander_no + 1
+                        self.hired_commander_level = self.gamedata_dynamic["commanders"][self.shown_commander_type_id]
+
+                        if self.shown_commander_type_id == 3:
+                            self.gamedata_dynamic['developer_skills'] = self.gamedata_dynamic['developers_skills'][self.selected_commander_no]
+                        else:
+                            self.gamedata_dynamic['commander_level'][self.shown_commander_type_id] = self.gamedata_dynamic['commanders_levels'][self.shown_commander_type_id][self.selected_commander_no]
+
+                        self.canbehired = False
+                        self.commander_says = [ self.gamedata_static["commander_hire_txt"]["ok"] ]
+                        self.sfx_to_play = "WELCOME"
                     else:
+                        self.commander_says = [ self.gamedata_static["commander_hire_txt"]["nomoney"] ]
                         self.sfx_to_play = "HIBA"
+
                 elif self.selected_commander_no == None:
                     self.sfx_to_play = "X"
+
                 else:
+                    # we cannot get here if there's no commander selected, so ok to use these vars
+                    if self.selected_commander_level < self.hired_commander_level:
+                        self.commander_says = [ self.gamedata_static["commander_hire_txt"]["noskill"] ]
+                    elif self.selected_commander_level == self.hired_commander_level:
+                        self.commander_says = [ self.gamedata_static["commander_hire_txt"]["already"] ]
+                    else:
+                        print(f"Unexpected state in screen_commanders ({self.selected_commander_level}:{self.hired_commander_level:})")
+                        exit(1)
+
                     self.sfx_to_play = "HIBA"
 
             else:
-                self.action = [ menuaction, None ]
+                self.action = menuaction
 
         self.current_commanders = gamedata_dynamic["commanders"]
 
@@ -89,10 +115,10 @@ class screen_commanders(screen):
             if mouse_buttonevent[0]:  # mouse button pressed
                 self.selected_commander_no = mouse_over_commander_no
                 self.commander_says = self.gamedata_static["commanders_desc"][self.shown_commander_type_id*3 + self.selected_commander_no][:2]
-                selected_commander_level = self.selected_commander_no + 1
-                hired_commander_level = self.gamedata_dynamic["commanders"][self.shown_commander_type_id]
+                self.selected_commander_level = self.selected_commander_no + 1
+                self.hired_commander_level = self.gamedata_dynamic["commanders"][self.shown_commander_type_id]
 
-                if selected_commander_level == hired_commander_level:
+                if self.selected_commander_level == self.hired_commander_level:
                     if self.shown_commander_type_id == 3:
                         sk = self.gamedata_dynamic['developer_skills']
                         self.commander_says.append(f"Level:  Math: {sk[0]}  Physics: {sk[1]}  Elect: {sk[2]}  A.Int: {sk[3]}")
@@ -110,7 +136,7 @@ class screen_commanders(screen):
                         sl = self.gamedata_dynamic['commanders_levels'][self.shown_commander_type_id][mouse_over_commander_no]
                         self.commander_says.append(f"My scholarly level: {sl:3}")
 
-                    if selected_commander_level < hired_commander_level:
+                    if self.selected_commander_level < self.hired_commander_level:
                         self.commander_says.append("I'm no better than your advisor")
                         self.canbehired = False
                     else:  # Salary
