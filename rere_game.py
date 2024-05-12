@@ -684,7 +684,7 @@ class ReReGame:
                                           struct.unpack_from("BBBB", savegame_fileimage, savegamepos_developers_skills + 8) ]
         savegame["message_count"]     = struct.unpack_from("<H", savegame_fileimage, savegamepos_message_count)[0]
         savegame["messages"]          = list(map(lambda x:x.decode("ascii"), struct.unpack_from("53p" * savegame["message_count"], savegame_fileimage, savegamepos_messages)))
-        savegame["date"]              = struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_date)
+        savegame["date"]              = list(struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_date))
         savegame["money"]             = struct.unpack_from("<I", savegame_fileimage, savegamepos_money)[0]
         savegame["commander_level"]   = list(struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_commander_level))  # pbfd
         savegame["developer_skills"]  = list(struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_developer_skills))
@@ -808,6 +808,7 @@ class ReReGame:
 
         self.config = config
         self.cache = {}
+        self.date_iterations = 0
 
         # load static data (buildings_info) from reunion binary
         [ self.gamedata_static, self.gamedata_dynamic ] = self.load_reunionprg()
@@ -890,6 +891,50 @@ class ReReGame:
 
         if mouseevent or any(mouse_buttonstate):
             self.current_screen.update(self.gamedata_dynamic, mouse_pos, mouse_buttonstate, [ mouseevent_buttondown, mouseevent_buttonup ])
+
+        [ a_hour_has_passed, a_day_has_passed ] = self.update_date()
+
+        if a_hour_has_passed:
+            pass
+
+        if a_day_has_passed:
+            pass
+            # todo, call updates for research, planet (build/mine), etc.
+
+
+    def update_date(self):
+
+        self.date_iterations += 1
+        increase_date = False
+        day_passed = False
+
+        if self.current_screen.infobar_timespinning:
+            if self.current_screen.infobar_timespinning_type == 1:
+                if self.date_iterations >= 4:
+                    increase_date = True
+            elif self.current_screen.infobar_timespinning_type == 2:
+                if self.date_iterations >= 1:
+                    increase_date = True
+        else:
+            if self.date_iterations >= 40:
+                increase_date = True
+
+        if increase_date:
+            self.date_iterations = 0
+            # the original game uses 30 days in every month, so let's just follow that
+            self.gamedata_dynamic["date"][3] += 1
+            if self.gamedata_dynamic["date"][3] > 24:
+                day_passed = True
+                self.gamedata_dynamic["date"][3] = 1
+                self.gamedata_dynamic["date"][2] += 1
+            if self.gamedata_dynamic["date"][2] > 30:
+                self.gamedata_dynamic["date"][2] = 1
+                self.gamedata_dynamic["date"][1] += 1
+            if self.gamedata_dynamic["date"][1] > 12:
+                self.gamedata_dynamic["date"][1] = 1
+                self.gamedata_dynamic["date"][0] += 1
+
+        return [ increase_date, day_passed ]
 
 
     def update_anims(self):
