@@ -245,21 +245,16 @@ class screen:
                 self.menuicon_pointerover = ''
                 self.menu_info["actiontext"] = 'Time'
                 if   mouse_buttonstate[0] and (not self.infobar_timespinning or self.infobar_timespinning_type != 1):
-                    print("idoporgetes lassu start")
                     self.infobar_timespinning = True
                     self.infobar_timespinning_type = 1
                 elif mouse_buttonstate[2] and (not self.infobar_timespinning or self.infobar_timespinning_type != 2):
-                    print("idoporgetes gyors start")
                     self.infobar_timespinning = True
                     self.infobar_timespinning_type = 2
             else:
                 if self.infobar_timespinning > 0:
                     self.infobar_timespinning = False
-                    print("idoporgetes STOP")
 
             if mouse_buttonevent[1]:  # buttonup
                 if self.infobar_timespinning:
-                    print("idoporgetes stop")
                     self.infobar_timespinning = False
                     self.infobar_timespinning_type = 0
-
