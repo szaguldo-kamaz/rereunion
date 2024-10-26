@@ -73,12 +73,22 @@ class screen_ship(screen):
                     self.menu_icons = [ "BACK TO M.SCREEN", "CONTROL PANEL", "GROUP", "NEW GROUP", "PLANET MAIN" ]
                     self.menu_text  = [ "BACK TO M.SCREEN", "CONTROL PANEL", "GROUP", "NEW UNIT",  "PLANET MAIN" ]
                     self.menu_sfx   = [ "BACK", "CONTROLL", "GROUP", "GROUPNEW", "PLANET" ]
+            else:
+                self.menu_icons = [ "BACK TO M.SCREEN" ]
+                self.menu_text  = [ "BACK TO M.SCREEN" ]
+                self.menu_sfx   = [ "BACK" ]
 
         else:
             self.current_shipgroup = self.shipgroups_planetforces
-            self.menu_icons = [ "BACK TO M.SCREEN", "GROUP", "PLANET MAIN" ]
-            self.menu_text  = [ "BACK TO M.SCREEN", "GROUP", "PLANET MAIN" ]
-            self.menu_sfx   = [ "BACK", "GROUP", "PLANET" ]
+
+            if self.selected_group_no_current > 0:
+                self.menu_icons = [ "BACK TO M.SCREEN", "GROUP", "PLANET MAIN" ]
+                self.menu_text  = [ "BACK TO M.SCREEN", "GROUP", "PLANET MAIN" ]
+                self.menu_sfx   = [ "BACK", "GROUP", "PLANET" ]
+            else:
+                self.menu_icons = [ "BACK TO M.SCREEN" ]
+                self.menu_text  = [ "BACK TO M.SCREEN" ]
+                self.menu_sfx   = [ "BACK" ]
 
         self.define_menu([ self.menu_icons, self.menu_text, self.menu_sfx])
 
