@@ -1387,9 +1387,9 @@ class ReReGFX:
                     if bldg_info['workers'] != 0:
                         statustext_offset_y += 9
                         self.screen_buffer.blit(self.render_text(f"Workers    : {bldg_info['workers']}", textcolor = 2), (98, statustext_offset_y))
-                    if bldg_info['power_consumption'] != 0:
+                    if bldg_info['energy_use'] != 0:
                         statustext_offset_y += 9
-                        self.screen_buffer.blit(self.render_text(f"Energy     : {bldg_info['power_consumption']} kwh", textcolor = 2), (98, statustext_offset_y))
+                        self.screen_buffer.blit(self.render_text(f"Energy     : {bldg_info['energy_use']} kwh", textcolor = 2), (98, statustext_offset_y))
 
                 self.screen_buffer.blit(self.planetmain_horiz_lines[0], (226,  54))
                 self.screen_buffer.blit(self.planetmain_horiz_lines[1], (226, 124))
