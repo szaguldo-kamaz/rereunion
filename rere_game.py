@@ -896,10 +896,20 @@ class ReReGame:
 
         if a_hour_has_passed:
             pass
+            # todo, call updates for research, planet (build/mine), etc.
 
         if a_day_has_passed:
-            pass
-            # todo, call updates for research, planet (build/mine), etc.
+
+            # planet related
+            total_daily_tax = 0
+            for solsys_id in range(1,len(self.solarsystems)):
+                for planet_id in self.solarsystems[solsys_id].planets.keys():
+                    # gather tax
+                    total_daily_tax += self.solarsystems[solsys_id].planets[planet_id].gather_tax()
+
+            self.gamedata_dynamic["money"] += total_daily_tax
+
+            # todo, call other updates
 
 
     def update_date(self):

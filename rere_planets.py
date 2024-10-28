@@ -263,7 +263,11 @@ class solarsystem:
 
 
         def gather_tax(self):
-            return self.population * self.tax_level / 1000  # just made this up, don't know yet how it is calculated originally
+            if self.race == 1:
+                # just made this up, don't know yet how it is calculated originally
+                return round(self.population_count * self.tax_level * 2 / 100)
+            else:
+                return 0
 
 
         def add_droid(self):
