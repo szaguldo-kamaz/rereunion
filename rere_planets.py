@@ -7,6 +7,9 @@
 
 # TODO ground forces, race known
 
+import random
+
+
 class solarsystem:
 
 
@@ -39,6 +42,15 @@ class solarsystem:
                     self.active = 1
                     self.energy_use = self.building_data["energy_use"]  # * random(0.5-1.0)?
                     self.workers = self.building_data["workers"]
+
+
+            def get_living_capacity(self):
+                if self.building_type == 1:  # "Command centre"
+                    return 20000 * self.performance // 100
+                elif self.building_type == 7:  # "Building"
+                    return 5000 * self.performance // 100
+                else:
+                    return 0
 
 
         class planetsurface:
@@ -101,6 +113,7 @@ class solarsystem:
 
             self.solar_plants = 0
 
+            self.living_capacity = 0
             self.food_production = 0
             self.food_need = 0
             self.hospital_production = 0
@@ -161,18 +174,20 @@ class solarsystem:
             self.lifesupporting_known = (self.sat_exploration_timecount >= 30)
 
 
-        def update(self):
+        def update_hourly(self):
 
+            self.buildings_update()
             self.update_sat_exploration()
+
+
+        def update_daily(self):
 
             # new taxlevel
             # TODO
             # new population count
             self.population_count_update()
-            # new population morale
-            self.population_morale_update()
-            # buildings
-            self.buildings_update()
+            # new population mood
+            self.population_mood_update()
 
 
         def build_new_building(self, building_type, pos, force_build = False,
@@ -247,19 +262,42 @@ class solarsystem:
 
 
         def buildings_update(self):
+
+            planet_living_capacity = 0
             for building in self.buildings:
                 building.update()
+                planet_living_capacity += building.get_living_capacity()
                 if bulding.type == minerstation:
                     self.minerstation = True
 
+            self.living_capacity = planet_living_capacity
+
 
         def population_count_update(self):
-            if self.population_morale == 2:
-                self.population += 5
+
+            if self.race != 1:
+                return
+
+            # just made this up, don't know yet how it is calculated originally
+            if not self.has_stadium and self.population_count >= 50000:
+                return
+            if not self.has_university and self.population_count >= 70000:
+                return
+
+            population_growth = 0
+            if self.population_mood < 20:
+                population_growth = -2000 / (20 - self.population_mood) * (0.75 + random.random()/4) * (1 + self.population_count / 100000)
+            else:
+                population_growth = 150 * (((self.population_mood - 20) * 0.05) + 1) * (0.66 + random.random()/3) * (1 + (self.population_mood + 1)/100) * (1 + self.population_count / 100000)
+
+            self.population_count += round(population_growth)
+
+            # TODO population decrease (high tax / radiation) + colony destroyed
 
 
-        def population_morale_update(self):
-            self.population_morale = 2
+        def population_mood_update(self):
+            # just made this up, don't know yet how it is calculated originally
+            self.population_mood = 20
 
 
         def gather_tax(self):

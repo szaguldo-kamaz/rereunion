@@ -906,6 +906,7 @@ class ReReGame:
                 for planet_id in self.solarsystems[solsys_id].planets.keys():
                     # gather tax
                     total_daily_tax += self.solarsystems[solsys_id].planets[planet_id].gather_tax()
+                    self.solarsystems[solsys_id].planets[planet_id].update_daily()
 
             self.gamedata_dynamic["money"] += total_daily_tax
 
