@@ -38,7 +38,7 @@ class solarsystem:
             def update(self):
                 self.time_to_finish -= 10
                 if self.time_to_finish <= 0:
-                    self.time.to_finish = 0
+                    self.time_to_finish = 0
                     self.active = 1
                     self.energy_use = self.building_data["energy_use"]  # * random(0.5-1.0)?
                     self.workers = self.building_data["workers"]
@@ -149,6 +149,12 @@ class solarsystem:
                 self.mineral_production_actual[mineralname] = self.mineral_production_base[mineralname] * self.miner_droids // 10
 
 
+        def do_mining(self):
+            for mineralname in self.mineral_production_base.keys():
+            # TODO planet maxstorage
+                self.mineral_storage[mineralname] += self.mineral_production_actual[mineralname]
+
+
         def add_moon(self, moon_seqid, moon_id):
             self.moons_seqids.append(moon_seqid)  # no in solsys
             self.moons_ids.append(moon_id)  # solsys, planet, moon
@@ -176,6 +182,7 @@ class solarsystem:
 
         def update_hourly(self):
 
+            self.do_mining()
             self.buildings_update()
             self.update_sat_exploration()
 
@@ -267,7 +274,7 @@ class solarsystem:
             for building in self.buildings:
                 building.update()
                 planet_living_capacity += building.get_living_capacity()
-                if bulding.type == minerstation:
+                if building.building_type == 25:
                     self.minerstation = True
 
             self.living_capacity = planet_living_capacity

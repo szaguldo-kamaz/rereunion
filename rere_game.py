@@ -419,7 +419,7 @@ class ReReGame:
 
         keys1 = [ "name", "required_invention_no", "minimum_developer", "building_typegroup?",
                   "requires_builder_plant", "requires_vehicle_plant" ]
-        keys2 = [ "workers", "power_consumption", "zero1", "zero2", "production", "price",
+        keys2 = [ "workers", "energy_use", "zero1", "zero2", "production", "price",
                   "power_off_priority", "time_to_build_mean", "building_size_x", "building_size_y" ]
 
         # "building_typegroup?"
@@ -895,8 +895,12 @@ class ReReGame:
         [ a_hour_has_passed, a_day_has_passed ] = self.update_date()
 
         if a_hour_has_passed:
-            pass
-            # todo, call updates for research, planet (build/mine), etc.
+
+            for solsys_id in range(1,len(self.solarsystems)):
+                for planet_id in self.solarsystems[solsys_id].planets.keys():
+                    self.solarsystems[solsys_id].planets[planet_id].update_hourly()
+
+            # todo, call updates for research, events, etc.
 
         if a_day_has_passed:
 
