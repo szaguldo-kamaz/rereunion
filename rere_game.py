@@ -510,6 +510,8 @@ class ReReGame:
 
     def load_reunionprg(self, reunionprg_filename = "GRWAR/REUNION.PRG"):
 
+        exepos_planetmain_messages = 0x04B06  # dynamic strings *6
+
         exepos_planettypenames     = 0x2A4AE  # len + string (es tenyleg csak olyan hosszu) 10 db
         exepos_cannotbuy_reasons   = 0x28DEE  # len + string (es tenyleg csak olyan hosszu) 6+1 db
 
@@ -548,6 +550,7 @@ class ReReGame:
         reunionexe.close()
 
         buildings_info = self.process_raw_buildingsinfodata(reunionexe_image[exepos_buildings_info:exepos_buildings_info + 25*63])
+        planetmain_messages = self.extract_dynamic_strings(reunionexe_image, exepos_planetmain_messages, 6)
         planettype_names_from_exe = self.extract_dynamic_strings(reunionexe_image, exepos_planettypenames, 10)
         planettype_names = [ "" ] + planettype_names_from_exe + [ "Artificial" ]
         commander_salaries = struct.unpack_from("<"+"I"*12, reunionexe_image, exepos_commander_salaries)
@@ -573,6 +576,7 @@ class ReReGame:
 
         gamedata_static = {
                 "buildings_info": buildings_info,
+                "planetmain_messages": planetmain_messages,
                 "planettype_names": planettype_names,
                 "commander_salaries": commander_salaries_processed,
                 "commander_names": commander_names_processed,
@@ -851,7 +855,7 @@ class ReReGame:
         elif screen_action == "PLANET MAIN":
             selected_planet = self.solarsystems[screen_action_params[0][0]].planets[screen_action_params[0]]
             selected_planet_map_position = screen_action_params[1]
-            self.screens["planetmain"] = screen_planetmain(self.gamedata_dynamic, selected_planet, map_position = selected_planet_map_position)
+            self.screens["planetmain"] = screen_planetmain(self.gamedata_static, self.gamedata_dynamic, selected_planet, map_position = selected_planet_map_position)
             self.current_screen = self.screens["planetmain"]
             screen_changed = True
         elif screen_action == "MINE":
