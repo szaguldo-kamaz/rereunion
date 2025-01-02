@@ -11,7 +11,9 @@ from rere_screen import screen
 
 class screen_planetmain(screen):
 
-    def __init__(self, gamedata_dynamic, planet, selected_building_index = 0, map_position = None):
+    def __init__(self, gamedata_static, gamedata_dynamic, planet, selected_building_index = 0, map_position = None):
+
+        self.gamedata_static = gamedata_static
 
         self.screentype = "planetmain"
 
@@ -220,11 +222,40 @@ class screen_planetmain(screen):
                     self.menu_info["actiontext"] = 'Build'
                     if mouse_buttonevent[0]:  # mouse button pressed
                         if not self.build_mode:
-                            self.sfx_to_play = "BUILD"
-                            self.build_mode = True
-                            self.demolish_mode = False
-                            self.animstates["builddemolish"].setframe(1)
-                            self.animstates["builddemolish"].resettick()
+                            if gamedata_dynamic["commanders"][1] == 0:
+                                print(self.gamedata_static["planetmain_messages"][5])
+                                self.sfx_to_play = "HIBA"
+                                self.build_mode = False
+                            elif gamedata_dynamic["commanders"][1] < self.selected_building_typeinfo['minimum_developer']:
+                                current_builder_name = self.gamedata_static["commander_names"][1][gamedata_dynamic["commanders"][1]-1]
+                                print(current_builder_name + self.gamedata_static["planetmain_messages"][0])
+                                self.sfx_to_play = "HIBA"
+                                self.build_mode = False
+                            elif self.selected_building_typeinfo['price'] > gamedata_dynamic["money"]:
+                                self.sfx_to_play = "HIBA"
+                                self.build_mode = False
+                            elif self.selected_building_typeinfo['requires_builder_plant'] == 1 and not self.planet.has_builder_plant:
+                                print(self.gamedata_static["planetmain_messages"][2])
+                                self.sfx_to_play = "HIBA"
+                                self.build_mode = False
+                            elif self.selected_building_typeinfo['requires_vehicle_plant'] == 1 and not self.planet.has_vehicle_plant:
+                                print(self.gamedata_static["planetmain_messages"][1])
+                                self.sfx_to_play = "HIBA"
+                                self.build_mode = False
+                            elif self.selected_building_typeinfo['name'] == b'Command centre':
+                                print(self.gamedata_static["planetmain_messages"][4])
+                                self.sfx_to_play = "HIBA"
+                                self.build_mode = False
+                            elif self.selected_building_typeinfo['name'] == b'Miner station ':
+                                print(self.gamedata_static["planetmain_messages"][3])
+                                self.sfx_to_play = "HIBA"
+                                self.build_mode = False
+                            else:
+                                self.sfx_to_play = "BUILD"
+                                self.build_mode = True
+                                self.demolish_mode = False
+                                self.animstates["builddemolish"].setframe(1)
+                                self.animstates["builddemolish"].resettick()
                         else:
                             self.sfx_to_play = "X"
                             self.build_mode = False
