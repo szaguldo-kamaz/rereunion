@@ -1418,6 +1418,29 @@ class ReReGFX:
                                                                            14*16, 9*16))
             self.screen_buffer.blit(planet_surface_cropped, (93, 4 + 49))
 
+            # placing building
+            if screenobj_planetmain.build_mode and \
+               screenobj_planetmain.build_mode_building_pos != None:
+
+                tobuild_tiles_y = len(screenobj_planetmain.build_mode_building_tiles)
+                tobuild_tiles_x = len(screenobj_planetmain.build_mode_building_tiles[0])
+                map_felszin = self.major_vs_felszin[screenobj_planetmain.planet.planettype]
+
+                for tilepos_y in range(tobuild_tiles_y):
+                    for tilepos_x in range(tobuild_tiles_x):
+                        tilecode = screenobj_planetmain.build_mode_building_tiles[tilepos_y][tilepos_x]
+                        abs_tilepos_x = screenobj_planetmain.build_mode_building_pos[0] + tilepos_x
+                        abs_tilepos_y = screenobj_planetmain.build_mode_building_pos[1] + tilepos_y
+                        if abs_tilepos_x < 14 and abs_tilepos_y < 9:
+                            pixel_tilepos_x = 93 + abs_tilepos_x * 16
+                            pixel_tilepos_y = 4 + 49 + abs_tilepos_y * 16
+                            if tilecode == -1:  # obstacle on map (or outside)
+                                tileframe_color = (0xF3, 0x00, 0x00)  # piros keret
+                            else:
+                                self.screen_buffer.blit(self.felszinepuletek[map_felszin][tilecode], (pixel_tilepos_x, pixel_tilepos_y))
+                                tileframe_color = (0x20, 0x20, 0x41)  # kek keret
+                            pygame.draw.rect(self.screen_buffer, tileframe_color, (pixel_tilepos_x, pixel_tilepos_y, 16, 16), 1)
+
         # radar yellow frame - kozeppont (45, 168)
         radar_frame_rect_size = (screenobj_planetmain.radar_frame_rect_pos[0][0],
                                  screenobj_planetmain.radar_frame_rect_pos[0][1],

@@ -47,6 +47,8 @@ class screen_planetmain(screen):
             self.map_position = map_position
         self.demolish_mode = False
         self.build_mode = False
+        self.build_mode_building_pos = None
+        self.build_mode_building_tiles = None
 
 #        self.map_of_scrolls = "qqqquuuuuueeee" + \
 #                              "qqqquuuuuueeee" + \
@@ -123,6 +125,9 @@ class screen_planetmain(screen):
         horizontal_scroll = 0
         vertical_scroll = 0
 
+        self.build_mode_building_pos = None
+        self.build_mode_building_tiles = None
+
         if self.screenmode_buildinginfo:
 
             if (53 <= mouse_pos[1] <= 199) and (90 <= mouse_pos[0] <= 319) or \
@@ -140,6 +145,35 @@ class screen_planetmain(screen):
             if (53 <= mouse_pos[1] <= 196) and (93 <= mouse_pos[0] <= 316):
 
                 self.menu_info["actiontext"] = 'Terrain'
+
+                if self.build_mode:
+
+                    mouse_on_terrain_tile = ( int((mouse_pos[0] - 93) / 16), int((mouse_pos[1] - 53) / 16) )
+                    mouse_on_terrain_tile_1d = mouse_on_terrain_tile[0] + mouse_on_terrain_tile[1] * 14
+
+                    self.build_mode_building_pos = mouse_on_terrain_tile
+                    tobuild_tiles_y = len(self.selected_building_typeinfo['tilecodes'])
+                    tobuild_tiles_x = len(self.selected_building_typeinfo['tilecodes'][0])
+
+                    self.build_mode_building_tiles = []
+
+                    for tilepos_y in range(tobuild_tiles_y):
+                        self.build_mode_building_tiles.append([])
+                        self.build_mode_building_tiles[tilepos_y] = []
+                        for tilepos_x in range(tobuild_tiles_x):
+                            abs_tilepos_x = self.map_position[0] + mouse_on_terrain_tile[0] + tilepos_x
+                            abs_tilepos_y = self.map_position[1] + mouse_on_terrain_tile[1] + tilepos_y
+                            if abs_tilepos_x >= self.planet.map_terrain.map_size[0] or \
+                               abs_tilepos_y >= self.planet.map_terrain.map_size[1]:
+                                tilecode = -1
+                            else:
+                                map_xy_index = abs_tilepos_x + 1 + \
+                                               (abs_tilepos_y + 1) * self.planet.map_terrain.map_size[0]
+                                if self.planet.map_buildings[map_xy_index] != -1:
+                                    tilecode = -1
+                                else:
+                                    tilecode = self.selected_building_typeinfo['tilecodes'][tilepos_y][tilepos_x]
+                            self.build_mode_building_tiles[tilepos_y].append(tilecode)
 
                 # Scroll over surface map (terrain) using right mouse button
                 if mouse_buttonstate[2]:  # right mouse button is being pressed
