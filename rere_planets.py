@@ -274,7 +274,24 @@ class solarsystem:
             for building in self.buildings:
                 building.update()
                 planet_living_capacity += building.get_living_capacity()
-                if building.building_type == 25:
+
+                if building.building_type == 9:
+                    self.has_stadium = True
+                elif building.building_type == 12:
+                    self.has_spaceport = True
+                elif building.building_type == 13:
+                    self.has_university = True
+                elif building.building_type == 17:
+                    self.has_radar = True
+                elif building.building_type == 19:
+                    self.has_radshield = True
+                elif building.building_type == 22:
+                    self.has_builder_plant = True
+                elif building.building_type == 23:
+                    self.has_vehicle_plant = True
+                elif building.building_type == 24:
+                    self.has_medicine_plant = True
+                elif building.building_type == 25:
                     self.minerstation = True
 
             self.living_capacity = planet_living_capacity
