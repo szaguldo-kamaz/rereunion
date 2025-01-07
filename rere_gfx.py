@@ -1418,7 +1418,7 @@ class ReReGFX:
                                                                            14*16, 9*16))
             self.screen_buffer.blit(planet_surface_cropped, (93, 4 + 49))
 
-            # placing building
+            # building placement
             if screenobj_planetmain.build_mode and \
                screenobj_planetmain.build_mode_building_pos != None:
 

@@ -118,6 +118,44 @@ class ReReGame:
         18: (3, 5, 4), # 'Moon 4'
     }
 
+    gamedata_const["buildabletypelists"] = {
+         1:  # earth (1)
+          [   0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,            14,  15,  16,  17,  18,  19,
+             20,       22,  23,  24,  25,  26,  27,  28,  29,  30,  31,            34,  35,  36,  37,  38,  39,
+             40,  41,                                               51,  52,  53,  54,  55,  56,
+             60,  61,                                               71,  72,  73,  74,  75,  76,              ],
+         2: [],
+         3:  # icy (2)
+          [   0,   1,
+             20,  21, ],
+         4: [],
+         5:  # tropical (10)
+          [   0,   1,             4,   5,             8,   9,  10,  11,  12,  13,
+             20,  21,            24,  25,            28,  29,  30,  31,  32,  33,
+                                                                                                       58,  59,
+                                                                                                       78,  79,
+                                 84,  85,  86,  87,  88,  89,  90,  91,
+                                104, 105, 106,      108, 109,
+                                                              130,      132, 133,      135,                139,
+                                                              150,           153,      155,                159, ],
+         6:  # desert (3)
+#          [   0,   1,                                          10,  11,                                     19,  # skeleton corner
+          [   0,   1,                                          10,  11,
+             20,  21,                                          30,  31, ],
+# oasis
+#                                                                         52,
+#                                                                         72,
+#                                                                         92,  93,  94,  95,
+#                                                                        112, 113, 114, 115,                     ],
+         7: [],
+         8:  # rock (5)
+          [   0,   1,
+             20,  21, ],
+         9: [],
+        10: [],
+        11: []
+    }
+
 
     def extract_dynamic_strings(self, raw_data, rawdata_start, number_of_strings):
 
@@ -758,7 +796,7 @@ class ReReGame:
             self.solarsystems.append(solarsystem(systemno,
                                             "System %d"%(systemno),
                                             loc_gamedata_dynamic["systems"][systemno],
-                                            self.gamedata_const["planets_id_mapping"][systemno],
+                                            self.gamedata_const,
                                             loc_gamedata_static,
                                             self.cache))
 

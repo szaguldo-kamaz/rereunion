@@ -55,7 +55,8 @@ class solarsystem:
 
         class planetsurface:
 
-            def __init__(self, maptuple):
+
+            def __init__(self, maptuple, gamedata_const):
 
                 self.map_major = maptuple[0]
                 self.map_minor = maptuple[1]
@@ -63,13 +64,43 @@ class solarsystem:
                 self.map_size = list(mapfile.read(2))
                 self.map_data = mapfile.read()
                 mapfile.close()
+                self.gen_obstacle_map(gamedata_const)
+
+
+            def gen_obstacle_map(self, gamedata_const):
+
+                # map of obstacles (can be built on (0) or cannot (1))
+                # (used for checking obstacles when building new buildings and for showing building info on surface map)
+                # let's waste some memory (first top and left "lines" won't be used), so we can save some cpu later (many "index-1"s)
+                # as positions on the surface map starts from 1
+                # (similarly to map_buildings)
+
+                self.map_obstacles = bytearray((self.map_size[0] + 1) * (self.map_size[1] + 1))
+                curr_mapx = 1
+                curr_mappointer = 2 + self.map_size[0]  # 1,1
+
+                for curr_maptiletypeno in range(len(self.map_data)):
+
+                    if self.map_data[curr_maptiletypeno] in gamedata_const["buildabletypelists"][self.map_major]:
+                        self.map_obstacles[curr_mappointer] = 0
+                    else:
+                        self.map_obstacles[curr_mappointer] = 1
+
+                    if curr_mapx == (self.map_size[0]):
+                        curr_mapx = 1
+                        curr_mappointer += 2
+                    else:
+                        curr_mapx += 1
+                        curr_mappointer += 1
+
 
         #############
         ### planet
         #######
-        def __init__(self, planet_data, planet_id, gamedata_static, cache):
+        def __init__(self, planet_data, planet_id, gamedata_const, gamedata_static, cache):
 
             self.gamedata_static = gamedata_static
+            self.gamedata_const = gamedata_const
             self.planet_id = planet_id
 
             self.planetname = planet_data["planetname"]
@@ -132,7 +163,7 @@ class solarsystem:
                 cache["planetsurfaces"] = {}
 
             if self.map_id not in cache["planetsurfaces"].keys():
-                cache["planetsurfaces"][self.map_id] = self.planetsurface(self.map_id)
+                cache["planetsurfaces"][self.map_id] = self.planetsurface(self.map_id, self.gamedata_const)
 
             # "raw" binary map
             self.map_terrain = cache["planetsurfaces"][self.map_id]
@@ -232,7 +263,7 @@ class solarsystem:
             building_to_add = self.buildings[building_to_add_no]
 
             for map_y in range(building_to_add.building_data["building_size_y"]):
-                map_xy_index = building_to_add.pos[0] + (building_to_add.pos[1] + map_y) * self.map_terrain.map_size[0]
+                map_xy_index = building_to_add.pos[0] + (building_to_add.pos[1] + map_y) * (self.map_terrain.map_size[0] + 1)
                 for map_x in range(building_to_add.building_data["building_size_x"]):
                     self.map_buildings[map_xy_index + map_x] = building_to_add_no
 
@@ -243,7 +274,9 @@ class solarsystem:
             # "raw" map of building without terrain
             # (used for checking occupiedness when building new buildings and for showing building info on surface map)
             # let's waste some memory (first top and left "lines" won't be used), so we can save some cpu later (many "index-1"s)
-            # as positiions on the surface map starts from 1
+            # as positions on the surface map starts from 1
+            # (similarly to map_obstacles)
+
             self.map_buildings = [-1] * ( (self.map_terrain.map_size[0] + 1) * (self.map_terrain.map_size[1] + 1))
 
             for building_no in range(len(self.buildings)):
@@ -392,24 +425,26 @@ class solarsystem:
     ### solarsystem
     ############
 
-    def __init__(self, solsys_id, solsys_name, planets_data, planets_id_mapping, gamedata_static, cache):
+    def __init__(self, solsys_id, solsys_name, planets_data, gamedata_const, gamedata_static, cache):
 
         self.solsys_id = solsys_id
         self.solsys_name = solsys_name
         self.num_of_planets = 0
         self.planets = {}
 
+        planets_id_mapping = gamedata_const["planets_id_mapping"][solsys_id]
+
         for planetno in planets_data.keys():
-            self.add_planet(planets_data[planetno], planetno, planets_id_mapping[planetno], gamedata_static, cache)
+            self.add_planet(planets_data[planetno], planetno, planets_id_mapping[planetno], gamedata_const, gamedata_static, cache)
 
 
-    def add_planet(self, planet_data, planet_seqid, planet_id, gamedata_static, cache):
+    def add_planet(self, planet_data, planet_seqid, planet_id, gamedata_const, gamedata_static, cache):
 
         if planet_id in self.planets.keys():
             print('planets: FATAL: planet "%s" already added! This should never happen.'%(planet_id))
             sys.exit(1)
 
-        self.planets[planet_id] = self.planet(planet_data, planet_id, gamedata_static, cache)
+        self.planets[planet_id] = self.planet(planet_data, planet_id, gamedata_const, gamedata_static, cache)
 
         if planet_id[2] == 0:
             self.num_of_planets += 1

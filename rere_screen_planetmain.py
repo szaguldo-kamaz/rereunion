@@ -70,6 +70,9 @@ class screen_planetmain(screen):
                                 (-1, +1), (-1, +1), (-1, +1), (-1, +1), ( 0, +1), ( 0, +1), ( 0, +1), ( 0, +1), ( 0, +1), ( 0, +1), (+1, +1), (+1, +1), (+1, +1), (+1, +1),
                                 (-1, +1), (-1, +1), (-1, +1), (-1, +1), ( 0, +1), ( 0, +1), ( 0, +1), ( 0, +1), ( 0, +1), ( 0, +1), (+1, +1), (+1, +1), (+1, +1), (+1, +1) ]
 
+        self.toscroll_horizontal = 0
+        self.toscroll_vertical = 0
+
         # yellow frame
         self.radar_frame_centerpos = (45, 168)
         self.radar_frame_rect_size = ( self.planet.map_terrain.map_size[0] + 2,
@@ -122,8 +125,11 @@ class screen_planetmain(screen):
 
         self.update_menu(gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent)
 
-        horizontal_scroll = 0
-        vertical_scroll = 0
+        if (self.toscroll_horizontal != 0) or (self.toscroll_vertical != 0):
+            self.set_map_position([ self.map_position[0] + self.toscroll_horizontal,
+                                    self.map_position[1] + self.toscroll_vertical ])
+        self.toscroll_horizontal = 0
+        self.toscroll_vertical = 0
 
         self.build_mode_building_pos = None
         self.build_mode_building_tiles = None
@@ -137,7 +143,6 @@ class screen_planetmain(screen):
                     self.screenmode_buildinginfo = False
                     self.screenmode_buildinginfo_specific = False
                     self.sfx_to_play = "X"
-
 
         else:
 
@@ -157,81 +162,97 @@ class screen_planetmain(screen):
 
                     self.build_mode_building_tiles = []
 
+                    build_mode_building_can_be_built = True
+                    build_mode_tobuild_basepos = (self.map_position[0] + mouse_on_terrain_tile[0] + 1,
+                                                  self.map_position[1] + mouse_on_terrain_tile[1] + 1)
                     for tilepos_y in range(tobuild_tiles_y):
                         self.build_mode_building_tiles.append([])
                         self.build_mode_building_tiles[tilepos_y] = []
                         for tilepos_x in range(tobuild_tiles_x):
-                            abs_tilepos_x = self.map_position[0] + mouse_on_terrain_tile[0] + tilepos_x
-                            abs_tilepos_y = self.map_position[1] + mouse_on_terrain_tile[1] + tilepos_y
-                            if abs_tilepos_x >= self.planet.map_terrain.map_size[0] or \
-                               abs_tilepos_y >= self.planet.map_terrain.map_size[1]:
+                            abs_tilepos_x = build_mode_tobuild_basepos[0] + tilepos_x
+                            abs_tilepos_y = build_mode_tobuild_basepos[1] + tilepos_y
+                            if abs_tilepos_x > self.planet.map_terrain.map_size[0] or \
+                               abs_tilepos_y > self.planet.map_terrain.map_size[1]:
                                 tilecode = -1
+                                build_mode_building_can_be_built = False
                             else:
-                                map_xy_index = abs_tilepos_x + 1 + \
-                                               (abs_tilepos_y + 1) * self.planet.map_terrain.map_size[0]
-                                if self.planet.map_buildings[map_xy_index] != -1:
+                                map_xy_index = abs_tilepos_x + \
+                                               (abs_tilepos_y) * (self.planet.map_terrain.map_size[0] + 1)
+                                if self.planet.map_buildings[map_xy_index] != -1 or \
+                                   self.planet.map_terrain.map_obstacles[map_xy_index] == 1:
                                     tilecode = -1
+                                    build_mode_building_can_be_built = False
                                 else:
                                     tilecode = self.selected_building_typeinfo['tilecodes'][tilepos_y][tilepos_x]
                             self.build_mode_building_tiles[tilepos_y].append(tilecode)
+
 
                 # Scroll over surface map (terrain) using right mouse button
                 if mouse_buttonstate[2]:  # right mouse button is being pressed
 
                     mouse_on_terrain_tile = ( int((mouse_pos[0] - 93) / 16), int((mouse_pos[1] - 53) / 16) )
                     mouse_on_terrain_tile_1d = mouse_on_terrain_tile[0] + mouse_on_terrain_tile[1] * 14
-                    [ horizontal_scroll, vertical_scroll ] = self.scroll_vectors[mouse_on_terrain_tile_1d]
+                    [ self.toscroll_horizontal, self.toscroll_vertical ] = self.scroll_vectors[mouse_on_terrain_tile_1d]
 
                 # Select building on surface map (terrain)
-                if mouse_buttonevent[0] and mouse_buttonstate[0] and not self.build_mode:  # left mouse button was pressed
+                if mouse_buttonevent[0] and mouse_buttonstate[0]:
 
-                    mouse_on_map_pos = ( int((mouse_pos[0] - 93)/16) + 1, int((mouse_pos[1] - 52)/16) + 1 )
-                    map_xy_index = self.map_position[0] + mouse_on_map_pos[0] + \
-                                   (self.map_position[1] + mouse_on_map_pos[1]) * self.planet.map_terrain.map_size[0]
-                    building_no = self.planet.map_buildings[map_xy_index]
+                    if self.build_mode:  # left mouse button was pressed - while in build mode
+                        if build_mode_building_can_be_built:
+                            self.sfx_to_play = "BUILDIN"
+                            self.build_mode = False
+                            self.planet.build_new_building(self.selected_building_type, build_mode_tobuild_basepos)
+                        else:
+                            self.sfx_to_play = "HIBA"
 
-                    if building_no > -1:  # valid building has been selected ?
-                        if self.demolish_mode:
-                            if self.planet.demolish_building(building_no):
-                                self.sfx_to_play = "DESTRUCT"
+                    else:  # left mouse button was pressed - not in build mode
+                        mouse_on_map_pos = ( int((mouse_pos[0] - 93)/16) + 1, int((mouse_pos[1] - 52)/16) + 1 )
+                        map_xy_index = self.map_position[0] + mouse_on_map_pos[0] + \
+                                       (self.map_position[1] + mouse_on_map_pos[1]) * (self.planet.map_terrain.map_size[0] + 1)
+                        building_no = self.planet.map_buildings[map_xy_index]
+
+                        if building_no > -1:  # valid building has been selected ?
+                            if self.demolish_mode:
+                                if self.planet.demolish_building(building_no):
+                                    self.sfx_to_play = "DESTRUCT"
+                                else:
+                                    self.sfx_to_play = "X"
+                                self.demolish_mode = False
                             else:
                                 self.sfx_to_play = "X"
-                            self.demolish_mode = False
-                        else:
-                            self.sfx_to_play = "X"
-                            self.selected_building_on_map = self.planet.buildings[building_no]
-                            if self.selected_building_on_map.building_type in [ 4, 25 ]:  # mine, miner station
-                                self.action = "MINE"
-                                self.action_params = [ self.planet, self.map_position ]
-                                self.sfx_to_play = "MINE"
-                            else:
-                                self.__select_building_by_type(self.selected_building_on_map.building_type)
-                                self.screenmode_buildinginfo = True
-                                self.screenmode_buildinginfo_specific = True
+                                self.selected_building_on_map = self.planet.buildings[building_no]
+                                if self.selected_building_on_map.building_type in [ 4, 25 ]:  # mine, miner station
+                                    self.action = "MINE"
+                                    self.action_params = [ self.planet, self.map_position ]
+                                    self.sfx_to_play = "MINE"
+                                else:
+                                    self.__select_building_by_type(self.selected_building_on_map.building_type)
+                                    self.screenmode_buildinginfo = True
+                                    self.screenmode_buildinginfo_specific = True
 
             elif 53 <= mouse_pos[1] <= 196 and 90 <= mouse_pos[0] <= 92:
 
                 self.menu_info["actiontext"] = 'Left'
                 if mouse_buttonstate[0]:  # left mouse button is being pressed
-                    horizontal_scroll = -1
+                    self.toscroll_horizontal = -1
 
             elif 53 <= mouse_pos[1] <= 196 and 317 <= mouse_pos[0] <= 319:
 
                 self.menu_info["actiontext"] = 'Right'
                 if mouse_buttonstate[0]:  # left mouse button is being pressed
-                    horizontal_scroll = +1
+                    self.toscroll_horizontal = +1
 
             elif 50 <= mouse_pos[1] <= 52 and 93 <= mouse_pos[0] <= 316:
 
                 self.menu_info["actiontext"] = 'Up'
                 if mouse_buttonstate[0]:  # left mouse button is being pressed
-                    vertical_scroll = -1
+                    self.toscroll_vertical = -1
 
             elif 197 <= mouse_pos[1] <= 199 and 93 <= mouse_pos[0] <= 316:
 
                 self.menu_info["actiontext"] = 'Down'
                 if mouse_buttonstate[0]:  # left mouse button is being pressed
-                    vertical_scroll = +1
+                    self.toscroll_vertical = +1
 
             # Radar viewer
             elif 138 <= mouse_pos[1] <= 200 and 0 <= mouse_pos[0] <= 89:
@@ -320,9 +341,6 @@ class screen_planetmain(screen):
                     self.screenmode_buildinginfo_specific = False
                     self.sfx_to_play = "X"
 
-            if (horizontal_scroll != 0) or (vertical_scroll != 0):
-                self.set_map_position([ self.map_position[0] + horizontal_scroll,
-                                        self.map_position[1] + vertical_scroll ])
 
         # Common in Terrain / Building info mode
 
