@@ -289,6 +289,7 @@ class screen_planetmain(screen):
                                 self.build_mode = False
                             elif self.selected_building_typeinfo['price'] > gamedata_dynamic["money"]:
                                 self.sfx_to_play = "HIBA"
+                                self.trigger_infobar_money_redflash()
                                 self.build_mode = False
                             elif self.selected_building_typeinfo['requires_builder_plant'] == 1 and not self.planet.has_builder_plant:
                                 print(self.gamedata_static["planetmain_messages"][2])

@@ -947,7 +947,12 @@ class ReReGFX:
     def render_infobar(self, menu_info):
 
         text_action = self.render_text(menu_info["actiontext"])
-        text_money = self.render_text("%d"%(menu_info["money"]))
+
+        if menu_info["money_red"]:
+            text_money = self.render_text("%d"%(menu_info["money"]), 2)
+        else:
+            text_money = self.render_text("%d"%(menu_info["money"]))
+
         text_date = self.render_text("%d-%d-%d-%d"%(menu_info["date"][0], menu_info["date"][1], menu_info["date"][2], menu_info["date"][3]))
 
         self.infobar.blit(self.PICs["TEXT"], (0, 0))

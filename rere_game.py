@@ -931,7 +931,8 @@ class ReReGame:
         if screen_changed:
             self.current_screen.update(self.gamedata_dynamic, mouse_pos, (False, False, False), [False, False])
 
-        if mouseevent or any(mouse_buttonstate):
+        if mouseevent or any(mouse_buttonstate) or \
+           self.current_screen.timed_event_active:
             self.current_screen.update(self.gamedata_dynamic, mouse_pos, mouse_buttonstate, [ mouseevent_buttondown, mouseevent_buttonup ])
 
         [ a_hour_has_passed, a_day_has_passed ] = self.update_date()

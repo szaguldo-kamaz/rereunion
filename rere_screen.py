@@ -151,10 +151,12 @@ class screen:
         self.menu_info = { "icons": menu_icons, "text": menu_text, "sfx": menu_sfx,
                            "updown": 0, "actiontext": "",
                            "date": self.gamedata_dynamic["date"],
-                           "money": self.gamedata_dynamic["money"] }
+                           "money": self.gamedata_dynamic["money"],
+                           "money_red": False }
         self.menuicon_pointerover = None
         self.infobar_timespinning = False
         self.infobar_timespinning_type = 0
+        self.infobar_money_redflash_timer = 0
 
 
     def get_action(self):
@@ -190,7 +192,25 @@ class screen:
                 self.update(self.gamedata_dynamic, None, [0,0,0], [0,0,0])
 
 
+    def trigger_infobar_money_redflash(self):
+
+        self.infobar_money_redflash_timer = 5
+        self.menu_info['money_red'] = True
+
+
     def update_menu(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):
+
+            if self.menu_info['money_red'] and \
+               self.infobar_money_redflash_timer > 0:
+
+                self.infobar_money_redflash_timer -= 1
+                if self.infobar_money_redflash_timer == 0:
+                    self.menu_info['money_red'] = False
+
+            if self.menu_info['money_red']:
+                self.timed_event_active = True
+            else:
+                self.timed_event_active = False
 
             if not self.has_menu:
                 return None
