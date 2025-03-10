@@ -846,6 +846,26 @@ class ReReGame:
             self.shipgroups_planetforces.append(shipgroup_toadd)
 
 
+    def inventions_update_hourly(self):
+
+        for inv_no in self.gamedata_dynamic["inventions"].keys():
+            currinv = self.gamedata_dynamic["inventions"][inv_no]
+
+            if currinv['time_to_produce_next'] == 0 and \
+               currinv['quantity_in_production'] > 0:
+                currinv['time_to_produce_next'] = currinv['time_to_produce_one']
+
+            if currinv['time_to_produce_next'] > 0:
+                currinv['time_to_produce_next'] -= 10
+                if currinv['time_to_produce_next'] <= 0:
+                    currinv['quantity_in_storage'] += 1
+                    currinv['quantity_in_production'] -= 1
+                    if currinv['quantity_in_production'] > 0:
+                        currinv['time_to_produce_next'] = currinv['time_to_produce_one']
+                    else:
+                        currinv['time_to_produce_next'] = 0
+
+
     def __init__(self, config, savegame_filename = "SAVE/SPIDYSAV.1"):
 
         self.config = config
@@ -942,6 +962,8 @@ class ReReGame:
             for solsys_id in range(1,len(self.solarsystems)):
                 for planet_id in self.solarsystems[solsys_id].planets.keys():
                     self.solarsystems[solsys_id].planets[planet_id].update_hourly()
+
+            self.inventions_update_hourly()
 
             # todo, call updates for research, events, etc.
 

@@ -57,8 +57,8 @@ class screen_infobuy(screen):
             self.stores = selectedinv['quantity_in_storage']
             self.bought_items = selectedinv['quantity_in_production']
             self.total_price = selectedinv['quantity_in_production'] * selectedinv['price']
-            self.time_to_go = (selectedinv['quantity_in_production'] * selectedinv['time_to_produce_one']) / 10 + \
-                               selectedinv['time_to_produce_next']
+            self.time_to_go = ((selectedinv['quantity_in_production'] - 1) * selectedinv['time_to_produce_one']) / 10 + \
+                               selectedinv['time_to_produce_next'] / 10
         else:
             self.can_be_produced = False
             self.cannot_be_produced_reason = "This will be fitted on your nose."
