@@ -144,6 +144,8 @@ class screen:
             self.has_menu = True
             self.define_menu(menu_data)
 
+        self.timed_menu_event_active = False
+
 
     def define_menu(self, menu_data):
 
@@ -200,6 +202,9 @@ class screen:
 
     def update_menu(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):
 
+            if not self.has_menu:
+                return None
+
             if self.menu_info['money_red'] and \
                self.infobar_money_redflash_timer > 0:
 
@@ -208,12 +213,9 @@ class screen:
                     self.menu_info['money_red'] = False
 
             if self.menu_info['money_red']:
-                self.timed_event_active = True
+                self.timed_menu_event_active = True
             else:
-                self.timed_event_active = False
-
-            if not self.has_menu:
-                return None
+                self.timed_menu_event_active = False
 
             self.menu_info["date"] = gamedata_dynamic["date"]
             self.menu_info["money"] = gamedata_dynamic["money"]
