@@ -255,7 +255,7 @@ class solarsystem:
             if building_type in [ 4, 25 ]:  # 4 = mine, 25 = miner station
                 self.num_of_mines += 1
 
-            return 0
+            return building_type_data["price"]
 
 
         def add_building_to_map_of_buildings(self, building_to_add_no):

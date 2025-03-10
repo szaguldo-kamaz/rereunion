@@ -201,7 +201,8 @@ class screen_planetmain(screen):
                         if build_mode_building_can_be_built:
                             self.sfx_to_play = "BUILDIN"
                             self.build_mode = False
-                            self.planet.build_new_building(self.selected_building_type, build_mode_tobuild_basepos)
+                            building_cost = self.planet.build_new_building(self.selected_building_type, build_mode_tobuild_basepos)
+                            gamedata_dynamic["money"] -= building_cost
                         else:
                             self.sfx_to_play = "HIBA"
 
