@@ -877,6 +877,8 @@ class ReReGame:
         # load dynamic data initial values (money, date, buildings_data, etc.) from savegame
         [ self.gamedata_dynamic ] = self.load_savegame(savegame_filename)  # needs self.gamedata_static !
 
+        self.gamedata_dynamic["time_stopped"] = False
+
         self.gamedata_static["inventions_desc"] = self.load_inventionsdesc()
         self.gamedata_static["buildings_desc"] = self.load_buildingsdesc()
         self.gamedata_static["commanders_desc"] = self.load_commandersdesc()
@@ -986,6 +988,9 @@ class ReReGame:
 
 
     def update_date(self):
+
+        if self.gamedata_dynamic["time_stopped"]:
+            return [ False, False ]
 
         self.date_iterations += 1
         increase_date = False
