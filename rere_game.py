@@ -601,11 +601,11 @@ class ReReGame:
                 'already': self.extract_dynamic_strings(reunionexe_image, exepos_commanderhire_already, 1)[0],
                 'noskill': self.extract_dynamic_strings(reunionexe_image, exepos_commanderhire_noskill, 1)[0]
             }
-        mineral_names     = list(map(lambda x:x.decode("ascii"), struct.unpack_from( "9p"*6,  reunionexe_image, exepos_mineralnames)))
-        race_names        = list(map(lambda x:x.decode("ascii"), struct.unpack_from("10p"*12, reunionexe_image, exepos_racenames)))
-        skill_names       = list(map(lambda x:x.decode("ascii"), struct.unpack_from( "8p"*4,  reunionexe_image, exepos_skillnames)))
-        system_names      = list(map(lambda x:x.decode("ascii"), struct.unpack_from( "9p"*8,  reunionexe_image, exepos_systemnames)))
-        system_shortnames = list(map(lambda x:x.decode("ascii"), struct.unpack_from( "7p"*8,  reunionexe_image, exepos_systemshortnames)))
+        mineral_names     = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "9p"*6,  reunionexe_image, exepos_mineralnames)))
+        race_names        = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from("10p"*12, reunionexe_image, exepos_racenames)))
+        skill_names       = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "8p"*4,  reunionexe_image, exepos_skillnames)))
+        system_names      = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "9p"*8,  reunionexe_image, exepos_systemnames)))
+        system_shortnames = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "7p"*8,  reunionexe_image, exepos_systemshortnames)))
 
 #        print(skill_names)
 #        exit(1)
