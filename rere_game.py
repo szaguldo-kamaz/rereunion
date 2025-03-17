@@ -980,6 +980,7 @@ class ReReGame:
 
         if screen_changed or \
            self.current_screen.timed_menu_event_active or \
+           self.current_screen.timed_screen_event_active or \
            a_hour_has_passed:
             self.current_screen.update(self.gamedata_dynamic, mouse_pos, (False, False, False), [False, False])
 

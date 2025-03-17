@@ -145,6 +145,7 @@ class screen:
             self.define_menu(menu_data)
 
         self.timed_menu_event_active = False
+        self.timed_screen_event_active = False
 
 
     def define_menu(self, menu_data):
