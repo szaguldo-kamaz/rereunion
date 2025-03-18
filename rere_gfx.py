@@ -26,6 +26,10 @@ class ReReGFX:
                   "ADD SPY SHIP", "ADD SOLAR SAT", "GROUND WAR", "USEFUL PLANETS", "DEATH PLANET?",
                   "RETREAT", "EXIT TO DOS", "ALIEN PLANETS" ]
 
+    infobuy_info_mineral_text_poses = [ (142, 142), (142, 151), (225, 142), (225, 160), (142, 160), (225, 151) ]
+    infobuy_info_mineral_text_padding = [ "", "", "  ", "", "", "   " ]
+    infobuy_buysell_mineral_text_poses = [ (142, 82), (142, 91), (225, 82), (225, 100), (142, 100), (225, 91) ]
+
 
     def __init__(self, config, game_obj):
 
@@ -1047,29 +1051,77 @@ class ReReGFX:
             self.screen_buffer.blit(self.render_text(screenobj_infobuy.invention_item_list[listitem_index][1], textcolor = itemcolor),
                                     (16, 55 + listitem_no * 9) )
 
-        if screenobj_infobuy.picturemode:
-            # Item pic
-            self.screen_buffer.blit(self.PICs["INFO%d"%(screenobj_infobuy.selected_item_invno)], (134, 55))
-#            self.screen_buffer.blit(self.PICs["INFO26"], (134, 55))
-        else:
-            # Item info
+        if screenobj_infobuy.buysellmode:
+            minerals_main = screenobj_infobuy.gamedata_dynamic["minerals_main"]
             self.screen_buffer.blit(self.render_text(screenobj_infobuy.invention_description[0], textcolor = 2), (136, 59) )
-            for descline_no in range(1, 7):
-                self.screen_buffer.blit(self.render_text(screenobj_infobuy.invention_description[descline_no], textcolor = 1), (136, 61 + descline_no * 10) )
-            self.screen_buffer.blit(self.render_text("Ore needed: [One piece]", textcolor = 2), (136, 133) )
-            self.screen_buffer.blit(self.render_text("Detoxin:%5d"%(screenobj_infobuy.minerals[0]), textcolor = 1), (142, 142) )
-            self.screen_buffer.blit(self.render_text("Energon:%5d"%(screenobj_infobuy.minerals[1]), textcolor = 1), (142, 151) )
-            self.screen_buffer.blit(self.render_text("Raenium:%5d"%(screenobj_infobuy.minerals[4]), textcolor = 1), (142, 160) )
-            self.screen_buffer.blit(self.render_text("Kremir  :%5d"%(screenobj_infobuy.minerals[2]), textcolor = 1), (225, 142) )
-            self.screen_buffer.blit(self.render_text("Texon   :%5d"%(screenobj_infobuy.minerals[5]), textcolor = 1), (225, 151) )
-            self.screen_buffer.blit(self.render_text("Lepitium:%5d"%(screenobj_infobuy.minerals[3]), textcolor = 1), (225, 160) )
+            self.screen_buffer.blit(self.render_text("Ores in stock", textcolor = 2), (136, 73) )
+            if screenobj_infobuy.items_in_production > 1:
+                piecesplural = 's'
+            else:
+                piecesplural = ''
+            self.screen_buffer.blit(self.render_text(f"Ore needed: [{screenobj_infobuy.items_in_production} piece{piecesplural} ]", textcolor = 2), (136, 133) )
+
+            mineral_index = 0
+            for mineral_name in screenobj_infobuy.mineral_names_list:
+                if self.infobuy_buysell_mineral_text_poses[mineral_index][0] == 225:
+                    mineraltext = mineral_name.ljust(8)
+                else:
+                    mineraltext = mineral_name
+
+                if minerals_main[mineral_name] >= 100000:
+                    mineraltext_stock = mineraltext + "%6d"%(minerals_main[mineral_name])
+                else:
+                    mineraltext_stock = mineraltext + ":%5d"%(minerals_main[mineral_name])
+
+                mineral_needed = screenobj_infobuy.needed_minerals[mineral_name]
+                if mineral_needed >= 100000:
+                    mineraltext_needed = mineraltext + "%6d"%(mineral_needed)
+                else:
+                    mineraltext_needed = mineraltext + ":%5d"%(mineral_needed)
+
+                self.screen_buffer.blit(self.render_text(mineraltext_stock, textcolor = 1),
+                                        (self.infobuy_buysell_mineral_text_poses[mineral_index]) )
+
+                if screenobj_infobuy.timed_screen_event_active and \
+                   screenobj_infobuy.mineral_flash_minerals[mineral_name]:
+                    mineralneeded_textcolor = 2
+                else:
+                    mineralneeded_textcolor = 1
+                self.screen_buffer.blit(self.render_text(mineraltext_needed, textcolor = mineralneeded_textcolor),
+                                        (self.infobuy_buysell_mineral_text_poses[mineral_index][0], self.infobuy_buysell_mineral_text_poses[mineral_index][1] + 60) )
+
+                mineral_index += 1
+
+        else:
+
+            if screenobj_infobuy.picturemode:
+                # Item pic
+                self.screen_buffer.blit(self.PICs["INFO%d"%(screenobj_infobuy.selected_item_invno)], (134, 55))
+#                self.screen_buffer.blit(self.PICs["INFO26"], (134, 55))
+            else:
+                # Item info
+                self.screen_buffer.blit(self.render_text(screenobj_infobuy.invention_description[0], textcolor = 2), (136, 59) )
+                for descline_no in range(1, 7):
+                    self.screen_buffer.blit(self.render_text(screenobj_infobuy.invention_description[descline_no], textcolor = 1), (136, 61 + descline_no * 10) )
+                self.screen_buffer.blit(self.render_text("Ore needed: [One piece]", textcolor = 2), (136, 133) )
+                mineral_index = 0
+                for mineral_name in screenobj_infobuy.mineral_names_list:
+                    mineral_name_and_amount = \
+                                mineral_name + \
+                                self.infobuy_info_mineral_text_padding[mineral_index] + \
+                                ":%5d"%(screenobj_infobuy.minerals[mineral_index])
+                    self.screen_buffer.blit(
+                        self.render_text(mineral_name_and_amount, textcolor = 1),
+                        self.infobuy_info_mineral_text_poses[mineral_index]
+                    )
+                    mineral_index += 1
 
         if screenobj_infobuy.can_be_produced:
             self.screen_buffer.blit(self.render_text("Stores:", textcolor = 1), (14, 189) )
             self.screen_buffer.blit(self.render_text("%d"%(screenobj_infobuy.stores), textcolor = 2), (100, 189) )
-            if screenobj_infobuy.bought_items > 0:
+            if screenobj_infobuy.items_in_production > 0:
                 self.screen_buffer.blit(self.render_text("Bought items:", textcolor = 1), (14, 180) )
-                self.screen_buffer.blit(self.render_text("%d"%(screenobj_infobuy.bought_items), textcolor = 2), (100, 180) )
+                self.screen_buffer.blit(self.render_text("%d"%(screenobj_infobuy.items_in_production), textcolor = 2), (100, 180) )
                 self.screen_buffer.blit(self.render_text("Time to go:", textcolor = 1), (160, 180) )
                 self.screen_buffer.blit(self.render_text("%d"%(screenobj_infobuy.time_to_go), textcolor = 2), (264, 180) )
                 self.screen_buffer.blit(self.render_text("Total price:", textcolor = 1), (160, 189) )
