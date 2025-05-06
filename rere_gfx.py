@@ -1560,6 +1560,7 @@ class ReReGFX:
             weapon_ypos = 156
             weapon_cnt_index = 0
             invention_padding = 11
+            weapon_name_list = self.gamedata_static["ship_on_ground_names"] + self.gamedata_static["vehicle_on_ground_names"]
             for weapon_invention_index in [ 10, 16, 23, 33, 17, 21, 26, 32 ]:
                 if weapon_invention_index == 17:
                     weapon_name_xpos = 197
@@ -1567,7 +1568,7 @@ class ReReGFX:
                     weapon_ypos = 156
                     invention_padding = 16
 
-                weapon_count = screenobj_planetinfo.planet.alien_ground_forces[weapon_cnt_index]
+                weapon_count = screenobj_planetinfo.planet.alien_garrison[weapon_name_list[weapon_cnt_index]]
                 weapon_cnt_index += 1
                 if weapon_count == 0:
                     continue

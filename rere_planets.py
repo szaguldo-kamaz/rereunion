@@ -122,7 +122,7 @@ class solarsystem:
             self.development_level = planet_data["development_level"]
             self.tax_level = planet_data["tax_level"]
             self.mineral_storage = planet_data["mineral_storage"]
-            self.alien_ground_forces = [ 8, 16, 32, 64, 1, 2, 4, 8 ]
+            self.alien_garrison = planet_data["alien_garrison"]
             self.mineral_production_base = planet_data["mineral_production"]
             self.deployed_sat_type = planet_data["deployed_sat_type"]
             self.deployed_spy_ship = planet_data["deployed_spy_ship"]

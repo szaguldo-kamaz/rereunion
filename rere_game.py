@@ -237,13 +237,26 @@ class ReReGame:
             # minerals storage
             # !: for alien planets this is the ground forces count!
             planetsdata[planetno]["mineral_storage"] = {}
+            planetsdata[planetno]["alien_garrison"] = {}
             for mineral in self.gamedata_static["mineral_names"]:
-                mineral_bytes = raw_planetsdata[planet_imagepos:planet_imagepos + 4]
-                planetsdata[planetno]["mineral_storage"][mineral] = struct.unpack("<I", mineral_bytes)[0]
+                if planetsdata[planetno]["race"] == 1:
+                    mineral_bytes = raw_planetsdata[planet_imagepos:planet_imagepos + 4]
+                    mineral_count = struct.unpack("<I", mineral_bytes)[0]
+                else:
+                    mineral_count = 0
+                planetsdata[planetno]["mineral_storage"][mineral] = mineral_count
                 planet_imagepos += 4
 
-            planetsdata[planetno]["unknown6"] = raw_planetsdata[planet_imagepos:planet_imagepos + 32 - 24]
-            planet_imagepos += 32 - 24
+            if planetsdata[planetno]["race"] > 1:
+                planet_imagepos -= 24
+                weapons_bytes = raw_planetsdata[planet_imagepos:planet_imagepos + 32]
+                weapon_counts = struct.unpack("<IIIIIIII", weapons_bytes)
+                for widx, weapon in enumerate(self.gamedata_static["ship_on_ground_names"] + self.gamedata_static["vehicle_on_ground_names"]):
+                    planetsdata[planetno]["alien_garrison"][weapon] = weapon_counts[widx]
+                planet_imagepos += 32
+
+            else:
+                planet_imagepos += 8
 
             # minerals production (/10)
             planetsdata[planetno]["mineral_production"] = {}
