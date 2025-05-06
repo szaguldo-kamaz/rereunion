@@ -236,12 +236,17 @@ class screen:
                         if mouse_buttonevent[0]:  # buttondown
                             print("activate menuitem: ", self.menu_info["text"][menuicon_pointerover_index])
                             self.action = self.menu_info["text"][menuicon_pointerover_index]
-                            if self.action == "PLANET MAIN":
+                            if self.action in [ "PLANET MAIN", "PLANET INFO" ]:
                                 if hasattr(self, 'preserved_surface_position'):
                                     preserved_position = self.preserved_surface_position
                                 else:
                                     preserved_position = None
-                                self.action_params = [ self.current_planet_surface, preserved_position ]
+                                if self.action == "PLANET MAIN":
+                                    self.action_params = [ self.current_planet_surface, preserved_position ]
+                                elif self.action == "PLANET INFO":
+                                    preserved_position = self.map_position
+                                    self.action_params = [ self.planet, preserved_position ]
+
                             self.sfx_to_play = self.menu_info["sfx"][menuicon_pointerover_index]
                     else:
                         self.menuicon_pointerover = ''

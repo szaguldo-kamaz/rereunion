@@ -122,9 +122,11 @@ class solarsystem:
             self.development_level = planet_data["development_level"]
             self.tax_level = planet_data["tax_level"]
             self.mineral_storage = planet_data["mineral_storage"]
+            self.alien_ground_forces = [ 8, 16, 32, 64, 1, 2, 4, 8 ]
             self.mineral_production_base = planet_data["mineral_production"]
             self.deployed_sat_type = planet_data["deployed_sat_type"]
             self.deployed_spy_ship = planet_data["deployed_spy_ship"]
+            self.spacestation_count = 0
             self.solarsat_count = planet_data["solarsat_count"]
             self.sat_exploration_timecount = planet_data["sat_exploration_timecount"]
 
@@ -220,8 +222,6 @@ class solarsystem:
 
         def update_daily(self):
 
-            # new taxlevel
-            # TODO
             # new population count
             self.population_count_update()
             # new population mood
@@ -408,17 +408,17 @@ class solarsystem:
 
 
         def increase_tax(self):
-            if self.tax == 5:
+            if self.tax_level == 7:
                 return False
             else:
-                self.tax += 1
+                self.tax_level += 1
 
 
         def decrease_tax(self):
-            if self.tax == 0:
+            if self.tax_level == 0:
                 return False
             else:
-                self.tax -= 1
+                self.tax_level -= 1
 
 
     ##################

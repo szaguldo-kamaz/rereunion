@@ -21,6 +21,7 @@ from rere_screen_starmap import *
 from rere_screen_messages import *
 from rere_screen_spacelocal import *
 from rere_screen_commanders import *
+from rere_screen_planetinfo import *
 
 
 class ReReGame:
@@ -234,6 +235,7 @@ class ReReGame:
             planetsdata[planetno] |= dict(zip(keys2, unpacklist2))
 
             # minerals storage
+            # !: for alien planets this is the ground forces count!
             planetsdata[planetno]["mineral_storage"] = {}
             for mineral in self.gamedata_static["mineral_names"]:
                 mineral_bytes = raw_planetsdata[planet_imagepos:planet_imagepos + 4]
@@ -380,6 +382,11 @@ class ReReGame:
         return commandersdesc
 
 
+    def load_racesdesc(self, racesdesc_filename = "TEXT/SZ_FAJ.RAW"):
+        racesdesc = self.load_rawtext(racesdesc_filename, 36, 12, 12)
+        return racesdesc
+
+
     def load_buildingsdesc(self, buildingsdesc_filename = "TEXT/SZ_FELSZ.TXT"):
 
         buildingsdesc = open(buildingsdesc_filename, "rb")
@@ -512,9 +519,10 @@ class ReReGame:
     # ?, living, ?, mainplanet_system, mainplanet_no_in_system, has_hunter, sfight, destroy, crusier, troop, btank, airc, mlaunch
 
     #    keys1 = [ "name", "", "" ]
+        races_data = {}
         for raceno in range(11):
-    #        unpacklist = struct.unpack_from("<13pBH", racedata, race_imagepos)
-            unpacklist = struct.unpack_from("<14p", racedata, race_imagepos)
+            racename = struct.unpack_from("<14p", racedata, race_imagepos)[0]
+            racename = racename.decode("ascii")
             race_imagepos += 14
 
     #        races[raceno] = dict(zip(keys1, unpacklist))
@@ -522,7 +530,11 @@ class ReReGame:
             race_unknown1 = racedata[race_imagepos:race_imagepos + 214]
             race_imagepos += 214
 
-            print("%14s %s"%(unpacklist[0], list(race_unknown1)))
+#            print("%14s %s"%(unpacklist[0], list(race_unknown1)))
+
+            races_data[racename] = race_unknown1
+
+        return races_data
 
 
     def process_raw_spacelocaldata(self, spacelocaldata):
@@ -550,8 +562,16 @@ class ReReGame:
 
         exepos_planetmain_messages = 0x04B06  # dynamic strings *6
 
-        exepos_planettypenames     = 0x2A4AE  # len + string (es tenyleg csak olyan hosszu) 10 db
-        exepos_cannotbuy_reasons   = 0x28DEE  # len + string (es tenyleg csak olyan hosszu) 6+1 db
+        exepos_planet_popmood_names  = 0x2A3A6  # len + string (es tenyleg csak olyan hosszu) 7 db
+        exepos_planet_taxlevel_names = 0x2A426  # len + string (es tenyleg csak olyan hosszu) 8 db
+        exepos_planet_devlevel_names = 0x2A468  # len + string (es tenyleg csak olyan hosszu) 6 db
+
+        exepos_planet_type_names     = 0x2A4AE  # len + string (es tenyleg csak olyan hosszu) 10 db
+        exepos_planet_explore_status_names = 0x2A4FF  # len + string (es tenyleg csak olyan hosszu) 6 db
+
+        exepos_planet_facilities_names     = 0x2A588  # len + string (es tenyleg csak olyan hosszu) 8 db
+
+        exepos_cannotbuy_reasons     = 0x28DEE  # len + string (es tenyleg csak olyan hosszu) 6+1 db
 
 # TODO
         exepos_commanderhire_okhired = 0x34D0B
@@ -571,8 +591,8 @@ class ReReGame:
 # TODO eddig
         # 0x44AF8 .. 0x44B33 unknown
         exepos_commandernames      = 0x44B34  # len + string (mind 18 char) (pilot, builder, fighter, developer) 18*12
-        exepos_shipnames_ground    = 0x44CE4  # 4
-        exepos_vehiclenames_ground = 0x44D0C  # 4
+        exepos_shipnames_ground    = 0x44CE4  # 4*9+1
+        exepos_vehiclenames_ground = 0x44D0C  # 4*8+1
         exepos_mineralnames        = 0x44D6C  # len + string (de amugy mind 8 char) - 6*8
         exepos_racenames           = 0x44DA2  # len + string (de amugy mind 9 char) - 12*9
         exepos_skillnames          = 0x44E3E  # len + string (fix 7 char) - 7*4
@@ -581,7 +601,7 @@ class ReReGame:
         exepos_charset             = 0x44EDE  # 78
         exepos_inventions          = 0x4509C
         exepos_buildings_info      = 0x45882  # 25*
-        exepos_races               = 0x45EBE
+        exepos_races               = 0x45EBE  # 12*228 byte
 
         reunionexe = open(reunionprg_filename, "rb")
         reunionexe_image = reunionexe.read(288992)
@@ -589,8 +609,14 @@ class ReReGame:
 
         buildings_info = self.process_raw_buildingsinfodata(reunionexe_image[exepos_buildings_info:exepos_buildings_info + 25*63])
         planetmain_messages = self.extract_dynamic_strings(reunionexe_image, exepos_planetmain_messages, 6)
-        planettype_names_from_exe = self.extract_dynamic_strings(reunionexe_image, exepos_planettypenames, 10)
-        planettype_names = [ "" ] + planettype_names_from_exe + [ "Artificial" ]
+        planet_type_names_from_exe = self.extract_dynamic_strings(reunionexe_image, exepos_planet_type_names, 10)
+        planet_type_names = [ "" ] + planet_type_names_from_exe + [ "Artificial" ]
+        planet_popmood_names = self.extract_dynamic_strings(reunionexe_image, exepos_planet_popmood_names, 7)
+        planet_taxlevel_names = self.extract_dynamic_strings(reunionexe_image, exepos_planet_taxlevel_names, 8)
+        planet_devlevel_names = self.extract_dynamic_strings(reunionexe_image, exepos_planet_devlevel_names, 6)
+        planet_explore_status_names = self.extract_dynamic_strings(reunionexe_image, exepos_planet_explore_status_names, 6)
+        planet_facilities_names = self.extract_dynamic_strings(reunionexe_image, exepos_planet_facilities_names, 8)
+
         commander_salaries = struct.unpack_from("<"+"I"*12, reunionexe_image, exepos_commander_salaries)
         commander_salaries_processed = [ commander_salaries[0:3], commander_salaries[3:6], commander_salaries[6:9], commander_salaries[9:12] ]
         commander_names   = list(map(lambda x:x.decode("ascii"), struct.unpack_from("19p"*12, reunionexe_image, exepos_commandernames)))
@@ -601,6 +627,9 @@ class ReReGame:
                 'already': self.extract_dynamic_strings(reunionexe_image, exepos_commanderhire_already, 1)[0],
                 'noskill': self.extract_dynamic_strings(reunionexe_image, exepos_commanderhire_noskill, 1)[0]
             }
+
+        ship_on_ground_names = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "10p"*4,  reunionexe_image, exepos_shipnames_ground)))
+        vehicle_on_ground_names = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "9p"*4,  reunionexe_image, exepos_vehiclenames_ground)))
         mineral_names     = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "9p"*6,  reunionexe_image, exepos_mineralnames)))
         race_names        = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from("10p"*12, reunionexe_image, exepos_racenames)))
         skill_names       = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "8p"*4,  reunionexe_image, exepos_skillnames)))
@@ -610,17 +639,26 @@ class ReReGame:
 #        print(skill_names)
 #        exit(1)
 
-        #self.process_raw_racedata(reunionexe_image[exepos_races:exepos_races+228*11])
+        races_info = self.process_raw_racedata(reunionexe_image[exepos_races:exepos_races+228*11])
+        race_nation_names = list(races_info.keys())
 
         gamedata_static = {
                 "buildings_info": buildings_info,
                 "planetmain_messages": planetmain_messages,
-                "planettype_names": planettype_names,
+                "planet_type_names": planet_type_names,
+                "planet_popmood_names": planet_popmood_names,
+                "planet_taxlevel_names": planet_taxlevel_names,
+                "planet_devlevel_names": planet_devlevel_names,
+                "planet_explore_status_names": planet_explore_status_names,
+                "planet_facilities_names": planet_facilities_names,
                 "commander_salaries": commander_salaries_processed,
                 "commander_names": commander_names_processed,
                 "commander_hire_txt": commander_hire_txt,
+                "ship_on_ground_names": ship_on_ground_names,
+                "vehicle_on_ground_names": vehicle_on_ground_names,
                 "mineral_names": mineral_names,
                 "race_names": race_names,
+                "race_nation_names": race_nation_names,
                 "skill_names": skill_names,
                 "system_names": system_names,
                 "system_shortnames": system_shortnames
@@ -882,6 +920,7 @@ class ReReGame:
         self.gamedata_static["inventions_desc"] = self.load_inventionsdesc()
         self.gamedata_static["buildings_desc"] = self.load_buildingsdesc()
         self.gamedata_static["commanders_desc"] = self.load_commandersdesc()
+        self.gamedata_static["races_desc"] = self.load_racesdesc()
 
         self.__setup_solarsystems(self.gamedata_static, self.gamedata_dynamic)
         self.__setup_buildings_on_planets(self.gamedata_dynamic)
@@ -918,11 +957,15 @@ class ReReGame:
             self.screens["planetmain"] = screen_planetmain(self.gamedata_static, self.gamedata_dynamic, selected_planet, map_position = selected_planet_map_position)
             self.current_screen = self.screens["planetmain"]
             screen_changed = True
-        elif screen_action == "MINE":
+        elif screen_action in [ "MINE", "PLANET INFO" ]:
             selected_planet = screen_action_params[0]
             selected_planet_map_position_preserve = screen_action_params[1]
-            self.screens["mine"] = screen_mine(self.gamedata_dynamic, selected_planet, selected_planet_map_position_preserve)
-            self.current_screen = self.screens["mine"]
+            if screen_action == "MINE":
+                self.screens["mine"] = screen_mine(self.gamedata_dynamic, selected_planet, selected_planet_map_position_preserve)
+                self.current_screen = self.screens["mine"]
+            elif screen_action == "PLANET INFO":
+                self.screens["planetinfo"] = screen_planetinfo(self.gamedata_static, self.gamedata_dynamic, self.solarsystems, selected_planet, selected_planet_map_position_preserve)
+                self.current_screen = self.screens["planetinfo"]
             screen_changed = True
         elif screen_action == "RESEARCH-DESIGN":
             self.current_screen = self.screens["researchdesign"]

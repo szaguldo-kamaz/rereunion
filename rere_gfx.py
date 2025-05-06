@@ -75,6 +75,7 @@ class ReReGFX:
         self.prepare_mine_szamok()
         self.prepare_kocsma_anims()
         self.prepare_kocsmatoltelekek()
+        self.prepare_planetinfo()
 
         self.menu_full = pygame.Surface((320, 64))
         self.infobar = pygame.Surface((320, 17))
@@ -307,7 +308,7 @@ class ReReGFX:
 
         PIClist.append("PLANETS/PLANET0.PIC")  # Planet info pic (extra 0 - unexplored planet)
         for planet_no in range(1,12):
-        #    PIClist.append("PLANETS/PLANET%d.PIC"%(planet_no))  # Planet info pic
+            PIClist.append("PLANETS/PLANET%d.PIC"%(planet_no))  # Planet info pic
             PIClist.append("PLANETS/FELSZ%d.PIC"%(planet_no))  # Felszinek listaja - MAP elements (element size is 32x32)
             PIClist.append("PLANETS/EPUL%d.PIC"%(planet_no))  # Epuletek a felszinen - Buildings on the surface
         #    PIClist.append("PLANETS/EPULT%d.PIC"%(planet_no))  # Idegen bazis a felszinen - Alien base on the surface
@@ -375,9 +376,16 @@ class ReReGFX:
         PIClist.append("GRAFIKA/FACES3.PIC")  # Commanders Fighters
         PIClist.append("GRAFIKA/FACES4.PIC")  # Commanders Developers
 
+        PIClist.append("GRAFIKA/BOLYGO.PIC")  # Planet Info
+        PIClist.append("GRAFIKA/ALIENNFO.PIC")  # Planet Info / Alien nfo
+
         # Nagy
-        #for nagy_no in range(13):
-        #    PIClist.append("PLANETS/NAGY%d.PIC"%(nagy_no))  #.
+        for nagy_no in range(13):
+            PIClist.append("PLANETS/NAGY%d.PIC"%(nagy_no))  # Nagy felszin kep - Surface
+
+        # Alien faces
+        for alien_no in range(1,17):
+            PIClist.append("ALIEN/ALIEN%d.PIC"%(alien_no))  # Nagy alien arckep - Alien faces
 
         #PIClist.append("PLANETS/MUSZI.PIC")  # Urhajo Muszerfal
         #PIClist.append("PLANETS/MUSZIANM.PIC")  # Urhajo Muszerfal animacio
@@ -826,6 +834,19 @@ class ReReGFX:
             self.kocsmatoltelekek[kocsmatoltelek].set_colorkey(pygame.Color(0, 0, 0xFF))
 
 
+    def prepare_planetinfo(self):
+
+        # Fajok
+        for faj_no in range(14):
+            self.PICs[f"FAJ{faj_no}"] = self.PICs[f"FAJ{faj_no}"].subsurface(pygame.Rect( 2, 2, 53, 43))
+        # Planet info pic
+        for planet_no in range(1,12):
+            self.PICs[f"PLANET{planet_no}"] = self.PICs[f"PLANET{planet_no}"].subsurface(pygame.Rect( 2, 2, 92, 51))
+        # Alien faces pic
+        for alien_no in range(1,17):
+            self.PICs[f"ALIEN{alien_no}"] = self.PICs[f"ALIEN{alien_no}"].subsurface(pygame.Rect( 1, 6, 94, 144))
+
+
     #################
     ### Render ###
     ###########
@@ -972,6 +993,8 @@ class ReReGFX:
             return self.render_controlroom(screenobj)
         elif screenobj.screentype == "planetmain":
             return self.render_planetmain(screenobj)
+        elif screenobj.screentype == "planetinfo":
+            return self.render_planetinfo(screenobj)
         elif screenobj.screentype == "mine":
             return self.render_mine(screenobj)
         elif screenobj.screentype == "researchdesign":
@@ -1511,6 +1534,124 @@ class ReReGFX:
                                   screenobj_planetmain.radar_viewer_rect_size[0],
                                   screenobj_planetmain.radar_viewer_rect_size[1])
         pygame.draw.rect(self.screen_buffer, (0xff, 0x0c, 0x00), radar_viewer_rect_pos, 1)
+
+        return self.screen_buffer
+
+
+    # planet info
+    def render_planetinfo(self, screenobj_planetinfo):
+
+        self.screen_buffer.blit(self.render_menu(screenobj_planetinfo.menu_info), (0, 0))
+        self.screen_buffer.blit(self.render_infobar(screenobj_planetinfo.menu_info), (0, 32))
+
+        if screenobj_planetinfo.surfacemode:
+            self.screen_buffer.blit(self.PICs[f"NAGY{screenobj_planetinfo.planet.planettype}"], (0, 49))
+
+        elif screenobj_planetinfo.aliennfomode:
+            self.screen_buffer.blit(self.PICs["ALIENNFO"], (0, 49))
+            self.screen_buffer.blit(self.PICs[f"ALIEN{screenobj_planetinfo.planet.race}"], (2, 53))
+            race_description = self.gamedata_static["races_desc"][screenobj_planetinfo.planet.race-1]
+            self.screen_buffer.blit(self.render_text(race_description[0], textcolor = 2), (105, 54))
+            for race_desc_index in range(len(race_description)-1):
+                self.screen_buffer.blit(self.render_text(race_description[race_desc_index + 1], textcolor = 1), (105, 81 + race_desc_index*9))
+
+            weapon_name_xpos = 104
+            weapon_count_xpos = 176
+            weapon_ypos = 156
+            weapon_cnt_index = 0
+            invention_padding = 11
+            for weapon_invention_index in [ 10, 16, 23, 33, 17, 21, 26, 32 ]:
+                if weapon_invention_index == 17:
+                    weapon_name_xpos = 197
+                    weapon_count_xpos = 299
+                    weapon_ypos = 156
+                    invention_padding = 16
+
+                weapon_count = screenobj_planetinfo.planet.alien_ground_forces[weapon_cnt_index]
+                weapon_cnt_index += 1
+                if weapon_count == 0:
+                    continue
+
+                invention_name = screenobj_planetinfo.gamedata_dynamic["inventions"][weapon_invention_index]["name"].decode("ascii")
+                text_weapon = self.render_text(f"{invention_name:{invention_padding}}:", textcolor = 1)
+                self.screen_buffer.blit(text_weapon, (weapon_name_xpos, weapon_ypos))
+                text_weapon_count = self.render_text(f"{weapon_count:2d}", textcolor = 2)
+                self.screen_buffer.blit(text_weapon_count, (weapon_count_xpos, weapon_ypos))
+                weapon_ypos += 8
+
+        else:
+            # main pic
+            self.screen_buffer.blit(self.PICs["BOLYGO"], (0, 49))
+
+            if screenobj_planetinfo.orbitingplanet == None:
+                planetmoon_image = self.starmap_planets[screenobj_planetinfo.planet.planet_id[0]-1][screenobj_planetinfo.planet.planet_id[1]-1]
+                planetmoon_posoffset = 16
+            else:
+                moon_seqid = screenobj_planetinfo.orbitingplanet.moons_seqids[screenobj_planetinfo.planet.planet_id[2]-1]
+                planetmoon_image = self.starmap_moons[screenobj_planetinfo.planet.planet_id[0]-1][moon_seqid]
+                planetmoon_posoffset = 8
+
+            if screenobj_planetinfo.display_fajpic == None:  # uninhabited planet
+                fajpicname = None
+            elif screenobj_planetinfo.display_fajpic == "?":
+                fajpicname = f"FAJ13"  # "?" mark
+            else:
+                fajpicname = f"FAJ{screenobj_planetinfo.display_fajpic}"
+
+            if fajpicname != None:
+                self.screen_buffer.blit(self.PICs[fajpicname], (2, 51))
+
+            self.screen_buffer.blit(planetmoon_image, (29 - planetmoon_posoffset, 121 - planetmoon_posoffset))
+
+            self.screen_buffer.blit(self.PICs[f"PLANET{screenobj_planetinfo.planet.planettype}"], (2, 147))
+
+            text_planetname = self.render_text(screenobj_planetinfo.planet_name_header, textcolor = 1)
+            self.screen_buffer.blit(text_planetname, (94, 53))
+
+            text_diameter = self.render_text(f"{screenobj_planetinfo.planet.diameter: 6d}", textcolor = 1)
+            self.screen_buffer.blit(text_diameter, (124, 133))
+
+            text_temperature = self.render_text(f"{screenobj_planetinfo.planet.temperature: 4d}", textcolor = 1)
+            self.screen_buffer.blit(text_temperature, (272, 133))
+
+            if screenobj_planetinfo.planet.colony == 1:
+                population_mood_text = self.gamedata_static["planet_popmood_names"][int(screenobj_planetinfo.planet.population_mood / 10)]
+                population_full_text = f"{screenobj_planetinfo.planet.population_count}{population_mood_text}"
+                taxlevel_text = self.gamedata_static["planet_taxlevel_names"][screenobj_planetinfo.planet.tax_level]
+                devlevel_text = self.gamedata_static["planet_devlevel_names"][int(screenobj_planetinfo.planet.development_level / 10)]
+            else:
+                population_full_text = "No"
+                taxlevel_text = "No"
+                devlevel_text = "No"
+
+            text_population = self.render_text(population_full_text, textcolor = 1)
+            self.screen_buffer.blit(text_population, (97, 69))
+
+            text_taxlevel = self.render_text(taxlevel_text, textcolor = 1)
+            self.screen_buffer.blit(text_taxlevel, (97, 85))
+
+            text_devlevel = self.render_text(devlevel_text, textcolor = 1)
+            self.screen_buffer.blit(text_devlevel, (97, 101))
+
+            text_type = self.render_text(screenobj_planetinfo.planet_type_desc, textcolor = 1)
+            self.screen_buffer.blit(text_type, (97, 117))
+
+            text_yes = self.render_text("YES", textcolor = 1)
+            text_no  = self.render_text("NO",  textcolor = 1)
+            mineral_present_ypos = 149
+            for mineralname in screenobj_planetinfo.planet.mineral_production_base:
+                if screenobj_planetinfo.planet.mineral_production_base[mineralname] == 0:
+                    text_mineral = text_no
+                else:
+                    text_mineral = text_yes
+                self.screen_buffer.blit(text_mineral, (160, mineral_present_ypos))
+                mineral_present_ypos += 8
+
+            facilities_ypos = 149
+            for facility_line_text in screenobj_planetinfo.facilities_list:
+                text_facility_line = self.render_text(facility_line_text, textcolor = 1)
+                self.screen_buffer.blit(text_facility_line, (194, facilities_ypos))
+                facilities_ypos += 8
 
         return self.screen_buffer
 
