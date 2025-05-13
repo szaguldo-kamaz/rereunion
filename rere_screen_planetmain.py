@@ -32,6 +32,7 @@ class screen_planetmain(screen):
         self.selected_building_on_map = None
 
         self.planet = planet
+        self.humanscolony = (self.planet.colony == 1 and self.planet.race == 1)
         if self.planet.possible_buildings_list != []:
             self.__select_building_by_index(selected_building_index)
         else:
@@ -272,7 +273,7 @@ class screen_planetmain(screen):
             # Build icon
             elif 50 <= mouse_pos[1] <= 62 and 0 <= mouse_pos[0] <= 43:
 
-                if self.planet.colony == 0:
+                if self.humanscolony == 0:
                     self.menu_info["actiontext"] = 'No effect'
                 else:
                     self.menu_info["actiontext"] = 'Build'
@@ -320,7 +321,7 @@ class screen_planetmain(screen):
             # Demolish icon
             elif 50 <= mouse_pos[1] <= 62 and 45 <= mouse_pos[0] <= 88:
 
-                if self.planet.colony == 0:
+                if self.humanscolony == 0:
                     self.menu_info["actiontext"] = 'No effect'
                 else:
                     self.menu_info["actiontext"] = 'Destroy'
@@ -337,11 +338,12 @@ class screen_planetmain(screen):
 
             # Invention info
             elif (64 <= mouse_pos[1] <= 127) and (12 <= mouse_pos[0] <=  88):
-                self.menu_info["actiontext"] = 'Invention Info'
-                if mouse_buttonevent[0]:
-                    self.screenmode_buildinginfo = True
-                    self.screenmode_buildinginfo_specific = False
-                    self.sfx_to_play = "X"
+                if self.humanscolony == 1:
+                    self.menu_info["actiontext"] = 'Invention Info'
+                    if mouse_buttonevent[0]:
+                        self.screenmode_buildinginfo = True
+                        self.screenmode_buildinginfo_specific = False
+                        self.sfx_to_play = "X"
 
 
         # Common in Terrain / Building info mode
@@ -350,7 +352,7 @@ class screen_planetmain(screen):
             # Invention up
             if 64 <= mouse_pos[1] <= 95 and 0 <= mouse_pos[0] <= 10:
 
-                if self.planet.colony == 0:
+                if self.humanscolony == 0:
                     self.menu_info["actiontext"] = 'No effect'
                 else:
                     self.menu_info["actiontext"] = 'Invention up'
@@ -364,7 +366,7 @@ class screen_planetmain(screen):
             # Invention down
             elif 97 <= mouse_pos[1] <= 128 and 0 <= mouse_pos[0] <= 10:
 
-                if self.planet.colony == 0:
+                if self.humanscolony == 0:
                     self.menu_info["actiontext"] = 'No effect'
                 else:
                     self.menu_info["actiontext"] = 'Invention down'

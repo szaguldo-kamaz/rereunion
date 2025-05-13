@@ -914,6 +914,33 @@ class ReReGFX:
         return base_mapsurface
 
 
+    def render_surface_under_buildinginfo(self, planet):
+
+        map_felszin = self.major_vs_felszin[planet.planettype]
+
+        if planet.planettype in [ 5, 6 ]:  # tropical, desert
+            for tilepos_y in range(0,4,2):
+                for tilepos_x in range(0,5,2):
+                    self.surface_building.blit( self.felszinek[map_felszin][0],  (tilepos_x * 16, tilepos_y * 16) )
+                    self.surface_building.blit( self.felszinek[map_felszin][1],  ((tilepos_x + 1) * 16, tilepos_y * 16) )
+                    self.surface_building.blit( self.felszinek[map_felszin][20], (tilepos_x * 16, (tilepos_y + 1) * 16) )
+                    self.surface_building.blit( self.felszinek[map_felszin][21], ((tilepos_x + 1) * 16, (tilepos_y + 1) * 16) )
+        if planet.planettype in [ 2 ]:  # gas
+            for tilepos_x in range(0,5):
+                tilecode = tilepos_x % 4
+                tilexpos = tilepos_x << 4
+                self.surface_building.blit( self.felszinek[map_felszin][tilecode],      (tilexpos,  0) )
+                self.surface_building.blit( self.felszinek[map_felszin][20 + tilecode], (tilexpos, 16) )
+                self.surface_building.blit( self.felszinek[map_felszin][4  + tilecode], (tilexpos, 32) )
+                self.surface_building.blit( self.felszinek[map_felszin][24 + tilecode], (tilexpos, 48) )
+        else:
+            for tilepos_y in range(0,4):
+                for tilepos_x in range(0,5):
+                    self.surface_building.blit( self.felszinek[map_felszin][0], (tilepos_x * 16, tilepos_y * 16) )
+
+        return self.surface_building
+
+
     def render_building(self, planet, building_data):
 
         map_felszin = self.major_vs_felszin[planet.planettype]
@@ -922,17 +949,7 @@ class ReReGFX:
         offset_x = 38 - (building_size[0]*8)
         offset_y = 32 - (building_size[1]*8)
 
-        if planet.planettype == 6:  # desert
-            for tilepos_y in range(0,4,2):
-                for tilepos_x in range(0,5,2):
-                    self.surface_building.blit( self.felszinek[map_felszin][0],  (tilepos_x * 16, tilepos_y * 16) )
-                    self.surface_building.blit( self.felszinek[map_felszin][1],  ((tilepos_x + 1) * 16, tilepos_y * 16) )
-                    self.surface_building.blit( self.felszinek[map_felszin][20], (tilepos_x * 16, (tilepos_y + 1) * 16) )
-                    self.surface_building.blit( self.felszinek[map_felszin][21], ((tilepos_x + 1) * 16, (tilepos_y + 1) * 16) )
-        else:
-            for tilepos_y in range(0,4):
-                for tilepos_x in range(0,5):
-                    self.surface_building.blit( self.felszinek[map_felszin][0], (tilepos_x * 16, tilepos_y * 16) )
+        self.surface_building = self.render_surface_under_buildinginfo(planet)
 
         for tilepos_y in range(building_size[1]):
             for tilepos_x in range(building_size[0]):
@@ -1411,7 +1428,10 @@ class ReReGFX:
         # main pic
         self.screen_buffer.blit(self.planetmain_designer, (0, 49))
 
-        if screenobj_planetmain.planet.colony == 1:
+        # terrain under building on surface illustration
+        self.screen_buffer.blit(self.render_surface_under_buildinginfo(screenobj_planetmain.planet), (12, 15 + 49))
+
+        if screenobj_planetmain.humanscolony == 1:
             # build icon
             buildicon_state = screenobj_planetmain.animstates["builddemolish"].currframe and screenobj_planetmain.build_mode
             self.screen_buffer.blit(self.planetmain_buildicon[buildicon_state], (0, 1 + 49))
