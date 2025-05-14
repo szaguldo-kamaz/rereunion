@@ -60,14 +60,16 @@ class ReReSFX:
             smpfile.close()
             self.effects[smpfile_name.split('.')[0].split('/')[1]] = pygame.mixer.Sound(BytesIO(voc_head + smpdata))
 
-        # "SHIP" is recycled from "MOVESHIP"
-        smpfile = open("SOUND/MOVESHIP.SMP", "rb")
-        # 12270 - 4806 + 4 = 0x001d2c
-        smpheader = bytes([ 0x01, 0x2c, 0x1d, 0x00, 0xad, 0x00 ])
-        smpfile.seek(4806)
-        smpdata = smpfile.read()
-        smpfile.close()
-        self.effects["SHIP"] = pygame.mixer.Sound(BytesIO(voc_head + smpheader + smpdata))
+#        # "SHIP" is recycled from "MOVESHIP"
+#        smpfile = open("SOUND/MOVESHIP.SMP", "rb")
+#        # 12270 - 4806 + 4 = 0x001d2c
+#        smpheader = bytes([ 0x01, 0x2c, 0x1d, 0x00, 0xad, 0x00 ])
+#        smpfile.seek(4806)
+#        smpdata = smpfile.read()
+#        smpfile.close()
+#        self.effects["SHIP"] = pygame.mixer.Sound(BytesIO(voc_head + smpheader + smpdata))
+
+        self.effects["SHIP"] = self.effects["BASEEFF"]
 
 
     def play_effect(self, effectname):
