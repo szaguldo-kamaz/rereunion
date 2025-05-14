@@ -79,3 +79,11 @@ class ReReSFX:
     def stop(self):
         pygame.mixer.stop()
 
+
+    def play_music(self, musicfile):
+        pygame.mixer.music.load(musicfile)
+        pygame.mixer.music.play()
+
+
+    def stop_music(self):
+        pygame.mixer.music.stop()

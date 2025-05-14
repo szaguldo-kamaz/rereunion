@@ -30,6 +30,8 @@ rereunion_sfx = ReReSFX()
 
 run = True
 
+rereunion_sfx.play_music("ANIM/MAIN1.SPD")
+
 while run:
 
     rereunion_gfx.draw(rereunion_game)
