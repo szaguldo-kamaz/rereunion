@@ -1089,3 +1089,10 @@ class ReReGame:
     def get_sfx(self):
         return self.current_screen.get_sfx()
 
+
+    def background_sfx_active(self):
+        return self.current_screen.has_background_sfx
+
+
+    def get_background_sfx(self):
+        return self.current_screen.get_background_sfx()

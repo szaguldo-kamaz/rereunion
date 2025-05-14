@@ -135,6 +135,7 @@ class screen:
         self.action = None
         self.action_params = None
         self.sfx_to_play = None
+        self.has_background_sfx = False
 
         self.last_mouse_pos = None
 
@@ -182,6 +183,10 @@ class screen:
             return sfx
         else:
             return None
+
+
+    def get_background_sfx(self):
+        return None
 
 
     def update_anims(self):

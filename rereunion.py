@@ -71,6 +71,14 @@ while run:
     if sfx_to_play != None:
         rereunion_sfx.play_effect(sfx_to_play)
 
+    if rereunion_game.background_sfx_active():
+        if rereunion_sfx.background_channel.get_queue() == None:
+            sfx_to_play_in_background = rereunion_game.get_background_sfx()
+            if sfx_to_play_in_background!= None:
+                rereunion_sfx.background_queue_add(sfx_to_play_in_background)
+    else:
+        rereunion_sfx.background_channel.stop()
+
     rereunion_game.update_anims()
 
     pygame.display.update()

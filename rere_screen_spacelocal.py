@@ -6,6 +6,7 @@
 #
 
 
+import random
 from rere_screen import screen
 
 
@@ -33,6 +34,20 @@ class screen_spacelocal(screen):
         self.add_anim("zagyva",          15, 2, 1)
         self.add_anim("nagyasztal",      32, 2, 1) #, delay = -1, delaymin = 4, delaymax = 16)
         self.add_anim("knightrider",     18, 2, 1)
+
+        self.has_background_sfx = True
+
+
+    def get_background_sfx(self):
+# 1 ambient
+# 2 burp
+# 3 tuduruduruuru
+# 4 nyihahha
+# 5 huhhhahahhaa
+# 6 zzzsrrrrp
+# 7 ugyubugyu hadabadibiidaa
+# 8 vaaggyaggyaa
+        return f"LOCAL{random.randint(1,8)}"
 
 
     def update(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):
