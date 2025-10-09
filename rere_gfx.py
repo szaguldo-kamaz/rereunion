@@ -879,7 +879,7 @@ class ReReGFX:
 
         rendered_map = pygame.Surface((map_size[0] * 16, map_size[1] * 16))
 
-        fanim_changeovertiles = [ 0, 80, 0, 0, 0, 160, 0, 0, 240 ]  # planet types
+        fanim_changeovertiles = [ 0, 80, 0, 0, 0, 160, 0, 0, 240 ]  # index: planet type
 
         # render map - # 1, 5, 8 have animations
         if map_major in [ 1, 5, 8 ]:
@@ -918,14 +918,11 @@ class ReReGFX:
 
         map_felszin = self.major_vs_felszin[planet.planettype]
 
-        if planet.planettype in [ 5, 6 ]:  # tropical, desert
-            for tilepos_y in range(0,4,2):
-                for tilepos_x in range(0,5,2):
-                    self.surface_building.blit( self.felszinek[map_felszin][0],  (tilepos_x * 16, tilepos_y * 16) )
-                    self.surface_building.blit( self.felszinek[map_felszin][1],  ((tilepos_x + 1) * 16, tilepos_y * 16) )
-                    self.surface_building.blit( self.felszinek[map_felszin][20], (tilepos_x * 16, (tilepos_y + 1) * 16) )
-                    self.surface_building.blit( self.felszinek[map_felszin][21], ((tilepos_x + 1) * 16, (tilepos_y + 1) * 16) )
-        if planet.planettype in [ 2 ]:  # gas
+        if planet.planettype in [ 1, 4 ]:  # earth, water
+            for tilepos_y in range(0,4):
+                for tilepos_x in range(0,5):
+                    self.surface_building.blit( self.felszinek[map_felszin][0], (tilepos_x * 16, tilepos_y * 16) )
+        elif planet.planettype in [ 2 ]:  # gas
             for tilepos_x in range(0,5):
                 tilecode = tilepos_x % 4
                 tilexpos = tilepos_x << 4
@@ -934,9 +931,12 @@ class ReReGFX:
                 self.surface_building.blit( self.felszinek[map_felszin][4  + tilecode], (tilexpos, 32) )
                 self.surface_building.blit( self.felszinek[map_felszin][24 + tilecode], (tilexpos, 48) )
         else:
-            for tilepos_y in range(0,4):
-                for tilepos_x in range(0,5):
-                    self.surface_building.blit( self.felszinek[map_felszin][0], (tilepos_x * 16, tilepos_y * 16) )
+            for tilepos_y in range(0,4,2):
+                for tilepos_x in range(0,5,2):
+                    self.surface_building.blit( self.felszinek[map_felszin][0],  (tilepos_x * 16, tilepos_y * 16) )
+                    self.surface_building.blit( self.felszinek[map_felszin][1],  ((tilepos_x + 1) * 16, tilepos_y * 16) )
+                    self.surface_building.blit( self.felszinek[map_felszin][20], (tilepos_x * 16, (tilepos_y + 1) * 16) )
+                    self.surface_building.blit( self.felszinek[map_felszin][21], ((tilepos_x + 1) * 16, (tilepos_y + 1) * 16) )
 
         return self.surface_building
 
