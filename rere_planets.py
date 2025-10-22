@@ -412,6 +412,7 @@ class solarsystem:
                 return False
             else:
                 self.tax_level += 1
+                return True
 
 
         def decrease_tax(self):
@@ -419,6 +420,7 @@ class solarsystem:
                 return False
             else:
                 self.tax_level -= 1
+                return True
 
 
     ##################
