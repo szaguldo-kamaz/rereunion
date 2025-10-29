@@ -14,6 +14,7 @@ from rere_shipgroups import shipgroup
 from rere_screen_controlroom import *
 from rere_screen_infobuy import *
 from rere_screen_ship import *
+from rere_screen_group import *
 from rere_screen_planetmain import *
 from rere_screen_mine import *
 from rere_screen_researchdesign import *
@@ -1019,6 +1020,7 @@ class ReReGame:
         self.screens["infobuy"] = screen_infobuy(self.gamedata_static, self.gamedata_dynamic)
         self.screens["researchdesign"] = screen_researchdesign(self.gamedata_static, self.gamedata_dynamic)
         self.screens["ship"] = screen_ship(self.gamedata_static, self.gamedata_dynamic, self.solarsystems, self.shipgroups_spaceforces, self.shipgroups_planetforces)
+        self.screens["group"] = screen_group(self.gamedata_static, self.gamedata_dynamic, self.solarsystems, self.shipgroups_spaceforces, self.shipgroups_planetforces)
         self.screens["starmap"] = screen_starmap(self.gamedata_static, self.gamedata_dynamic, self.solarsystems)
         self.screens["messages"] = screen_messages(self.gamedata_dynamic)
         self.screens["spacelocal"] = screen_spacelocal(self.gamedata_dynamic)
@@ -1059,6 +1061,9 @@ class ReReGame:
             screen_changed = True
         elif screen_action in [ "SHIP INFO", "SPACEPORT" ]:
             self.current_screen = self.screens["ship"]
+            screen_changed = True
+        elif screen_action in [ "GROUP", "PLANET FORCES" ]:
+            self.current_screen = self.screens["group"]
             screen_changed = True
         elif screen_action == "GALACTIC MAP":
             self.current_screen = self.screens["starmap"]

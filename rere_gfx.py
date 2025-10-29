@@ -70,6 +70,7 @@ class ReReGFX:
         self.prepare_infobuy()
         self.prepare_researchdesign_computer()
         self.prepare_ship()
+        self.prepare_group()
         self.prepare_starmap()
         self.prepare_felszin()
         self.prepare_planetmain()
@@ -380,6 +381,9 @@ class ReReGFX:
         PIClist.append("GRAFIKA/BOLYGO.PIC")  # Planet Info
         PIClist.append("GRAFIKA/ALIENNFO.PIC")  # Planet Info / Alien nfo
 
+        PIClist.append("GRAFIKA/BEOSZTAS.PIC")  # Group Info
+        PIClist.append("GRAFIKA/BENYIL.PIC")  # Group Info Arrows / Nyilak
+
         # Nagy
         for nagy_no in range(13):
             PIClist.append("PLANETS/NAGY%d.PIC"%(nagy_no))  # Nagy felszin kep - Surface
@@ -649,6 +653,13 @@ class ReReGFX:
                 self.ship_icons_spaceforces[ship3_icon_y + 1][-1].set_colorkey(pygame.Color(0, 0, 0))
 
         self.ship_icon_planetforces.set_colorkey(pygame.Color(0, 0, 0))
+
+
+    def prepare_group(self):
+        self.group_icon_up_arrow    = self.PICs["BENYIL"].subsurface(pygame.Rect( 0, 0, 17, 28))
+        self.group_icon_down_arrow  = self.PICs["BENYIL"].subsurface(pygame.Rect(18, 0, 17, 28))
+        self.group_icon_left_arrow  = self.PICs["BENYIL"].subsurface(pygame.Rect(36, 0, 10, 12))
+        self.group_icon_right_arrow = self.PICs["BENYIL"].subsurface(pygame.Rect(48, 0, 10, 12))
 
 
     def prepare_starmap(self):
@@ -1021,6 +1032,8 @@ class ReReGFX:
             return self.render_infobuy(screenobj)
         elif screenobj.screentype == "ship":
             return self.render_ship(screenobj)
+        elif screenobj.screentype == "group":
+            return self.render_group(screenobj)
         elif screenobj.screentype == "starmap":
             return self.render_starmap(screenobj)
         elif screenobj.screentype == "messages":
@@ -1434,6 +1447,99 @@ class ReReGFX:
                 yellow_text_time_remaining = self.render_text(f"Time remaining:{curgrp.remaining_flight_time}", textcolor = 1)
                 self.screen_buffer.blit(yellow_text_time_remaining, (202, 100))
 
+
+        return self.screen_buffer
+
+
+    # group/beosztas
+    def render_group(self, screenobj_group):
+
+        self.screen_buffer.blit(self.render_menu(screenobj_group.menu_info), (0, 0))
+        self.screen_buffer.blit(self.render_infobar(screenobj_group.menu_info), (0, 32))
+
+        # main pic
+        self.screen_buffer.blit(self.PICs["BEOSZTAS"], (0, 49))
+
+        # cover arrows when necessary
+        if not screenobj_group.inventory_to_show_up_arrow:
+            pygame.draw.rect(self.screen_buffer, (0x00, 0x00, 0x00), (294,  87, 17, 28), 0)
+        if not screenobj_group.inventory_to_show_down_arrow:
+            pygame.draw.rect(self.screen_buffer, (0x00, 0x00, 0x00), (294, 125, 17, 28), 0)
+        if not screenobj_group.inventory_to_show_left_arrow:
+            pygame.draw.rect(self.screen_buffer, (0x00, 0x00, 0x00), (  9,  53, 10, 12), 0)
+        if not screenobj_group.inventory_to_show_right_arrow:
+            pygame.draw.rect(self.screen_buffer, (0x00, 0x00, 0x00), (131,  53, 10, 12), 0)
+
+        if screenobj_group.selected_group_no_current > 0:
+
+            curgrp = screenobj_group.current_shipgroup[screenobj_group.selected_group_no_current]
+            [ sysname, planetname, moonname ] = screenobj_group.selected_group_location_names
+            if moonname == None:
+                moonname = ''
+
+            # location
+            quantity_text_color = 1  # yellow
+            if curgrp.type == 5:  # planet forces
+                locbasetext = ""
+                quantity_text_color = 2  # red
+            else:
+                if 4 <= curgrp.orbit_status <= 6:
+                    locbasetext = "Destination"
+                elif curgrp.orbit_status == 1:
+                    locbasetext = "In dock of"
+                    quantity_text_color = 2  # red
+                else:
+                    locbasetext = "In orbit"
+
+            for c_idx in range(len(screenobj_group.inventory_to_show_crafts)):
+
+                craftname = screenobj_group.inventory_to_show_craft_names[c_idx]
+                craftkey = screenobj_group.inventory_to_show_crafts[c_idx]
+                craftquantity = f"{curgrp.fleet[craftkey]:3d}"
+
+                yellow_text_craftname = self.render_text(craftname, textcolor = 1)
+                text_craft_quantity = self.render_text(craftquantity, textcolor = quantity_text_color)
+
+                if curgrp.type == 2:  # trade
+                    craftname_posidx_x = c_idx in [1, 2]
+                    craftname_posidx_y = c_idx > 1
+                else:
+                    craftname_posidx_x = c_idx // 2
+                    craftname_posidx_y = c_idx % 2
+
+                self.screen_buffer.blit(yellow_text_craftname, (21, 109 + c_idx * 10))
+                self.screen_buffer.blit(yellow_text_craftname, ([16, 88][craftname_posidx_x], [176, 186][craftname_posidx_y]))
+                self.screen_buffer.blit(text_craft_quantity, (109, 109 + c_idx * 10))
+
+                for e_idx in range(len(screenobj_group.inventory_to_show_equips)):
+
+                    equipname = screenobj_group.inventory_to_show_equip_names[e_idx]
+                    equipkey = screenobj_group.inventory_to_show_equips[e_idx]
+
+                    if c_idx == 0:
+                        yellow_text_equipname = self.render_text(equipname, textcolor = 1)
+                        if curgrp.type == 4:  # carrier
+                            equipname_xposes = [ 99, 148]
+                        else:
+                            equipname_xposes = [188, 248]
+                        self.screen_buffer.blit(yellow_text_equipname, (144 + e_idx * 38, 99))
+                        self.screen_buffer.blit(yellow_text_equipname, (equipname_xposes[e_idx // 2], [176, 186][e_idx % 2]))
+
+                    if curgrp.fleet[craftkey + '_' + equipkey] == -1:
+                        equipquantity = "  -"
+                    else:
+                        equipquantity = f"{curgrp.fleet[craftkey+'_'+equipkey]:3d}"
+
+                    text_equip_quantity = self.render_text(equipquantity, textcolor = quantity_text_color)
+                    self.screen_buffer.blit(text_equip_quantity, (152 + e_idx * 38, 109 + c_idx * 10))
+
+            red_text_group_name = self.render_text(curgrp.name, textcolor = 2)
+            yellow_text_group_type = self.render_text(self.gamedata_static["group_type_names"][curgrp.type - 1], textcolor = 1)
+            yellow_text_group_loc_basetext = self.render_text(f"{locbasetext} {sysname} system {planetname} {moonname}", textcolor = 1)
+
+            self.screen_buffer.blit(red_text_group_name, (24, 56))
+            self.screen_buffer.blit(yellow_text_group_type, (223, 56))
+            self.screen_buffer.blit(yellow_text_group_loc_basetext, (12, 67))
 
         return self.screen_buffer
 
