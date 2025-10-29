@@ -121,7 +121,11 @@ class screen_ship(screen):
                     self.__set_location_names(bool(self.currentview))
                     self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
                     if is_icon:
-                        self.sfx_to_play = "GROUP"
+                        self.action = "GROUP"
+                        if self.currentview == 0:
+                            self.sfx_to_play = "CONTROLL"
+                        else:
+                            self.sfx_to_play = "GROUP"
 
         # CHANGE at the bottom
         if (188 <= mouse_pos[1] <= 200) and (0 <= mouse_pos[0] <= 191):
