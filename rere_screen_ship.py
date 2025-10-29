@@ -117,6 +117,7 @@ class screen_ship(screen):
                 if mouse_buttonevent[0]:
                     self.selected_group_no[self.currentview] = mouse_over_groupno
                     self.selected_group_no_current = self.selected_group_no[self.currentview]
+                    gamedata_dynamic["groups_selectedgroupno"] = [ self.selected_group_no_current, self.selected_group_no[0], self.selected_group_no[1] ]
                     self.__set_location_names(bool(self.currentview))
                     self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
                     if is_icon:
@@ -128,6 +129,8 @@ class screen_ship(screen):
             if mouse_buttonevent[0]:
                 self.currentview = int(not self.currentview)
                 self.selected_group_no_current = self.selected_group_no[self.currentview]
+                gamedata_dynamic["groups_currentview"] = self.currentview
+                gamedata_dynamic["groups_selectedgroupno"] = [ self.selected_group_no_current, self.selected_group_no[0], self.selected_group_no[1] ]
                 self.update(gamedata_dynamic, mouse_pos, [0,0,0], [0,0,0])
                 if self.currentview == 0 and self.numofgroups_spaceforces > 0:
                     self.__set_location_names(bool(self.currentview))
