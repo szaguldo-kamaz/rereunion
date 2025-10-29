@@ -282,19 +282,21 @@ class ReReGame:
 
         keys = [ "type", "name", "system_no", "planet_no", "moon_no", "orbit_status",
                  "travel_time_between_solsystems", "outside_destination_solsystem", "travel_time_inside_solsystem",
-                 "Ship1", "Ship1_Laser", "Ship1_Twin", "Ship1_Miss", "Ship1_Plasma",
-                 "Ship2", "Ship2_Laser", "Ship2_Twin", "Ship2_Miss", "Ship2_Plasma",
-                 "Ship3", "Ship3_Laser", "Ship3_Twin", "Ship3_Miss", "Ship3_Plasma",
-                 "Ship4", "Ship4_Laser", "Ship4_Twin", "Ship4_Miss", "Ship4_Plasma",
-                 "Trooper", "Trooper_Laser", "Trooper_Twin", "Trooper_Miss", "Trooper_Plasma",
-                 "Tank", "Tank_Laser", "Tank_Twin", "Tank_Miss", "Tank_Plasma",
-                 "Aircraft", "Aircraft_Laser", "Aircraft_Twin", "Aircraft_Miss", "Aircraft_Plasma",
-                 "Launcher", "Launcher_Laser", "Launcher_Twin", "Launcher_Miss", "Launcher_Plasma",
-                 "Transfer_Detoxin", "Transfer_Energon", "Transfer_Kremir", "Transfer_Lepitium", "Transfer_Raenium", "Transfer_Texon",
-                 "Transfer_Hunter", "Transfer_unknown1", "Transfer_unknown2", "Transfer_unknown3",  # star fight?, destroyer?, cruiser?
-                 "Transfer_Trooper", "Transfer_Battle tank", "Transfer_Aircraft?", "Transfer_Missilie launcher?",
-                 "Transfer_Laser cannon", "Transfer_Twin Laser gun", "Transfer_Missile", "Transfer_Plasma gun?",
-                 "Transfer_Miner droid", "Transfer_unknown4" ]
+                 "Ship1", "Ship1_Equip1", "Ship1_Equip2", "Ship1_Equip3", "Ship1_Equip4",
+                 "Ship2", "Ship2_Equip1", "Ship2_Equip2", "Ship2_Equip3", "Ship2_Equip4",
+                 "Ship3", "Ship3_Equip1", "Ship3_Equip2", "Ship3_Equip3", "Ship3_Equip4",
+                 "Ship4", "Ship4_Equip1", "Ship4_Equip2", "Ship4_Equip3", "Ship4_Equip4",
+                 "Vehicle1", "Vehicle1_Equip1", "Vehicle1_Equip2", "Vehicle1_Equip3", "Vehicle1_Equip4",
+                 "Vehicle2", "Vehicle2_Equip1", "Vehicle2_Equip2", "Vehicle2_Equip3", "Vehicle2_Equip4",
+                 "Vehicle3", "Vehicle3_Equip1", "Vehicle3_Equip2", "Vehicle3_Equip3", "Vehicle3_Equip4",
+                 "Vehicle4", "Vehicle4_Equip1", "Vehicle4_Equip2", "Vehicle4_Equip3", "Vehicle4_Equip4",
+                 "Transfer_Mineral1", "Transfer_Mineral2", "Transfer_Mineral3",
+                 "Transfer_Mineral4", "Transfer_Mineral5", "Transfer_Mineral6",
+                 "Transfer_Ship1", "Transfer_unknown1", "Transfer_unknown2", "Transfer_unknown3",  # Ship2-4?
+                 "Transfer_Vehicle1", "Transfer_Vehicle2", "Transfer_Vehicle3", "Transfer_Vehicle4",
+                 "Transfer_Equip1", "Transfer_Equip2", "Transfer_Equip3", "Transfer_Equip4",
+                 "Transfer_MinerDroid",
+                 "Transfer_unknown4" ]
 
         if num_of_groups > 24:
             print(f"FATAL: number of groups larger than 24 ({num_of_groups})")
@@ -571,6 +573,33 @@ class ReReGame:
             print("%14s %s"%(unpacklist[0], list(spacelocal_unknown1)))
 
 
+    def process_raw_groupcraftdata(self, groupcraftdata):
+
+        craftdata_offset = 0
+        craft_names = []
+
+        for craft_no in range(4):
+            unpacklist = struct.unpack_from("<12p", groupcraftdata, craftdata_offset)
+            craftdata_offset += 25
+            if unpacklist[0] != b'':
+                craft_names.append(unpacklist[0].decode('ascii'))
+
+        return craft_names
+
+
+    def process_raw_groupequipmentdata(self, groupequipmentdata):
+
+        equipmentdata_offset = 0
+        equipment_names = []
+
+        for equipment_no in range(4):
+            unpacklist = struct.unpack_from("<6p", groupequipmentdata, equipmentdata_offset)
+            equipmentdata_offset += 14
+            equipment_names.append(unpacklist[0].decode('ascii'))
+
+        return equipment_names
+
+
     def load_reunionprg(self, reunionprg_filename = "GRWAR/REUNION.PRG"):
 
         exepos_planetmain_messages = 0x04B06  # dynamic strings *6
@@ -593,6 +622,21 @@ class ReReGame:
         exepos_commanderhire_noskill = 0x34E4D
 
         exepos_spacelocal_guest    = 0x3F42A  # len: 10 * 27
+        #...
+        exepos_ship_capacity_sloop      = 0x3FB38  # 4 bytes
+        exepos_ship_capacity_tradeship  = 0x3FB3C  # 4 bytes
+        exepos_ship_capacity_piracyship = 0x3FB40  # 4 bytes
+        exepos_ship_capacity_galleon    = 0x3FB44  # 4 bytes
+        #...
+        exepos_group_army_space_equip  = 0x3FBCC  # 1+5(len+string) + 8 (unknown data)
+        exepos_group_army_space_craft  = 0x3FC04  # 1+11(len+string) + 13 (unknown data)
+        exepos_group_trade_equip       = 0x3FC6A  # 1+5(len+string) + 8 (unknown data)
+        exepos_group_trade_craft       = 0x3FCA2  # 1+11(len+string) + 13 (unknown data)
+        exepos_group_army_ground_equip = 0x3FD08  # 1+5(len+string) + 8 (unknown data)
+        exepos_group_army_ground_craft = 0x3FD40  # 1+11(len+string) + 13 (unknown data)
+        exepos_group_carrier_equip     = 0x3FDA6  # 1+5(len+string) + 8 (unknown data)
+        exepos_group_carrier_craft     = 0x3FDDE  # 1+11(len+string) + 13 (unknown data)
+        #...
         exepos_planets_system1     = 0x40D8C  # System 1 planets in reunion.prg
         exepos_systemplanets       = 0x43AC6  # 8*8
         exepos_commander_salaries  = 0x44A8C  # 12 * int (32bit)
@@ -604,6 +648,8 @@ class ReReGame:
 # TODO eddig
         # 0x44AF8 .. 0x44B33 unknown
         exepos_commandernames      = 0x44B34  # len + string (mind 18 char) (pilot, builder, fighter, developer) 18*12
+        exepos_group_type_names    = 0x44C18  # 5*13+1
+        # ...
         exepos_shipnames_ground    = 0x44CE4  # 4*9+1
         exepos_vehiclenames_ground = 0x44D0C  # 4*8+1
         exepos_mineralnames        = 0x44D6C  # len + string (de amugy mind 8 char) - 6*8
@@ -641,6 +687,7 @@ class ReReGame:
                 'noskill': self.extract_dynamic_strings(reunionexe_image, exepos_commanderhire_noskill, 1)[0]
             }
 
+        group_type_names = list(map(lambda x:x.decode("ascii"), struct.unpack_from("14p"*5, reunionexe_image, exepos_group_type_names)))
         ship_on_ground_names = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "10p"*4,  reunionexe_image, exepos_shipnames_ground)))
         vehicle_on_ground_names = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "9p"*4,  reunionexe_image, exepos_vehiclenames_ground)))
         mineral_names     = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "9p"*6,  reunionexe_image, exepos_mineralnames)))
@@ -655,6 +702,17 @@ class ReReGame:
         races_info = self.process_raw_racedata(reunionexe_image[exepos_races:exepos_races+228*11])
         race_nation_names = list(races_info.keys())
 
+        craftlist_army_space  = self.process_raw_groupcraftdata(reunionexe_image[exepos_group_army_space_craft:exepos_group_army_space_craft+4*25])
+        craftlist_army_ground = self.process_raw_groupcraftdata(reunionexe_image[exepos_group_army_ground_craft:exepos_group_army_ground_craft+4*25])
+        craftlist_trade       = self.process_raw_groupcraftdata(reunionexe_image[exepos_group_trade_craft:exepos_group_trade_craft+4*25])
+        craftlist_carrier     = self.process_raw_groupcraftdata(reunionexe_image[exepos_group_carrier_craft:exepos_group_carrier_craft+4*25])
+        equiplist_army_space  = self.process_raw_groupequipmentdata(reunionexe_image[exepos_group_army_space_equip:exepos_group_army_space_equip+4*13])
+        equiplist_army_ground = self.process_raw_groupequipmentdata(reunionexe_image[exepos_group_army_ground_equip:exepos_group_army_ground_equip+4*13])
+        equiplist_trade       = self.process_raw_groupequipmentdata(reunionexe_image[exepos_group_trade_equip:exepos_group_trade_equip+4*13])
+        equiplist_carrier     = self.process_raw_groupequipmentdata(reunionexe_image[exepos_group_carrier_equip:exepos_group_carrier_equip+4*13])
+        group_craftlist = [ craftlist_army_space, craftlist_army_ground, craftlist_trade, craftlist_carrier ]
+        group_equiplist = [ equiplist_army_space, equiplist_army_ground, equiplist_trade, equiplist_carrier ]
+
         gamedata_static = {
                 "buildings_info": buildings_info,
                 "planetmain_messages": planetmain_messages,
@@ -667,6 +725,9 @@ class ReReGame:
                 "commander_salaries": commander_salaries_processed,
                 "commander_names": commander_names_processed,
                 "commander_hire_txt": commander_hire_txt,
+                "group_type_names": group_type_names,
+                "group_craftlist": group_craftlist,
+                "group_equiplist": group_equiplist,
                 "ship_on_ground_names": ship_on_ground_names,
                 "vehicle_on_ground_names": vehicle_on_ground_names,
                 "mineral_names": mineral_names,
@@ -792,8 +853,8 @@ class ReReGame:
             raw_systemdata = savegame_fileimage[savegamepos_planets_in_system[systemno]:savegamepos_planets_in_system[systemno] + savegamepos_planets_in_system_count[systemno] * savegamepos_planets_in_one_system_len]
             savegame["systems"].append(self.process_raw_planetsdata(raw_systemdata, savegamepos_planets_in_system_count[systemno]))
 
-        savegame["groups_numofgroups"]     = struct.unpack_from("<HHH", savegame_fileimage, savegamepos_groups_numofgroups)
-        savegame["groups_selectedgroupno"] = struct.unpack_from("<HHH", savegame_fileimage, savegamepos_groups_selectedgroupno)
+        savegame["groups_numofgroups"]     = list(struct.unpack_from("<HHH", savegame_fileimage, savegamepos_groups_numofgroups))
+        savegame["groups_selectedgroupno"] = list(struct.unpack_from("<HHH", savegame_fileimage, savegamepos_groups_selectedgroupno))
         savegame["groups_currentview"]     = struct.unpack_from("<H", savegame_fileimage, savegamepos_groups_currentview)[0]
         if savegame["groups_numofgroups"][1] > 0:
             savegame["groups_spacegroups"]     = self.process_raw_groupdata(savegame_fileimage[savegamepos_groups_spacegroups:savegamepos_groups_spacegroups + savegamepos_groups_spacegroups_len], savegame["groups_numofgroups"][1])
@@ -929,6 +990,16 @@ class ReReGame:
         [ self.gamedata_dynamic ] = self.load_savegame(savegame_filename)  # needs self.gamedata_static !
 
         self.gamedata_dynamic["time_stopped"] = False
+
+        # TODO: generate from "inventions"
+        self.gamedata_dynamic["invented_army_ship_list"]          = [ "Ship1", "Ship2", "Ship3", "Ship4" ]
+        self.gamedata_dynamic["invented_army_vehicle_list"]       = [ "Vehicle1", "Vehicle2", "Vehicle3", "Vehicle4" ]
+        self.gamedata_dynamic["invented_army_ship_equip_list"]    = [ "Equip1", "Equip2", "Equip3", "Equip4" ]
+        self.gamedata_dynamic["invented_army_vehicle_equip_list"] = [ "Equip1", "Equip2", "Equip3" ]
+        self.gamedata_dynamic["invented_trade_ship_list"]         = [ "Ship1", "Ship2", "Ship3", "Ship4" ]
+        self.gamedata_dynamic["invented_trade_equip_list"]        = [ "Equip1", "Equip2", "Equip3", "Equip4" ]
+        self.gamedata_dynamic["invented_carrier_ship_list"]       = [ "Ship1" ]
+        self.gamedata_dynamic["invented_carrier_equip_list"]      = [ "Equip1", "Equip2", "Equip3", "Equip4" ]
 
         self.gamedata_static["inventions_desc"] = self.load_inventionsdesc()
         self.gamedata_static["buildings_desc"] = self.load_buildingsdesc()

@@ -13,25 +13,25 @@ class shipgroup:
     def __init__(self, groupname, grouptype, initial_groupraw_data = None):
 
         self.__cargonames = (  # see also: process_raw_groupdata() in rere_game.py
-                             "Detoxin",
-                             "Energon",
-                             "Kremir",
-                             "Lepitium",
-                             "Raenium",
-                             "Texon",
-                             "Hunter",
+                             "Mineral1",
+                             "Mineral2",
+                             "Mineral3",
+                             "Mineral4",
+                             "Mineral5",
+                             "Mineral6",
+                             "Ship1",
                              "unknown1",  # maybe unused
                              "unknown2",  # maybe unused
                              "unknown3",  # maybe unused
-                             "Trooper",
-                             "Battle tank",
-                             "Aircraft?",
-                             "Missilie launcher?",
-                             "Laser cannon",
-                             "Twin Laser gun",
-                             "Missile",
-                             "Plasma gun?",
-                             "Miner droid",
+                             "Vehicle1",
+                             "Vehicle2",
+                             "Vehicle3",
+                             "Vehicle4",
+                             "Equip1",
+                             "Equip2",
+                             "Equip3",
+                             "Equip4",
+                             "MinerDroid",
                              "unknown4"
                             )
 
@@ -48,29 +48,29 @@ class shipgroup:
             if self.type in [1, 5]:  # army / ground forces
 
                 self.fleet = {
-                    "Hunter":    0, "Hunter_Laser":    0, "Hunter_Twin":    0, "Hunter_Miss":    0, "Hunter_Plasma":    0,
-                    "Fighter":   0, "Fighter_Laser":   0, "Fighter_Twin":   0, "Fighter_Miss":   0, "Fighter_Plasma":   0,
-                    "Destroyer": 0, "Destroyer_Laser": 0, "Destroyer_Twin": 0, "Destroyer_Miss": 0, "Destroyer_Plasma": 0,
-                    "Cruiser":   0, "Cruiser_Laser":   0, "Cruiser_Twin":   0, "Cruiser_Miss":   0, "Cruiser_Plasma":   0,
-                    "Trooper":   0, "Trooper_Laser":   0, "Trooper_Twin":   0, "Trooper_Miss":   0, "Trooper_Plasma":   0,
-                    "Tank":      0, "Tank_Laser":      0, "Tank_Twin":      0, "Tank_Miss":      0, "Tank_Plasma":      0,
-                    "Aircraft":  0, "Aircraft_Laser":  0, "Aircraft_Twin":  0, "Aircraft_Miss":  0, "Aircraft_Plasma":  0,
-                    "Launcher":  0, "Launcher_Laser":  0, "Launcher_Twin":  0, "Launcher_Miss":  0, "Launcher_Plasma":  0
+                    "Ship1":    0, "Ship1_Equip1":     0, "Ship1_Equip2":     0, "Ship1_Equip3":    -1, "Ship1_Equip4":    -1,
+                    "Ship2":    0, "Ship2_Equip1":    -1, "Ship2_Equip2":     0, "Ship2_Equip3":     0, "Ship2_Equip4":    -1,
+                    "Ship3":    0, "Ship3_Equip1":    -1, "Ship3_Equip2":     0, "Ship3_Equip3":     0, "Ship3_Equip4":    -1,
+                    "Ship4":    0, "Ship4_Equip1":    -1, "Ship4_Equip2":     0, "Ship4_Equip3":     0, "Ship4_Equip4":     0,
+                    "Vehicle1": 0, "Vehicle1_Equip1":  0, "Vehicle1_Equip2": -1, "Vehicle1_Equip3": -1, "Vehicle1_Equip4": -1,
+                    "Vehicle2": 0, "Vehicle2_Equip1":  0, "Vehicle2_Equip2":  0, "Vehicle2_Equip3": -1, "Vehicle2_Equip4": -1,
+                    "Vehicle3": 0, "Vehicle3_Equip1": -1, "Vehicle3_Equip2":  0, "Vehicle3_Equip3":  0, "Vehicle3_Equip4": -1,
+                    "Vehicle4": 0, "Vehicle4_Equip1": -1, "Vehicle4_Equip2": -1, "Vehicle4_Equip3":  0, "Vehicle4_Equip4": -1
                 }
 
             elif self.type == 2:  # trade
 
                 self.fleet = {
-                     "Sloop":       0, "Sloop_Mine":        0,
-                     "Trade ship":  0, "Trade ship_Mine":   0,
-                     "Piracy ship": 0, "Piracy ship_Laser": 0, "Piracy ship_Twin": 0, "Piracy ship_Miss": 0,
-                     "Galleon":     0, "Galleon_Laser":     0, "Galleon_Mine":     0
+                     "Ship1": 0, "Ship1_Equip1": -1, "Ship1_Equip2": -1, "Ship1_Equip3": -1, "Ship1_Equip4":  0,
+                     "Ship2": 0, "Ship2_Equip1": -1, "Ship2_Equip2": -1, "Ship2_Equip3": -1, "Ship2_Equip4":  0,
+                     "Ship3": 0, "Ship3_Equip1":  0, "Ship3_Equip2":  0, "Ship3_Equip3":  0, "Ship3_Equip4": -1,
+                     "Ship4": 0, "Ship4_Equip1":  0, "Ship4_Equip2": -1, "Ship4_Equip3": -1, "Ship4_Equip4":  0,
                 }
 
             elif self.type == 4:  # carrier
 
                 self.fleet = {
-                     "Sat Carr": 0, "Satellite": 0, "Spy Sat": 0, "Spy Ship": 0, "Solar Plant": 0
+                     "Ship1": 0, "Ship1_Equip1": 0, "Ship1_Equip2": 0, "Ship1_Equip3": 0, "Ship1_Equip4": 0,
                 }
 
             else:
@@ -97,70 +97,79 @@ class shipgroup:
 
             if self.type in [1, 5]:  # army
                 self.fleet = {
-                    "Hunter":           initial_groupraw_data['Ship1'],
-                    "Hunter_Laser":     initial_groupraw_data['Ship1_Laser'],
-                    "Hunter_Twin":      initial_groupraw_data['Ship1_Twin'],
-                    "Hunter_Miss":      initial_groupraw_data['Ship1'],
-                    "Hunter_Plasma":    initial_groupraw_data['Ship1_Plasma'],
-                    "Fighter":          initial_groupraw_data['Ship2'],
-                    "Fighter_Laser":    initial_groupraw_data['Ship2_Laser'],
-                    "Fighter_Twin":     initial_groupraw_data['Ship2_Twin'],
-                    "Fighter_Miss":     initial_groupraw_data['Ship2'],
-                    "Fighter_Plasma":   initial_groupraw_data['Ship2_Plasma'],
-                    "Destroyer":        initial_groupraw_data['Ship3'],
-                    "Destroyer_Laser":  initial_groupraw_data['Ship3_Laser'],
-                    "Destroyer_Twin":   initial_groupraw_data['Ship3_Twin'],
-                    "Destroyer_Miss":   initial_groupraw_data['Ship3'],
-                    "Destroyer_Plasma": initial_groupraw_data['Ship3_Plasma'],
-                    "Cruiser":          initial_groupraw_data['Ship4'],
-                    "Cruiser_Laser":    initial_groupraw_data['Ship4_Laser'],
-                    "Cruiser_Twin":     initial_groupraw_data['Ship4_Twin'],
-                    "Cruiser_Miss":     initial_groupraw_data['Ship4'],
-                    "Cruiser_Plasma":   initial_groupraw_data['Ship4_Plasma'],
-                    "Trooper":          initial_groupraw_data['Trooper'],
-                    "Trooper_Laser":    initial_groupraw_data['Trooper_Laser'],
-                    "Trooper_Twin":     initial_groupraw_data['Trooper_Twin'],
-                    "Trooper_Miss":     initial_groupraw_data['Trooper_Miss'],
-                    "Trooper_Plasma":   initial_groupraw_data['Trooper_Plasma'],
-                    "Tank":             initial_groupraw_data['Tank'],
-                    "Tank_Laser":       initial_groupraw_data['Tank_Laser'],
-                    "Tank_Twin":        initial_groupraw_data['Tank_Twin'],
-                    "Tank_Miss":        initial_groupraw_data['Tank_Miss'],
-                    "Tank_Plasma":      initial_groupraw_data['Tank_Plasma'],
-                    "Aircraft":         initial_groupraw_data['Aircraft'],
-                    "Aircraft_Laser":   initial_groupraw_data['Aircraft_Laser'],
-                    "Aircraft_Twin":    initial_groupraw_data['Aircraft_Twin'],
-                    "Aircraft_Miss":    initial_groupraw_data['Aircraft_Miss'],
-                    "Aircraft_Plasma":  initial_groupraw_data['Aircraft_Plasma'],
-                    "Launcher":         initial_groupraw_data['Launcher'],
-                    "Launcher_Laser":   initial_groupraw_data['Launcher_Laser'],
-                    "Launcher_Twin":    initial_groupraw_data['Launcher_Twin'],
-                    "Launcher_Miss":    initial_groupraw_data['Launcher_Miss'],
-                    "Launcher_Plasma":  initial_groupraw_data['Launcher_Plasma']
+                    "Ship1":           initial_groupraw_data['Ship1'],
+                    "Ship1_Equip1":    initial_groupraw_data['Ship1_Equip1'],
+                    "Ship1_Equip2":    initial_groupraw_data['Ship1_Equip2'],
+                    "Ship1_Equip3":    -1,
+                    "Ship1_Equip4":    -1,
+                    "Ship2":           initial_groupraw_data['Ship2'],
+                    "Ship2_Equip1":    -1,
+                    "Ship2_Equip2":    initial_groupraw_data['Ship2_Equip2'],
+                    "Ship2_Equip3":    initial_groupraw_data['Ship2'],
+                    "Ship2_Equip4":    -1,
+                    "Ship3":           initial_groupraw_data['Ship3'],
+                    "Ship3_Equip1":    -1,
+                    "Ship3_Equip2":    initial_groupraw_data['Ship3_Equip2'],
+                    "Ship3_Equip3":    initial_groupraw_data['Ship3'],
+                    "Ship3_Equip4":    initial_groupraw_data['Ship3_Equip4'],
+                    "Ship4":           initial_groupraw_data['Ship4'],
+                    "Ship4_Equip1":    -1,
+                    "Ship4_Equip2":    initial_groupraw_data['Ship4_Equip2'],
+                    "Ship4_Equip3":    initial_groupraw_data['Ship4'],
+                    "Ship4_Equip4":    initial_groupraw_data['Ship4_Equip4'],
+                    "Vehicle1":        initial_groupraw_data['Vehicle1'],
+                    "Vehicle1_Equip1": initial_groupraw_data['Vehicle1_Equip1'],
+                    "Vehicle1_Equip2": -1,
+                    "Vehicle1_Equip3": -1,
+                    "Vehicle1_Equip4": -1,
+                    "Vehicle2":        initial_groupraw_data['Vehicle2'],
+                    "Vehicle2_Equip1": initial_groupraw_data['Vehicle2_Equip1'],
+                    "Vehicle2_Equip2": initial_groupraw_data['Vehicle2_Equip2'],
+                    "Vehicle2_Equip3": -1,
+                    "Vehicle2_Equip4": -1,
+                    "Vehicle3":        initial_groupraw_data['Vehicle3'],
+                    "Vehicle3_Equip1": -1,
+                    "Vehicle3_Equip2": initial_groupraw_data['Vehicle3_Equip2'],
+                    "Vehicle3_Equip3": initial_groupraw_data['Vehicle3_Equip3'],
+                    "Vehicle3_Equip4": -1,
+                    "Vehicle4":        initial_groupraw_data['Vehicle4'],
+                    "Vehicle4_Equip1": -1,
+                    "Vehicle4_Equip2": -1,
+                    "Vehicle4_Equip3": initial_groupraw_data['Vehicle4_Equip3'],
+                    "Vehicle4_Equip4": -1,
                 }
 
             elif self.type == 2:  # trade
                 self.fleet = {
-                    "Sloop":             initial_groupraw_data['Ship1'],
-                    "Sloop_Mine":        initial_groupraw_data['Ship1_Plasma'],
-                    "Trade ship":        initial_groupraw_data['Ship2'],
-                    "Trade ship_Mine":   initial_groupraw_data['Ship2_Plasma'],
-                    "Piracy ship":       initial_groupraw_data['Ship3'],
-                    "Piracy ship_Laser": initial_groupraw_data['Ship3_Laser'],
-                    "Piracy ship_Twin":  initial_groupraw_data['Ship3_Twin'],
-                    "Piracy ship_Miss":  initial_groupraw_data['Ship3_Miss'],
-                    "Galleon":           initial_groupraw_data['Ship4'],
-                    "Galleon_Laser":     initial_groupraw_data['Ship4_Laser'],
-                    "Galleon_Mine":      initial_groupraw_data['Ship4_Plasma']
+                    "Ship1":        initial_groupraw_data['Ship1'],
+                    "Ship1_Equip1": -1,
+                    "Ship1_Equip2": -1,
+                    "Ship1_Equip3": -1,
+                    "Ship1_Equip4": initial_groupraw_data['Ship1_Equip4'],
+                    "Ship2":        initial_groupraw_data['Ship2'],
+                    "Ship2_Equip1": -1,
+                    "Ship2_Equip2": -1,
+                    "Ship2_Equip3": -1,
+                    "Ship2_Equip4": initial_groupraw_data['Ship2_Equip4'],
+                    "Ship3":        initial_groupraw_data['Ship3'],
+                    "Ship3_Equip1": initial_groupraw_data['Ship3_Equip1'],
+                    "Ship3_Equip2": initial_groupraw_data['Ship3_Equip2'],
+                    "Ship3_Equip3": initial_groupraw_data['Ship3_Equip3'],
+                    "Ship3_Equip4": -1,
+                    "Ship4":        initial_groupraw_data['Ship4'],
+                    "Ship4_Equip1": initial_groupraw_data['Ship4_Equip1'],
+                    "Ship4_Equip2": -1,
+                    "Ship4_Equip3": -1,
+                    "Ship4_Equip4": initial_groupraw_data['Ship4_Equip4']
                 }
 
             elif self.type == 4:  # carrier
                 self.fleet = {
-                    "Sat Carr":    initial_groupraw_data['Ship1'],
-                    "Satellite":   initial_groupraw_data['Ship1_Laser'],
-                    "Spy Sat":     initial_groupraw_data['Ship1_Twin'],
-                    "Spy Ship":    initial_groupraw_data['Ship1_Miss'],
-                    "Solar Plant": initial_groupraw_data['Ship1_Plasma']
+                    "Ship1":        initial_groupraw_data['Ship1'],
+                    "Ship1_Equip1": initial_groupraw_data['Ship1_Equip1'],
+                    "Ship1_Equip2": initial_groupraw_data['Ship1_Equip2'],
+                    "Ship1_Equip3": initial_groupraw_data['Ship1_Equip3'],
+                    "Ship1_Equip4": initial_groupraw_data['Ship1_Equip4']
                 }
 
             else:

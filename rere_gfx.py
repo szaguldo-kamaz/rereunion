@@ -35,6 +35,7 @@ class ReReGFX:
 
         self.config = config
         self.gamedata_static = game_obj.gamedata_static
+        self.gamedata_dynamic = game_obj.gamedata_dynamic
 
         self.major_vs_felszin = [ 0, 1, 8, 2, 7, 10, 3, 9, 5, 4, 6, 11 ]
         # maptype_majorX - felszinX
@@ -1350,35 +1351,53 @@ class ReReGFX:
             [ sysname, planetname, moonname ] = screenobj_ship.selected_group_location_names
 
             if curgrp.type in [1, 5]:
-                shiplist = [ "Hunter", "Fighter", "Destroyer", "Cruiser" ]
-#                vehiclelist = [ "Trooper", "Tank", "Aircraft", "Miss Tank" ]
-                vehiclelist = [ "Trooper", "Tank", "Aircraft", "Launcher" ]
+                fleet_item_names = self.gamedata_static["group_craftlist"][0] + \
+                                   self.gamedata_static["group_craftlist"][1]
+                fleet_keys = self.gamedata_dynamic["invented_army_ship_list"] + \
+                             self.gamedata_dynamic["invented_army_vehicle_list"]
 
             elif curgrp.type == 2:
-                shiplist = [ "Sloop", "Trade ship", "Piracy ship", "Galleon" ]
-                vehiclelist = []
+                fleet_item_names = self.gamedata_static["group_craftlist"][2]
+                fleet_keys = self.gamedata_dynamic["invented_trade_ship_list"]
 
             elif curgrp.type == 4:
-                shiplist = [ "Sat Carr" ]
-                vehiclelist = [ "Satellite", "Spy Sat", "Spy Ship", "Solar Plant" ]
+                fleet_item_names = self.gamedata_static["group_craftlist"][3] + \
+                                   self.gamedata_static["group_equiplist"][3]
+                fleet_keys = self.gamedata_dynamic["invented_carrier_ship_list"] + \
+                             self.gamedata_dynamic["invented_carrier_equip_list"]
 
             yellow_text_colon = self.render_text(":", textcolor = 1)
 
-            allvehiclescount = 0
+            fleetitems_count = 0
             horizoffset = 0
             vertoffset = 0
-            for vehicletype in shiplist + vehiclelist:
-                allvehiclescount += 1
-                if curgrp.fleet[vehicletype] > 0:
-                    yellow_text_vehicletype_name = self.render_text(f"{vehicletype}", textcolor = 1)
-                    red_text_vehicletype_name = self.render_text(f"{curgrp.fleet[vehicletype]:3}", textcolor = 2)
-                    self.screen_buffer.blit(yellow_text_vehicletype_name, (204 + horizoffset, 116 + vertoffset))
+
+            for fleetitem_key in fleet_keys:
+
+                if curgrp.type == 4 and \
+                   fleetitem_key != fleet_keys[0]:
+                    fleetitem_fullkey = fleet_keys[0] + '_' + fleetitem_key
+                else:
+                    fleetitem_fullkey = fleetitem_key
+
+                fleetitem_name = fleet_item_names[fleetitems_count]
+
+                fleetitems_count += 1
+
+                if curgrp.fleet[fleetitem_fullkey] > 0:
+                    yellow_text_fleetitem_name = self.render_text(f"{fleetitem_name}", textcolor = 1)
+                    red_text_fleetitem_name = self.render_text(f"{curgrp.fleet[fleetitem_fullkey]:3}", textcolor = 2)
+                    self.screen_buffer.blit(yellow_text_fleetitem_name, (204 + horizoffset, 116 + vertoffset))
                     self.screen_buffer.blit(yellow_text_colon, (274, 116 + vertoffset))
-                    self.screen_buffer.blit(red_text_vehicletype_name, (280, 116 + vertoffset))
+                    self.screen_buffer.blit(red_text_fleetitem_name, (280, 116 + vertoffset))
                     vertoffset += 9
-                if allvehiclescount == 4 and curgrp.type != 4:
+
+                if fleetitems_count == 4 and \
+                   curgrp.type != 4:
                     vertoffset += 3
-                if curgrp.type == 4 and vehicletype == "Sat Carr":
+
+                if curgrp.type == 4 and \
+                   fleetitems_count == 1:
                     horizoffset = 4
                     vertoffset += 3
 
