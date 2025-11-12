@@ -1113,7 +1113,7 @@ class ReReGFX:
                 piecesplural = 's'
             else:
                 piecesplural = ''
-            self.screen_buffer.blit(self.render_text(f"Ore needed: [{screenobj_infobuy.items_in_production} piece{piecesplural} ]", textcolor = 2), (136, 133) )
+            self.screen_buffer.blit(self.render_text(f"Ore needed: ({screenobj_infobuy.items_in_production} piece{piecesplural} )", textcolor = 2), (136, 133) )
 
             mineral_index = 0
             for mineral_name in screenobj_infobuy.mineral_names_list:
@@ -1157,7 +1157,7 @@ class ReReGFX:
                 self.screen_buffer.blit(self.render_text(screenobj_infobuy.invention_description[0], textcolor = 2), (136, 59) )
                 for descline_no in range(1, 7):
                     self.screen_buffer.blit(self.render_text(screenobj_infobuy.invention_description[descline_no], textcolor = 1), (136, 61 + descline_no * 10) )
-                self.screen_buffer.blit(self.render_text("Ore needed: [One piece]", textcolor = 2), (136, 133) )
+                self.screen_buffer.blit(self.render_text("Ore needed: (One piece)", textcolor = 2), (136, 133) )
                 mineral_index = 0
                 for mineral_name in screenobj_infobuy.mineral_names_list:
                     mineral_name_and_amount = \
