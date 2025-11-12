@@ -486,14 +486,18 @@ class ReReGFX:
         pygame.surfarray.blit_array(yellow_charset_full_surface, yellow_charset_full)
         pygame.surfarray.blit_array(red_charset_full_surface, red_charset_full)
 
-        for currchar in """ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz?![]'"+-:;.,1234567890%& /""":
+        if self.gamedata_static["reunion_version"] == 1:  # compact disc version
+            char_spacing = 8
+        else:  # floppy disk version
+            char_spacing = 16
+        for currchar in self.gamedata_static["charset_string"]:
             if char_xpos == 20 * 16:
                 char_xpos = 0
                 char_ypos += 8
-            self.charset[0][currchar] = self.PICs["CHARSET1"].subsurface(pygame.Rect(char_xpos, char_ypos, 5, 7))
-            self.charset[1][currchar] = yellow_charset_full_surface.subsurface(pygame.Rect(char_xpos, char_ypos, 5, 7))
-            self.charset[2][currchar] = red_charset_full_surface.subsurface(pygame.Rect(char_xpos, char_ypos, 5, 7))
-            char_xpos += 16
+            self.charset[0][currchar] = self.PICs["CHARSET1"].subsurface(pygame.Rect(char_xpos, char_ypos, 6, 7))
+            self.charset[1][currchar] = yellow_charset_full_surface.subsurface(pygame.Rect(char_xpos, char_ypos, 6, 7))
+            self.charset[2][currchar] = red_charset_full_surface.subsurface(pygame.Rect(char_xpos, char_ypos, 6, 7))
+            char_xpos += char_spacing
 
 
     def prepare_icons(self):
@@ -868,8 +872,8 @@ class ReReGFX:
         #  0 original blue
         #  1 yellow
         #  2 red
-        if type(text_to_render) == bytes:
-            text_to_render = text_to_render.decode('ascii')
+        if type(text_to_render) == str:
+            text_to_render = text_to_render.encode('ascii')
         textlength = len(text_to_render)
         rendered_text = pygame.Surface((textlength * 6, 8))
         for curr_char_no in range(textlength):

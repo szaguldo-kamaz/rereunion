@@ -9,6 +9,9 @@ import os
 import struct
 import pygame
 import time
+
+from hashlib import sha256
+
 from rere_planets import solarsystem
 from rere_shipgroups import shipgroup
 from rere_screen_controlroom import *
@@ -603,118 +606,196 @@ class ReReGame:
 
     def load_reunionprg(self, reunionprg_filename = "GRWAR/REUNION.PRG"):
 
-        exepos_planetmain_messages = 0x04B06  # dynamic strings *6
+        exepos_FD = {}  # floppy disk
+        exepos_CD = {}  # compact disc
 
-        exepos_planet_popmood_names  = 0x2A3A6  # len + string (es tenyleg csak olyan hosszu) 7 db
-        exepos_planet_taxlevel_names = 0x2A426  # len + string (es tenyleg csak olyan hosszu) 8 db
-        exepos_planet_devlevel_names = 0x2A468  # len + string (es tenyleg csak olyan hosszu) 6 db
+        exepos_FD['planetmain_messages'] = 0x04B06  # dynamic strings *6
+        exepos_CD['planetmain_messages'] = 0x04B06  # dynamic strings *6
 
-        exepos_planet_type_names     = 0x2A4AE  # len + string (es tenyleg csak olyan hosszu) 10 db
-        exepos_planet_explore_status_names = 0x2A4FF  # len + string (es tenyleg csak olyan hosszu) 6 db
+        exepos_FD['planet_popmood_names']  = 0x2A3A6  # len + string (es tenyleg csak olyan hosszu) 7 db
+        exepos_FD['planet_taxlevel_names'] = 0x2A426  # len + string (es tenyleg csak olyan hosszu) 8 db
+        exepos_FD['planet_devlevel_names'] = 0x2A468  # len + string (es tenyleg csak olyan hosszu) 6 db
+        exepos_CD['planet_popmood_names']  = 0x2A376  # len + string (es tenyleg csak olyan hosszu) 7 db
+        exepos_CD['planet_taxlevel_names'] = 0x2A3F6  # len + string (es tenyleg csak olyan hosszu) 8 db
+        exepos_CD['planet_devlevel_names'] = 0x2A438  # len + string (es tenyleg csak olyan hosszu) 6 db
 
-        exepos_planet_facilities_names     = 0x2A588  # len + string (es tenyleg csak olyan hosszu) 8 db
+        exepos_FD['planet_type_names']           = 0x2A4AE  # len + string (es tenyleg csak olyan hosszu) 10 db
+        exepos_FD['planet_explore_status_names'] = 0x2A4FF  # len + string (es tenyleg csak olyan hosszu) 6 db
+        exepos_CD['planet_type_names']           = 0x2A47E  # len + string (es tenyleg csak olyan hosszu) 10 db
+        exepos_CD['planet_explore_status_names'] = 0x2A4CF  # len + string (es tenyleg csak olyan hosszu) 6 db
 
-        exepos_cannotbuy_reasons     = 0x28DEE  # len + string (es tenyleg csak olyan hosszu) 6+1 db
+        exepos_FD['planet_facilities_names']     = 0x2A588  # len + string (es tenyleg csak olyan hosszu) 8 db
+        exepos_CD['planet_facilities_names']     = 0x2A558  # len + string (es tenyleg csak olyan hosszu) 8 db
+
+        exepos_FD['cannotbuy_reasons']     = 0x28DEE  # len + string (es tenyleg csak olyan hosszu) 6+1 db
+        exepos_CD['cannotbuy_reasons']     = 0x28DBE  # len + string (es tenyleg csak olyan hosszu) 6+1 db
 
 # TODO
-        exepos_commanderhire_okhired = 0x34D0B
-        exepos_commanderhire_nomoney = 0x34D6E
-        exepos_commanderhire_already = 0x34DE7
-        exepos_commanderhire_noskill = 0x34E4D
+        exepos_FD['commanderhire_okhired'] = 0x34D0B
+        exepos_FD['commanderhire_nomoney'] = 0x34D6E
+        exepos_FD['commanderhire_already'] = 0x34DE7
+        exepos_FD['commanderhire_noskill'] = 0x34E4D
+        exepos_CD['commanderhire_okhired'] = 0x34CBB
+        exepos_CD['commanderhire_nomoney'] = 0x34D1E
+        exepos_CD['commanderhire_already'] = 0x34D97
+        exepos_CD['commanderhire_noskill'] = 0x34DFD
 
-        exepos_spacelocal_guest    = 0x3F42A  # len: 10 * 27
+        exepos_FD['spacelocal_guest']   = 0x3F42A  # len: 10 * 27
+        exepos_CD['spacelocal_guest']   = 0x3F40A  # len: 10 * 27
         #...
-        exepos_ship_capacity_sloop      = 0x3FB38  # 4 bytes
-        exepos_ship_capacity_tradeship  = 0x3FB3C  # 4 bytes
-        exepos_ship_capacity_piracyship = 0x3FB40  # 4 bytes
-        exepos_ship_capacity_galleon    = 0x3FB44  # 4 bytes
+        exepos_FD['ship_capacity_sloop']      = 0x3FB38  # 4 bytes
+        exepos_FD['ship_capacity_tradeship']  = 0x3FB3C  # 4 bytes
+        exepos_FD['ship_capacity_piracyship'] = 0x3FB40  # 4 bytes
+        exepos_FD['ship_capacity_galleon']    = 0x3FB44  # 4 bytes
+        exepos_CD['ship_capacity_sloop']      = 0x3FB13  # 4 bytes
+        exepos_CD['ship_capacity_tradeship']  = 0x3FB17  # 4 bytes
+        exepos_CD['ship_capacity_piracyship'] = 0x3FB1B  # 4 bytes
+        exepos_CD['ship_capacity_galleon']    = 0x3FB1F  # 4 bytes
         #...
-        exepos_group_army_space_equip  = 0x3FBCC  # 1+5(len+string) + 8 (unknown data)
-        exepos_group_army_space_craft  = 0x3FC04  # 1+11(len+string) + 13 (unknown data)
-        exepos_group_trade_equip       = 0x3FC6A  # 1+5(len+string) + 8 (unknown data)
-        exepos_group_trade_craft       = 0x3FCA2  # 1+11(len+string) + 13 (unknown data)
-        exepos_group_army_ground_equip = 0x3FD08  # 1+5(len+string) + 8 (unknown data)
-        exepos_group_army_ground_craft = 0x3FD40  # 1+11(len+string) + 13 (unknown data)
-        exepos_group_carrier_equip     = 0x3FDA6  # 1+5(len+string) + 8 (unknown data)
-        exepos_group_carrier_craft     = 0x3FDDE  # 1+11(len+string) + 13 (unknown data)
+        exepos_FD['group_army_space_equip']  = 0x3FBCC  # 1+5(len+string) + 8 (unknown data)
+        exepos_FD['group_army_space_craft']  = 0x3FC04  # 1+11(len+string) + 13 (unknown data)
+        exepos_FD['group_trade_equip']       = 0x3FC6A  # 1+5(len+string) + 8 (unknown data)
+        exepos_FD['group_trade_craft']       = 0x3FCA2  # 1+11(len+string) + 13 (unknown data)
+        exepos_FD['group_army_ground_equip'] = 0x3FD08  # 1+5(len+string) + 8 (unknown data)
+        exepos_FD['group_army_ground_craft'] = 0x3FD40  # 1+11(len+string) + 13 (unknown data)
+        exepos_FD['group_carrier_equip']     = 0x3FDA6  # 1+5(len+string) + 8 (unknown data)
+        exepos_FD['group_carrier_craft']     = 0x3FDDE  # 1+11(len+string) + 13 (unknown data)
+        exepos_CD['group_army_space_equip']  = 0x3FBA8  # 1+5(len+string) + 8 (unknown data)
+        exepos_CD['group_army_space_craft']  = 0x3FBE0  # 1+11(len+string) + 13 (unknown data)
+        exepos_CD['group_trade_equip']       = 0x3FC46  # 1+5(len+string) + 8 (unknown data)
+        exepos_CD['group_trade_craft']       = 0x3FC7E  # 1+11(len+string) + 13 (unknown data)
+        exepos_CD['group_army_ground_equip'] = 0x3FCE4  # 1+5(len+string) + 8 (unknown data)
+        exepos_CD['group_army_ground_craft'] = 0x3FD1C  # 1+11(len+string) + 13 (unknown data)
+        exepos_CD['group_carrier_equip']     = 0x3FD82  # 1+5(len+string) + 8 (unknown data)
+        exepos_CD['group_carrier_craft']     = 0x3FDBA  # 1+11(len+string) + 13 (unknown data)
         #...
-        exepos_planets_system1     = 0x40D8C  # System 1 planets in reunion.prg
-        exepos_systemplanets       = 0x43AC6  # 8*8
-        exepos_commander_salaries  = 0x44A8C  # 12 * int (32bit)
+        exepos_FD['planets_system1']     = 0x40D8C  # System 1 planets in reunion.prg
+        exepos_FD['systemplanets']       = 0x43AC6  # 8*8
+        exepos_FD['commander_salaries']  = 0x44A8C  # 12 * int (32bit)
+        exepos_CD['planets_system1']     = 0x40D67  # System 1 planets in reunion.prg
+        exepos_CD['systemplanets']       = 0x43A94  # 8*8
+        exepos_CD['commander_salaries']  = 0x44A5A  # 12 * int (32bit)
 # TODO
-        exepos_commander_levels    = 0x44ABC  # 4*3*short int (16bit)
-        exepos_commander_levelsmax = 0x44AD4  # 4*3*char
-        exepos_developer_skills    = 0x44AE0  # 3*4*char
-        exepos_developer_skillsmax = 0x44AEC  # 3*4*char
+        exepos_FD['commander_levels']    = 0x44ABC  # 4*3*short int (16bit)
+        exepos_FD['commander_levelsmax'] = 0x44AD4  # 4*3*char
+        exepos_FD['developer_skills']    = 0x44AE0  # 3*4*char
+        exepos_FD['developer_skillsmax'] = 0x44AEC  # 3*4*char
+        exepos_CD['commander_levels']    = 0x44A8A  # 4*3*short int (16bit)
+        exepos_CD['commander_levelsmax'] = 0x44AAB  # 4*3*char
+        exepos_CD['developer_skills']    = 0x44AAE  # 3*4*char
+        exepos_CD['developer_skillsmax'] = 0x44ABA  # 3*4*char
 # TODO eddig
         # 0x44AF8 .. 0x44B33 unknown
-        exepos_commandernames      = 0x44B34  # len + string (mind 18 char) (pilot, builder, fighter, developer) 18*12
-        exepos_group_type_names    = 0x44C18  # 5*13+1
+        exepos_FD['commandernames']      = 0x44B34  # len + string (mind 18 char) (pilot, builder, fighter, developer) 18*12
+        exepos_FD['group_type_names']    = 0x44C18  # 5*13+1
+        exepos_CD['commandernames']      = 0x44B02  # len + string (mind 18 char) (pilot, builder, fighter, developer) 18*12
+        exepos_CD['group_type_names']    = 0x44BE6  # 5*13+1
         # ...
-        exepos_shipnames_ground    = 0x44CE4  # 4*9+1
-        exepos_vehiclenames_ground = 0x44D0C  # 4*8+1
-        exepos_mineralnames        = 0x44D6C  # len + string (de amugy mind 8 char) - 6*8
-        exepos_racenames           = 0x44DA2  # len + string (de amugy mind 9 char) - 12*9
-        exepos_skillnames          = 0x44E3E  # len + string (fix 7 char) - 7*4
-        exepos_systemnames         = 0x44E5E  # 8*8
-        exepos_systemshortnames    = 0x44EA6  # 8*6
-        exepos_charset             = 0x44EDE  # 78
-        exepos_inventions          = 0x4509C
-        exepos_buildings_info      = 0x45882  # 25*
-        exepos_races               = 0x45EBE  # 12*228 byte
+        exepos_FD['shipnames_ground']    = 0x44CE4  # 4*9+1
+        exepos_FD['vehiclenames_ground'] = 0x44D0C  # 4*8+1
+        exepos_CD['shipnames_ground']    = 0x44CB1  # 4*9+1
+        exepos_CD['vehiclenames_ground'] = 0x44CD9  # 4*8+1
+        # ...
+        exepos_FD['mineralnames']        = 0x44D6C  # len + string (de amugy mind 8 char) - 6*8
+        exepos_FD['racenames']           = 0x44DA2  # len + string (de amugy mind 9 char) - 12*9
+        exepos_FD['group_type_names2']   = 0x44E1E  # len + string - 8*4
+        exepos_FD['skillnames']          = 0x44E3E  # len + string (fix 7 char) - 7*4
+        exepos_FD['systemnames']         = 0x44E5E  # 8*8
+        exepos_FD['systemshortnames']    = 0x44EA6  # 8*6
+        exepos_FD['charset']             = 0x44EDE  # 78 floppy ver
+        exepos_CD['mineralnames']        = 0x44D38  # len + string (de amugy mind 8 char) - 6*8
+        exepos_CD['racenames']           = 0x44D6E  # len + string (de amugy mind 9 char) - 12*9
+        exepos_CD['group_type_names2']   = 0x44DE6  # len + string - 8*4
+        exepos_CD['skillnames']          = 0x44E0A  # len + string (fix 7 char) - 7*4
+        exepos_CD['systemnames']         = 0x44E2A  # 8*8
+        exepos_CD['systemshortnames']    = 0x44E72  # 8*6
+        exepos_CD['charset']             = 0x44EAA  # 87 CD ver charset is longer
+        # ...
+        exepos_FD['inventions']          = 0x4509C
+        exepos_FD['buildings_info']      = 0x45882  # 25*
+        exepos_FD['races']               = 0x45EBE  # 12*228 byte
+        exepos_CD['inventions']          = 0x4505A
+        exepos_CD['buildings_info']      = 0x45840  # 25*
+        exepos_CD['races']               = 0x45E7C  # 12*228 byte
 
         reunionexe = open(reunionprg_filename, "rb")
         reunionexe_image = reunionexe.read(288992)
         reunionexe.close()
 
-        buildings_info = self.process_raw_buildingsinfodata(reunionexe_image[exepos_buildings_info:exepos_buildings_info + 25*63])
-        planetmain_messages = self.extract_dynamic_strings(reunionexe_image, exepos_planetmain_messages, 6)
-        planet_type_names_from_exe = self.extract_dynamic_strings(reunionexe_image, exepos_planet_type_names, 10)
-        planet_type_names = [ "" ] + planet_type_names_from_exe + [ "Artificial" ]
-        planet_popmood_names = self.extract_dynamic_strings(reunionexe_image, exepos_planet_popmood_names, 7)
-        planet_taxlevel_names = self.extract_dynamic_strings(reunionexe_image, exepos_planet_taxlevel_names, 8)
-        planet_devlevel_names = self.extract_dynamic_strings(reunionexe_image, exepos_planet_devlevel_names, 6)
-        planet_explore_status_names = self.extract_dynamic_strings(reunionexe_image, exepos_planet_explore_status_names, 6)
-        planet_facilities_names = self.extract_dynamic_strings(reunionexe_image, exepos_planet_facilities_names, 8)
+        h256 = sha256()
+        h256.update(reunionexe_image)
+        reunionexe_chksum = h256.hexdigest()
 
-        commander_salaries = struct.unpack_from("<"+"I"*12, reunionexe_image, exepos_commander_salaries)
+        if len(reunionexe_image) == 288992 and \
+           reunionexe_chksum in \
+              [
+                'f1c28d5e520b69784cb1b900d47c7b89f036c2b033c8e7fd731685f29a85fb75',  # floppy version
+                '339aa4ad1ab2a8f51e4544699e144877300dbc58a465a7ff6f2fec72d396416d',  # floppy "patched" version
+              ]:
+            reunion_version = 0  # floppy disk
+            charset_string_length = 78
+            exepos = exepos_FD
+            print("Found the floppy disk version.")
+        elif len(reunionexe_image) == 288928 and \
+           reunionexe_chksum in \
+              [
+                '1e0f20ec8af1e9f7c1f198f5d0ff7d8967cbbe4564b696080257867bddaa66bc',  # compact disc version
+              ]:
+            reunion_version = 1  # compact disc
+            charset_string_length = 87
+            exepos = exepos_CD
+            print("Found the compact disc version.")
+        else:
+            print("Cannot find any recognized REUNION executable.")
+            return None
+
+        buildings_info = self.process_raw_buildingsinfodata(reunionexe_image[exepos['buildings_info']:exepos['buildings_info'] + 25*63])
+        planetmain_messages = self.extract_dynamic_strings(reunionexe_image, exepos['planetmain_messages'], 6)
+        planet_type_names_from_exe = self.extract_dynamic_strings(reunionexe_image, exepos['planet_type_names'], 10)
+        planet_type_names = [ "" ] + planet_type_names_from_exe + [ "Artificial" ]
+        planet_popmood_names = self.extract_dynamic_strings(reunionexe_image, exepos['planet_popmood_names'], 7)
+        planet_taxlevel_names = self.extract_dynamic_strings(reunionexe_image, exepos['planet_taxlevel_names'], 8)
+        planet_devlevel_names = self.extract_dynamic_strings(reunionexe_image, exepos['planet_devlevel_names'], 6)
+        planet_explore_status_names = self.extract_dynamic_strings(reunionexe_image, exepos['planet_explore_status_names'], 6)
+        planet_facilities_names = self.extract_dynamic_strings(reunionexe_image, exepos['planet_facilities_names'], 8)
+
+        commander_salaries = struct.unpack_from("<"+"I"*12, reunionexe_image, exepos['commander_salaries'])
         commander_salaries_processed = [ commander_salaries[0:3], commander_salaries[3:6], commander_salaries[6:9], commander_salaries[9:12] ]
-        commander_names   = list(map(lambda x:x.decode("ascii"), struct.unpack_from("19p"*12, reunionexe_image, exepos_commandernames)))
+        commander_names   = list(map(lambda x:x.decode("ascii"), struct.unpack_from("19p"*12, reunionexe_image, exepos['commandernames'])))
         commander_names_processed = [ commander_names[0:3], commander_names[3:6], commander_names[6:9], commander_names[9:12] ]
         commander_hire_txt = {
-                'ok': self.extract_dynamic_strings(reunionexe_image, exepos_commanderhire_okhired, 1)[0],
-                'nomoney': self.extract_dynamic_strings(reunionexe_image, exepos_commanderhire_nomoney, 1)[0],
-                'already': self.extract_dynamic_strings(reunionexe_image, exepos_commanderhire_already, 1)[0],
-                'noskill': self.extract_dynamic_strings(reunionexe_image, exepos_commanderhire_noskill, 1)[0]
+                'ok': self.extract_dynamic_strings(reunionexe_image, exepos['commanderhire_okhired'], 1)[0],
+                'nomoney': self.extract_dynamic_strings(reunionexe_image, exepos['commanderhire_nomoney'], 1)[0],
+                'already': self.extract_dynamic_strings(reunionexe_image, exepos['commanderhire_already'], 1)[0],
+                'noskill': self.extract_dynamic_strings(reunionexe_image, exepos['commanderhire_noskill'], 1)[0]
             }
 
-        group_type_names = list(map(lambda x:x.decode("ascii"), struct.unpack_from("14p"*5, reunionexe_image, exepos_group_type_names)))
-        ship_on_ground_names = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "10p"*4,  reunionexe_image, exepos_shipnames_ground)))
-        vehicle_on_ground_names = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "9p"*4,  reunionexe_image, exepos_vehiclenames_ground)))
-        mineral_names     = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "9p"*6,  reunionexe_image, exepos_mineralnames)))
-        race_names        = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from("10p"*12, reunionexe_image, exepos_racenames)))
-        skill_names       = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "8p"*4,  reunionexe_image, exepos_skillnames)))
-        system_names      = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "9p"*8,  reunionexe_image, exepos_systemnames)))
-        system_shortnames = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "7p"*8,  reunionexe_image, exepos_systemshortnames)))
+        group_type_names = list(map(lambda x:x.decode("ascii"), struct.unpack_from("14p"*5, reunionexe_image, exepos['group_type_names'])))
+        ship_on_ground_names = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "10p"*4,  reunionexe_image, exepos['shipnames_ground'])))
+        vehicle_on_ground_names = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "9p"*4,  reunionexe_image, exepos['vehiclenames_ground'])))
+        mineral_names     = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "9p"*6,  reunionexe_image, exepos['mineralnames'])))
+        race_names        = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from("10p"*12, reunionexe_image, exepos['racenames'])))
+        skill_names       = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "8p"*4,  reunionexe_image, exepos['skillnames'])))
+        system_names      = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "9p"*8,  reunionexe_image, exepos['systemnames'])))
+        system_shortnames = list(map(lambda x:x.decode("ascii").strip(), struct.unpack_from( "7p"*8,  reunionexe_image, exepos['systemshortnames'])))
+        charset_string    = struct.unpack_from( f"{charset_string_length+1}p", reunionexe_image, exepos['charset'])[0]
 
-#        print(skill_names)
-#        exit(1)
-
-        races_info = self.process_raw_racedata(reunionexe_image[exepos_races:exepos_races+228*11])
+        races_info = self.process_raw_racedata(reunionexe_image[exepos['races']:exepos['races']+228*11])
         race_nation_names = list(races_info.keys())
 
-        craftlist_army_space  = self.process_raw_groupcraftdata(reunionexe_image[exepos_group_army_space_craft:exepos_group_army_space_craft+4*25])
-        craftlist_army_ground = self.process_raw_groupcraftdata(reunionexe_image[exepos_group_army_ground_craft:exepos_group_army_ground_craft+4*25])
-        craftlist_trade       = self.process_raw_groupcraftdata(reunionexe_image[exepos_group_trade_craft:exepos_group_trade_craft+4*25])
-        craftlist_carrier     = self.process_raw_groupcraftdata(reunionexe_image[exepos_group_carrier_craft:exepos_group_carrier_craft+4*25])
-        equiplist_army_space  = self.process_raw_groupequipmentdata(reunionexe_image[exepos_group_army_space_equip:exepos_group_army_space_equip+4*13])
-        equiplist_army_ground = self.process_raw_groupequipmentdata(reunionexe_image[exepos_group_army_ground_equip:exepos_group_army_ground_equip+4*13])
-        equiplist_trade       = self.process_raw_groupequipmentdata(reunionexe_image[exepos_group_trade_equip:exepos_group_trade_equip+4*13])
-        equiplist_carrier     = self.process_raw_groupequipmentdata(reunionexe_image[exepos_group_carrier_equip:exepos_group_carrier_equip+4*13])
+        craftlist_army_space  = self.process_raw_groupcraftdata(reunionexe_image[exepos['group_army_space_craft']:exepos['group_army_space_craft']+4*25])
+        craftlist_army_ground = self.process_raw_groupcraftdata(reunionexe_image[exepos['group_army_ground_craft']:exepos['group_army_ground_craft']+4*25])
+        craftlist_trade       = self.process_raw_groupcraftdata(reunionexe_image[exepos['group_trade_craft']:exepos['group_trade_craft']+4*25])
+        craftlist_carrier     = self.process_raw_groupcraftdata(reunionexe_image[exepos['group_carrier_craft']:exepos['group_carrier_craft']+4*25])
+        equiplist_army_space  = self.process_raw_groupequipmentdata(reunionexe_image[exepos['group_army_space_equip']:exepos['group_army_space_equip']+4*13])
+        equiplist_army_ground = self.process_raw_groupequipmentdata(reunionexe_image[exepos['group_army_ground_equip']:exepos['group_army_ground_equip']+4*13])
+        equiplist_trade       = self.process_raw_groupequipmentdata(reunionexe_image[exepos['group_trade_equip']:exepos['group_trade_equip']+4*13])
+        equiplist_carrier     = self.process_raw_groupequipmentdata(reunionexe_image[exepos['group_carrier_equip']:exepos['group_carrier_equip']+4*13])
         group_craftlist = [ craftlist_army_space, craftlist_army_ground, craftlist_trade, craftlist_carrier ]
         group_equiplist = [ equiplist_army_space, equiplist_army_ground, equiplist_trade, equiplist_carrier ]
 
         gamedata_static = {
+                "reunion_version": reunion_version,
                 "buildings_info": buildings_info,
                 "planetmain_messages": planetmain_messages,
                 "planet_type_names": planet_type_names,
@@ -736,12 +817,11 @@ class ReReGame:
                 "race_nation_names": race_nation_names,
                 "skill_names": skill_names,
                 "system_names": system_names,
-                "system_shortnames": system_shortnames
+                "system_shortnames": system_shortnames,
+                "charset_string": charset_string,
             }
 
-        gamedata_dynamic = {}
-
-        return [ gamedata_static, gamedata_dynamic ]
+        return gamedata_static
 
 
     def load_savegame(self, savegame_filename, develmode = False):
@@ -820,9 +900,13 @@ class ReReGame:
         savegamepos_groups_planetforces_len     = 161 * 32  # * (maxgroups = 32)
         # 0xA21E .. 0xA2C6
 
-        savegame_filehndl = open(savegame_filename, "rb")
-        savegame_fileimage = savegame_filehndl.read(41670)
-        savegame_filehndl.close()
+        try:
+            savegame_filehndl = open(savegame_filename, "rb")
+            savegame_fileimage = savegame_filehndl.read(41670)
+            savegame_filehndl.close()
+        except:
+            print(f"Cannot open savegame file: {savegame_filename}")
+            return False
 
         savegame = {}
 
@@ -896,7 +980,7 @@ class ReReGame:
 
         #print(self.process_raw_systemplanetsdata(savegame_fileimage[savegamepos_systemplanets:savegamepos_systemplanets+savegamepos_systemplanets_len]))
 
-        return [ savegame ]
+        return savegame
 
 
     def __setup_solarsystems(self, loc_gamedata_static, loc_gamedata_dynamic):
@@ -979,16 +1063,24 @@ class ReReGame:
                         currinv['time_to_produce_next'] = 0
 
 
-    def __init__(self, config, savegame_filename = "SAVE/SPIDYSAV.1"):
+    def __init__(self, config):
 
         self.config = config
         self.cache = {}
         self.date_iterations = 0
 
+
+    def setup(self, savegame_filename = "SAVE/SPIDYSAV.1"):
+
         # load static data (buildings_info) from reunion binary
-        [ self.gamedata_static, self.gamedata_dynamic ] = self.load_reunionprg()
+        self.gamedata_static = self.load_reunionprg()
+        if self.gamedata_static == None:
+            return False
+
         # load dynamic data initial values (money, date, buildings_data, etc.) from savegame
-        [ self.gamedata_dynamic ] = self.load_savegame(savegame_filename)  # needs self.gamedata_static !
+        self.gamedata_dynamic = self.load_savegame(savegame_filename)  # needs self.gamedata_static !
+        if self.gamedata_dynamic == None:
+            return False
 
         self.gamedata_dynamic["time_stopped"] = False
 
@@ -1027,6 +1119,8 @@ class ReReGame:
         self.screens["commanders"] = screen_commanders(self.gamedata_static, self.gamedata_dynamic)
 
         self.current_screen = self.screens["controlroom"]
+
+        return True
 
 
     def update(self, mouse_pos, mouse_buttonstate, mouseevent, mouseevent_buttondown, mouseevent_buttonup):
