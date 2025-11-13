@@ -22,6 +22,8 @@ pygame.init()
 clock = pygame.time.Clock()
 # init game engine
 rereunion_game = ReReGame(config)
+if not rereunion_game.setup(savegame_filename = "SAVE/SPIDYSAV.1"):
+    exit(1)
 # init graphics
 rereunion_gfx = ReReGFX(config, rereunion_game)
 # init sound effects
