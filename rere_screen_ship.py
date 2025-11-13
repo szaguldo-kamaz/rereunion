@@ -74,9 +74,13 @@ class screen_ship(screen):
                     self.menu_text  = [ "BACK TO M.SCREEN", "CONTROL PANEL", "GROUP", "NEW UNIT",  "PLANET MAIN" ]
                     self.menu_sfx   = [ "BACK", "CONTROLL", "GROUP", "GROUPNEW", "PLANET" ]
             else:
-                self.menu_icons = [ "BACK TO M.SCREEN" ]
-                self.menu_text  = [ "BACK TO M.SCREEN" ]
-                self.menu_sfx   = [ "BACK" ]
+                self.menu_icons = [ "BACK TO M.SCREEN", "NEW GROUP" ]
+                self.menu_text  = [ "BACK TO M.SCREEN", "NEW UNIT" ]
+                self.menu_sfx   = [ "BACK", "GROUPNEW" ]
+                # TODO check inventions
+#                self.menu_icons = [ "BACK TO M.SCREEN" ]
+#                self.menu_text  = [ "BACK TO M.SCREEN" ]
+#                self.menu_sfx   = [ "BACK" ]
 
         else:
             self.current_shipgroup = self.shipgroups_planetforces

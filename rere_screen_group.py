@@ -43,16 +43,22 @@ class screen_group(screen):
         self.numofgroups_spaceforces = self.gamedata_dynamic["groups_numofgroups"][1]
         self.numofgroups_planetforces = self.gamedata_dynamic["groups_numofgroups"][2]
         self.currentview = self.gamedata_dynamic["groups_currentview"]  # 0 - normal, 1 - planet forces
+
         if self.currentview == 0:
             self.current_shipgroup = self.shipgroups_spaceforces
         else:
             self.current_shipgroup = self.shipgroups_planetforces
-        self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
+
+        if self.numofgroups_spaceforces == 0:
+            self.current_planet_surface = (1, 5, 0)  # Main planet
+        else:
+            self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
 
 
     def __set_location_names(self):
 
-        [ sysno, planetno, moonno ] = self.current_shipgroup[self.selected_group_no_current].location
+        [ sysno, planetno, moonno ] = self.current_planet_surface
+#        [ sysno, planetno, moonno ] = self.current_shipgroup[self.selected_group_no_current].location
 
         planetname = self.solarsystems[sysno].planets[(sysno, planetno, 0)].planetname
         if moonno == 0:
@@ -69,7 +75,15 @@ class screen_group(screen):
 
         curgrp = self.current_shipgroup[self.selected_group_no_current]
 
-        if curgrp.type in [1, 5]:
+        if curgrp == []:
+            self.inventory_to_show_up_arrow = False
+            self.inventory_to_show_down_arrow = False
+            self.inventory_to_show_craft_names = []
+            self.inventory_to_show_equip_names = []
+            self.inventory_to_show_crafts = []
+            self.inventory_to_show_equips = []
+
+        elif curgrp.type in [1, 5]:
 
             if self.inventory_to_show_currentpage == 1:
                 self.inventory_to_show_up_arrow = False
@@ -109,7 +123,8 @@ class screen_group(screen):
         self.__set_location_names()
         self.__gen_inventory_to_show()
 
-        if self.current_shipgroup[self.selected_group_no_current].type == 2:  # trade
+        if self.current_shipgroup[self.selected_group_no_current] != [] and \
+           self.current_shipgroup[self.selected_group_no_current].type == 2:  # trade
             self.menu_icons = [ "BACK TO M.SCREEN", "SHIP INFO", "CONTROL PANEL", "TRANSFER", "GALACTIC MAP", "PLANET MAIN" ]
             self.menu_text  = [ "BACK TO M.SCREEN", "SHIP INFO", "CONTROL PANEL", "TRANSFER", "GALACTIC MAP", "PLANET MAIN" ]
             self.menu_sfx   = [ "BACK", "SHIP", "CONTROLL", "STARMAP", "TRANSFER", "PLANET" ]
