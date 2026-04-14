@@ -246,6 +246,11 @@ class solarsystem:
 
 # TODO: building_type_data["minimum_developer"] vs actual commander
 
+            if pos == (0xFF, 0xFF):
+                pos = [ round(self.map_terrain.map_size[0] / 2 - building_type_data['building_size_x'] / 2),
+                        round(self.map_terrain.map_size[1] / 2 - building_type_data['building_size_y'] / 2) ]
+                print(f"Buggy position (0xFF,0xFF) on planet: {self.planet_id} type: {building_type}. Centering as a workaround: {pos}")
+
             newbuilding = self.building(building_type, building_type_data, pos, time_to_finish, performance, active, workers, energy_use, working)
             self.buildings.append(newbuilding)
             building_no = len(self.buildings) - 1
