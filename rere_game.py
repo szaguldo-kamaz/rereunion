@@ -123,6 +123,130 @@ class ReReGame:
         18: (3, 5, 4), # 'Moon 4'
     }
 
+    gamedata_const["planets_id_mapping"][4] = {
+        # System 4
+
+         1: (4, 1, 0), # 'Antares 1'
+         2: (4, 2, 0), # 'Antares 2'
+         3: (4, 3, 0), # 'Antares 3'
+
+         4: (4, 1, 1), # 'Moon 1'
+         5: (4, 1, 2), # 'Moon 2'
+         6: (4, 1, 3), # 'Moon 3'
+
+         7: (4, 2, 1), # 'Moon 1'
+         8: (4, 2, 2), # 'Moon 2'
+    }
+
+    gamedata_const["planets_id_mapping"][5] = {
+        # System 5
+
+         1: (5, 1, 0), # 'Orionis 1'
+         2: (5, 2, 0), # 'Orionis 2'
+         3: (5, 3, 0), # 'Orionis 3'
+
+         4: (5, 1, 1), # 'Moon 1'
+         5: (5, 1, 2), # 'Moon 2'
+
+         6: (5, 2, 1), # 'Moon 1'
+         7: (5, 2, 2), # 'Moon 2'
+         8: (5, 2, 3), # 'Moon 3'
+         9: (5, 2, 4), # 'Moon 4'
+        10: (5, 2, 5), # 'Moon 5'
+
+        11: (5, 3, 1), # 'Moon 1'
+        12: (5, 3, 2), # 'Moon 2'
+        13: (5, 3, 3), # 'Moon 3'
+    }
+
+    gamedata_const["planets_id_mapping"][6] = {
+        # System 6
+
+         1: (6, 1, 0), # 'Lyrae 1'
+         2: (6, 2, 0), # 'Lyrae 2'
+         3: (6, 3, 0), # 'Lyrae 3'
+         4: (6, 4, 0), # 'Lyrae 4'
+         5: (6, 5, 0), # 'Lyrae 5'
+         6: (6, 6, 0), # 'Lyrae 6'
+         7: (6, 7, 0), # 'Lyrae 7'
+
+         8: (6, 1, 1), # 'Moon 1'
+
+         9: (6, 2, 1), # 'Moon 1'
+        10: (6, 2, 2), # 'Moon 2'
+        11: (6, 2, 3), # 'Moon 3'
+        12: (6, 2, 4), # 'Moon 4'
+
+        13: (6, 3, 1), # 'Moon 1'
+        14: (6, 3, 2), # 'Moon 2'
+
+        15: (6, 4, 1), # 'Moon 1'
+        16: (6, 4, 2), # 'Moon 2'
+        17: (6, 4, 3), # 'Moon 3'
+        18: (6, 4, 4), # 'Moon 4'
+        19: (6, 4, 5), # 'Moon 5'
+        20: (6, 4, 6), # 'Moon 6'
+
+        21: (6, 5, 1), # 'Moon 1'
+        22: (6, 5, 2), # 'Moon 2'
+
+        23: (6, 6, 1), # 'Moon 1'
+    }
+
+    gamedata_const["planets_id_mapping"][7] = {
+        # System 7
+
+         1: (7, 1, 0), # 'Rigel 1'
+         2: (7, 2, 0), # 'Rigel 2'
+
+         3: (7, 1, 1), # 'Moon 1'
+         4: (7, 1, 2), # 'Moon 2'
+         5: (7, 1, 3), # 'Moon 3'
+    }
+
+    gamedata_const["planets_id_mapping"][8] = {
+        # System 8
+
+         1: (8, 1, 0), # 'Mercury'
+         2: (8, 2, 0), # 'Venus'
+         3: (8, 3, 0), # 'Earth'
+         4: (8, 4, 0), # 'Mars'
+         5: (8, 5, 0), # 'Jupiter'
+         6: (8, 6, 0), # 'Saturn'
+         7: (8, 7, 0), # 'Uranus'
+         8: (8, 8, 0), # 'Neptune'
+
+         9: (8, 3, 1), # 'Moon'
+
+        10: (8, 4, 1), # 'Phobos'
+        11: (8, 4, 2), # 'Deimos'
+
+        12: (8, 5, 1), # 'Io'
+        13: (8, 5, 2), # 'Europa'
+        14: (8, 5, 3), # 'Ganymede'
+        15: (8, 5, 4), # 'Callisto'
+        16: (8, 5, 5), # 'Leda'
+        17: (8, 5, 6), # 'Himalia'
+        18: (8, 5, 7), # 'Elara'
+        19: (8, 5, 8), # 'Sinope'
+
+        20: (8, 6, 1), # 'Janus'
+        21: (8, 6, 2), # 'Mimas'
+        22: (8, 6, 3), # 'Enceladus'
+        23: (8, 6, 4), # 'Dione'
+        24: (8, 6, 5), # 'Rhea'
+        25: (8, 6, 6), # 'Titan'
+
+        26: (8, 7, 1), # 'Miranda'
+        27: (8, 7, 2), # 'Ariel'
+        28: (8, 7, 3), # 'Umbriel'
+        29: (8, 7, 4), # 'Titania'
+        30: (8, 7, 5), # 'Oberon'
+
+        31: (8, 8, 1), # 'Triton'
+        32: (8, 8, 2), # 'Nereid'
+    }
+
     gamedata_const["buildabletypelists"] = {
          1:  # earth (1)
           [   0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,            14,  15,  16,  17,  18,  19,
@@ -987,7 +1111,7 @@ class ReReGame:
 
         # process solar system data
         self.solarsystems = [ 0 ]
-        for systemno in range(1,4):
+        for systemno in range(1,9):
             if self.config["verbose"] > 1:
                 print("System no", systemno)
             self.solarsystems.append(solarsystem(systemno,
