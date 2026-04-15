@@ -127,7 +127,7 @@ class screen_group(screen):
            self.current_shipgroup[self.selected_group_no_current].type == 2:  # trade
             self.menu_icons = [ "BACK TO M.SCREEN", "SHIP INFO", "CONTROL PANEL", "TRANSFER", "GALACTIC MAP", "PLANET MAIN" ]
             self.menu_text  = [ "BACK TO M.SCREEN", "SHIP INFO", "CONTROL PANEL", "TRANSFER", "GALACTIC MAP", "PLANET MAIN" ]
-            self.menu_sfx   = [ "BACK", "SHIP", "CONTROLL", "STARMAP", "TRANSFER", "PLANET" ]
+            self.menu_sfx   = [ "BACK", "SHIP", "CONTROLL", "TRANSFER", "STARMAP", "PLANET" ]
         else:
             self.menu_icons = [ "BACK TO M.SCREEN", "SHIP INFO", "CONTROL PANEL", "GALACTIC MAP", "PLANET MAIN" ]
             self.menu_text  = [ "BACK TO M.SCREEN", "SHIP INFO", "CONTROL PANEL", "GALACTIC MAP", "PLANET MAIN" ]
