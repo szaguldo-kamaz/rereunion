@@ -1281,6 +1281,9 @@ class ReReGame:
             self.current_screen = self.screens["ship"]
             screen_changed = True
         elif screen_action in [ "GROUP", "PLANET FORCES" ]:
+            if screen_action == "PLANET FORCES":
+                self.gamedata_dynamic["groups_currentview"] = 1
+                self.screens["group"].set_group_to_planetforces_by_planet_id(screen_action_params[0])
             self.current_screen = self.screens["group"]
             screen_changed = True
         elif screen_action == "GALACTIC MAP":

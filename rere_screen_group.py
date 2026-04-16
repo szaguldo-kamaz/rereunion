@@ -30,10 +30,31 @@ class screen_group(screen):
         self.inventory_to_show_currentpage = 1
 
         self.__update_from_dynamic()
-        self.__set_location_names()
         self.__gen_inventory_to_show()
 
         self.update(gamedata_dynamic, (0,0), [0,0,0], [0,0,0])
+
+
+    def set_group_to_planetforces_by_planet_id(self, planet_id):
+
+        self.gamedata_dynamic["groups_currentview"] = 1
+        self.currentview = 1
+        self.numofgroups_planetforces = self.gamedata_dynamic["groups_numofgroups"][2]
+
+        groupno_by_location = -1
+        for pf_group_idx in range(1,self.numofgroups_planetforces+1):
+            if planet_id == self.shipgroups_planetforces[pf_group_idx].location:
+                groupno_by_location = pf_group_idx
+                break
+
+        if groupno_by_location == -1:
+            print(f"BUG: planet {planet_id} does not have planet forces!")
+            exit(1)
+
+        self.selected_group_no_current = groupno_by_location
+        self.selected_group_no[1] = self.selected_group_no_current
+        self.gamedata_dynamic["groups_selectedgroupno"][0] = self.selected_group_no_current
+        self.gamedata_dynamic["groups_selectedgroupno"][2] = self.selected_group_no_current
 
 
     def __update_from_dynamic(self):
@@ -49,24 +70,22 @@ class screen_group(screen):
         else:
             self.current_shipgroup = self.shipgroups_planetforces
 
-        if self.numofgroups_spaceforces == 0:
+        self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
+        if self.currentview == 1 and self.numofgroups_spaceforces == 0:
             self.current_planet_surface = (1, 5, 0)  # Main planet
-        else:
-            self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
-
-
-    def __set_location_names(self):
 
         [ sysno, planetno, moonno ] = self.current_planet_surface
-#        [ sysno, planetno, moonno ] = self.current_shipgroup[self.selected_group_no_current].location
-
-        planetname = self.solarsystems[sysno].planets[(sysno, planetno, 0)].planetname
-        if moonno == 0:
-            moonname = None
-        else:
-            moonname = self.solarsystems[sysno].planets[(sysno, planetno, moonno)].planetname
 
         sysname = self.gamedata_static["system_names"][sysno-1]
+
+        if moonno == 0:
+            self.current_planet_obj = self.solarsystems[sysno].planets[(sysno, planetno, 0)]
+            planetname = self.current_planet_obj.planetname
+            moonname = None
+        else:
+            self.current_planet_obj = self.solarsystems[sysno].planets[(sysno, planetno, moonno)]
+            planetname = self.solarsystems[sysno].planets[(sysno, planetno, 0)].planetname
+            moonname = self.current_planet_obj.planetname
 
         self.selected_group_location_names = [ sysname, planetname, moonname ]
 
@@ -120,7 +139,6 @@ class screen_group(screen):
     def update(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):
 
         self.__update_from_dynamic()
-        self.__set_location_names()
         self.__gen_inventory_to_show()
 
         if self.current_shipgroup[self.selected_group_no_current] != [] and \
@@ -135,8 +153,6 @@ class screen_group(screen):
 
         self.define_menu([ self.menu_icons, self.menu_text, self.menu_sfx])
         self.update_menu(gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent)
-
-        self.currentview = self.gamedata_dynamic["groups_currentview"]  # 0 - normal, 1 - planet forces
 
         if self.currentview == 0 and \
            self.selected_group_no_current == 1:
@@ -161,14 +177,14 @@ class screen_group(screen):
 
                 if self.currentview == 1 and \
                    self.selected_group_no_current == 1:
-                    self.gamedata_dynamic["groups_currentview"] = 0
+                    self.currentview = 0
+                    self.gamedata_dynamic["groups_currentview"] = self.currentview
                     self.gamedata_dynamic["groups_selectedgroupno"] = [ self.numofgroups_spaceforces, self.numofgroups_spaceforces, 1 ]
                 else:
                     self.gamedata_dynamic["groups_selectedgroupno"][0] -= 1
-                    self.gamedata_dynamic["groups_selectedgroupno"][1] -= 1
+                    self.gamedata_dynamic["groups_selectedgroupno"][self.currentview+1] -= 1
 
                 self.__update_from_dynamic()
-                self.__set_location_names()
                 self.__gen_inventory_to_show()
                 self.sfx_to_play = "X"
 
@@ -180,14 +196,14 @@ class screen_group(screen):
                 self.inventory_to_show_currentpage = 1
                 if self.currentview == 0 and \
                    self.selected_group_no_current == self.numofgroups_spaceforces:
-                    self.gamedata_dynamic["groups_currentview"] = 1
+                    self.currentview = 1
+                    self.gamedata_dynamic["groups_currentview"] = self.currentview
                     self.gamedata_dynamic["groups_selectedgroupno"] = [ 1, self.numofgroups_spaceforces, 1 ]
                 else:
                     self.gamedata_dynamic["groups_selectedgroupno"][0] += 1
-                    self.gamedata_dynamic["groups_selectedgroupno"][1] += 1
+                    self.gamedata_dynamic["groups_selectedgroupno"][self.currentview+1] += 1
 
                 self.__update_from_dynamic()
-                self.__set_location_names()
                 self.__gen_inventory_to_show()
                 self.sfx_to_play = "X"
 

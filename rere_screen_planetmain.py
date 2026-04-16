@@ -17,9 +17,16 @@ class screen_planetmain(screen):
 
         self.screentype = "planetmain"
 
-        menu_icons = [ "BACK TO M.SCREEN", "GALACTIC MAP", "PLANET INFO", "SHIP INFO", "PLANET FORCES" ]
-        menu_text  = [ "BACK TO M.SCREEN", "GALACTIC MAP", "PLANET INFO", "SPACEPORT", "PLANET FORCES" ]
-        menu_sfx   = [ "BACK", "STARMAP", "PLANETIN", "SHIP", "PLANETFO" ]
+        menu_icons = [ "BACK TO M.SCREEN", "GALACTIC MAP", "PLANET INFO", "SHIP INFO" ]
+        menu_text  = [ "BACK TO M.SCREEN", "GALACTIC MAP", "PLANET INFO", "SPACEPORT" ]
+        menu_sfx   = [ "BACK", "STARMAP", "PLANETIN", "SHIP" ]
+
+        self.planet = planet
+        self.humanscolony = (self.planet.colony == 1 and self.planet.race == 1)
+        if self.humanscolony:
+            menu_icons.append("PLANET FORCES")
+            menu_text.append("PLANET FORCES")
+            menu_sfx.append("PLANETFO")
 
         super().__init__(gamedata_dynamic, [ menu_icons, menu_text, menu_sfx ])
 
@@ -31,8 +38,6 @@ class screen_planetmain(screen):
         self.screenmode_buildinginfo_specific = False
         self.selected_building_on_map = None
 
-        self.planet = planet
-        self.humanscolony = (self.planet.colony == 1 and self.planet.race == 1)
         if self.planet.possible_buildings_list != []:
             self.__select_building_by_index(selected_building_index)
         else:
@@ -134,6 +139,17 @@ class screen_planetmain(screen):
 
         self.build_mode_building_pos = None
         self.build_mode_building_tiles = None
+
+        [ menuaction, menuaction_params ] = self.get_action()
+        if menuaction != None:
+
+            if menuaction == 'PLANET FORCES':
+                self.action_params = [ self.planet.planet_id ]
+            else:
+                self.action_params = menuaction_params
+
+            self.action = menuaction
+
 
         if self.screenmode_buildinginfo:
 

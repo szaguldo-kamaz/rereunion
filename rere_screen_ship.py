@@ -61,6 +61,9 @@ class screen_ship(screen):
 
     def update(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):
 
+        self.currentview = gamedata_dynamic["groups_currentview"]
+        [ self.selected_group_no_current, self.selected_group_no[0], self.selected_group_no[1] ] = gamedata_dynamic["groups_selectedgroupno"]
+
         if self.currentview == 0:
 
             self.current_shipgroup = self.shipgroups_spaceforces
