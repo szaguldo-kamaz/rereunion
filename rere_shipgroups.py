@@ -19,20 +19,16 @@ class shipgroup:
                              "Mineral4",
                              "Mineral5",
                              "Mineral6",
-                             "Ship1",
-                             "unknown1",  # maybe unused
-                             "unknown2",  # maybe unused
-                             "unknown3",  # maybe unused
-                             "Vehicle1",
-                             "Vehicle2",
-                             "Vehicle3",
-                             "Vehicle4",
-                             "Equip1",
-                             "Equip2",
-                             "Equip3",
-                             "Equip4",
+                             "ArmyShip1",
+                             "ArmyVehicle1",
+                             "ArmyVehicle2",
+                             "ArmyVehicle3",
+                             "ArmyVehicle4",
+                             "ArmyEquip1",
+                             "ArmyEquip2",
+                             "ArmyEquip3",
+                             "ArmyEquip4",
                              "MinerDroid",
-                             "unknown4"
                             )
 
         if initial_groupraw_data == None:

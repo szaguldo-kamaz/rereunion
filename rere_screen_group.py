@@ -101,8 +101,10 @@ class screen_group(screen):
             self.inventory_to_show_equip_names = []
             self.inventory_to_show_crafts = []
             self.inventory_to_show_equips = []
+            self.inventory_to_show_crafts_in_stock = []
+            self.inventory_to_show_equips_in_stock = []
 
-        elif curgrp.type in [1, 5]:
+        elif curgrp.type in [1, 5]:  # army space + ground
 
             if self.inventory_to_show_currentpage == 1:
                 self.inventory_to_show_up_arrow = False
@@ -111,6 +113,19 @@ class screen_group(screen):
                 self.inventory_to_show_equip_names = self.gamedata_static["group_equiplist"][0]
                 self.inventory_to_show_crafts = self.gamedata_dynamic["invented_army_ship_list"]
                 self.inventory_to_show_equips = self.gamedata_dynamic["invented_army_ship_equip_list"]
+                self.inventory_to_show_crafts_in_stock = [
+                                           self.current_planet_obj.storage["ArmyShip1"],
+                                           self.current_planet_obj.storage["ArmyShip2"],
+                                           self.current_planet_obj.storage["ArmyShip3"],
+                                           self.current_planet_obj.storage["ArmyShip4"],
+                                           ]
+                self.inventory_to_show_equips_in_stock = [
+                                           self.current_planet_obj.storage["ArmyEquip1"],
+                                           self.current_planet_obj.storage["ArmyEquip2"],
+                                           self.current_planet_obj.storage["ArmyEquip3"],
+                                           self.current_planet_obj.storage["ArmyEquip4"],
+                                           ]
+
             else:
                 self.inventory_to_show_up_arrow = True
                 self.inventory_to_show_down_arrow = False
@@ -118,6 +133,18 @@ class screen_group(screen):
                 self.inventory_to_show_equip_names = self.gamedata_static["group_equiplist"][1]
                 self.inventory_to_show_crafts = self.gamedata_dynamic["invented_army_vehicle_list"]
                 self.inventory_to_show_equips = self.gamedata_dynamic["invented_army_vehicle_equip_list"]
+                self.inventory_to_show_crafts_in_stock = [
+                                           self.current_planet_obj.storage["ArmyVehicle1"],
+                                           self.current_planet_obj.storage["ArmyVehicle2"],
+                                           self.current_planet_obj.storage["ArmyVehicle3"],
+                                           self.current_planet_obj.storage["ArmyVehicle4"],
+                                           ]
+                self.inventory_to_show_equips_in_stock = [
+                                           self.current_planet_obj.storage["ArmyEquip1"],
+                                           self.current_planet_obj.storage["ArmyEquip2"],
+                                           self.current_planet_obj.storage["ArmyEquip3"],
+                                           self.current_planet_obj.storage["ArmyEquip4"],
+                                           ]
 
         elif curgrp.type == 2:  # trade
             self.inventory_to_show_up_arrow = False
@@ -126,6 +153,18 @@ class screen_group(screen):
             self.inventory_to_show_equip_names = self.gamedata_static["group_equiplist"][2]
             self.inventory_to_show_crafts = self.gamedata_dynamic["invented_trade_ship_list"]
             self.inventory_to_show_equips = self.gamedata_dynamic["invented_trade_equip_list"]
+            self.inventory_to_show_crafts_in_stock = [
+                                       self.current_planet_obj.storage["TradeShip1"],
+                                       self.current_planet_obj.storage["TradeShip2"],
+                                       self.current_planet_obj.storage["TradeShip3"],
+                                       self.current_planet_obj.storage["TradeShip4"],
+                                       ]
+            self.inventory_to_show_equips_in_stock = [
+                                       self.current_planet_obj.storage["ArmyEquip1"],
+                                       self.current_planet_obj.storage["ArmyEquip2"],
+                                       self.current_planet_obj.storage["ArmyEquip3"],
+                                       self.current_planet_obj.storage["TradeEquip4"],
+                                       ]
 
         else:  # carrier
             self.inventory_to_show_up_arrow = False
@@ -134,6 +173,15 @@ class screen_group(screen):
             self.inventory_to_show_equip_names = self.gamedata_static["group_equiplist"][3]
             self.inventory_to_show_crafts = self.gamedata_dynamic["invented_carrier_ship_list"]
             self.inventory_to_show_equips = self.gamedata_dynamic["invented_carrier_equip_list"]
+            self.inventory_to_show_crafts_in_stock = [
+                                       self.current_planet_obj.storage["CarryShip1"],
+                                       ]
+            self.inventory_to_show_equips_in_stock = [
+                                       self.current_planet_obj.storage["CarryEquip1"],
+                                       self.current_planet_obj.storage["CarryEquip2"],
+                                       self.current_planet_obj.storage["CarryEquip3"],
+                                       self.current_planet_obj.storage["CarryEquip4"],
+                                       ]
 
 
     def update(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):

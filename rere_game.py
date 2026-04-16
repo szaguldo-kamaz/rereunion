@@ -285,6 +285,33 @@ class ReReGame:
         11: []
     }
 
+    gamedata_const["invention_to_storage_mapping"] = {
+         2 : 'MinerDroid',
+         3 : 'CarryEquip1',
+         4 : 'CarryShip1',
+         5 : 'TradeEquip4',
+         6 : 'TradeShip1',
+         9 : 'TradeShip2',
+        10 : 'ArmyShip1',
+        11 : 'ArmyEquip1',
+        13 : 'ArmyEquip2',
+        15 : 'TradeShip4',
+        16 : 'ArmyShip2',
+        17 : 'Vehicle1',
+        19 : 'TradeShip3',
+        20 : 'CarryEquip2',
+        21 : 'Vehicle2',
+        22 : 'ArmyEquip3',
+        23 : 'ArmyShip3',
+        24 : 'SpaceStation',
+        25 : 'CarryEquip3',
+        26 : 'Vehicle3',
+        27 : 'CarryEquip4',
+        31 : 'ArmyEquip4',
+        32 : 'Vehicle4',
+        33 : 'ArmyShip4',
+    }
+
 
     def extract_dynamic_strings(self, raw_data, rawdata_start, number_of_strings):
 
@@ -420,11 +447,11 @@ class ReReGame:
                  "Vehicle4", "Vehicle4_Equip1", "Vehicle4_Equip2", "Vehicle4_Equip3", "Vehicle4_Equip4",
                  "Transfer_Mineral1", "Transfer_Mineral2", "Transfer_Mineral3",
                  "Transfer_Mineral4", "Transfer_Mineral5", "Transfer_Mineral6",
-                 "Transfer_Ship1", "Transfer_unknown1", "Transfer_unknown2", "Transfer_unknown3",  # Ship2-4?
-                 "Transfer_Vehicle1", "Transfer_Vehicle2", "Transfer_Vehicle3", "Transfer_Vehicle4",
-                 "Transfer_Equip1", "Transfer_Equip2", "Transfer_Equip3", "Transfer_Equip4",
+                 "Transfer_ArmyShip1", "Transfer_ArmyShip2", "Transfer_ArmyShip3", "Transfer_ArmyShip4",
+                 "Transfer_ArmyVehicle1", "Transfer_ArmyVehicle2", "Transfer_ArmyVehicle3", "Transfer_ArmyVehicle4",
+                 "Transfer_ArmyEquip1", "Transfer_ArmyEquip2", "Transfer_ArmyEquip3", "Transfer_ArmyEquip4",
                  "Transfer_MinerDroid",
-                 "Transfer_unknown4" ]
+                 "MineralStorageCapacity" ]
 
         if num_of_groups > 24:
             print(f"FATAL: number of groups larger than 24 ({num_of_groups})")
@@ -1167,6 +1194,26 @@ class ReReGame:
             self.shipgroups_planetforces.append(shipgroup_toadd)
 
 
+    def __setup_planet_storage(self, loc_gamedata_dynamic):
+
+        for planetforce_id in loc_gamedata_dynamic["groups_planetforces"].keys():
+
+            planetforce = loc_gamedata_dynamic["groups_planetforces"][planetforce_id]
+            system_no = planetforce["system_no"]
+            planet_id = ( system_no, planetforce["planet_no"], planetforce["moon_no"] )
+
+            for storage_item_name in [ "ArmyShip1", "ArmyShip2", "ArmyShip3", "ArmyShip4",
+                                       "ArmyVehicle1", "ArmyVehicle2", "ArmyVehicle3", "ArmyVehicle4",
+                                       "ArmyEquip1", "ArmyEquip2", "ArmyEquip3", "ArmyEquip4",
+                                     ]:
+                self.solarsystems[system_no].planets[planet_id].storage[storage_item_name] = planetforce["Transfer_" + storage_item_name]
+
+        for inv_no in self.gamedata_const["invention_to_storage_mapping"].keys():
+            currinv = self.gamedata_dynamic["inventions"][inv_no]
+            storage_item_name = self.gamedata_const["invention_to_storage_mapping"][inv_no]
+            self.solarsystems[1].planets[(1,5,0)].storage[storage_item_name] = currinv["quantity_in_storage"]
+
+
     def inventions_update_hourly(self):
 
         for inv_no in self.gamedata_dynamic["inventions"].keys():
@@ -1179,7 +1226,9 @@ class ReReGame:
             if currinv['time_to_produce_next'] > 0:
                 currinv['time_to_produce_next'] -= 10
                 if currinv['time_to_produce_next'] <= 0:
-                    currinv['quantity_in_storage'] += 1
+
+                    self.solarsystems[1].planets[(1,5,0)].storage[self.gamedata_const["invention_to_storage_mapping"][inv_no]] += 1
+
                     currinv['quantity_in_production'] -= 1
                     if currinv['quantity_in_production'] > 0:
                         currinv['time_to_produce_next'] = currinv['time_to_produce_one']
@@ -1227,13 +1276,14 @@ class ReReGame:
         self.__setup_buildings_on_planets(self.gamedata_dynamic)
 
         self.__setup_shipgroups(self.gamedata_dynamic)
+        self.__setup_planet_storage(self.gamedata_dynamic)
 
         #for planetno in self.gamedata_dynamic["systems"][systemno].keys():
         #    print(planetno, self.gamedata_dynamic["systems"][systemno][planetno]["planetname"], self.gamedata_const["planets_id_mapping"][systemno][planetno] )
 
         self.screens = {}
         self.screens["controlroom"] = screen_controlroom(self.gamedata_static, self.gamedata_dynamic)
-        self.screens["infobuy"] = screen_infobuy(self.gamedata_static, self.gamedata_dynamic)
+        self.screens["infobuy"] = screen_infobuy(self.gamedata_const, self.gamedata_static, self.gamedata_dynamic, self.solarsystems)
         self.screens["researchdesign"] = screen_researchdesign(self.gamedata_static, self.gamedata_dynamic)
         self.screens["ship"] = screen_ship(self.gamedata_static, self.gamedata_dynamic, self.solarsystems, self.shipgroups_spaceforces, self.shipgroups_planetforces)
         self.screens["group"] = screen_group(self.gamedata_static, self.gamedata_dynamic, self.solarsystems, self.shipgroups_spaceforces, self.shipgroups_planetforces)

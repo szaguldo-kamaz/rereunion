@@ -133,7 +133,16 @@ class solarsystem:
             self.moons_seqids = []  # no in solsys
             self.moons_ids = []  # solsys, planet, moon
 
-            self.storage = { "miner_droids" : 0, "hunter" : 0 }
+            self.storage = { "ArmyShip1"    : 0, "ArmyShip2"    : 0, "ArmyShip3"    : 0, "ArmyShip4"    : 0,
+                             "ArmyVehicle1" : 0, "ArmyVehicle2" : 0, "ArmyVehicle3" : 0, "ArmyVehicle4" : 0,
+                             "ArmyEquip1"   : 0, "ArmyEquip2"   : 0, "ArmyEquip3"   : 0, "ArmyEquip4"   : 0,
+                             "TradeShip1"   : 0, "TradeShip2"   : 0, "TradeShip3"   : 0, "TradeShip4"   : 0,
+                             "TradeEquip4"  : 0,
+                             "CarryShip1"   : 0,
+                             "CarryEquip1"  : 0, "CarryEquip2"  : 0, "CarryEquip3"  : 0, "CarryEquip4"  : 0,
+                             "MinerDroid"   : 0,
+                             "SpaceStation" : 0,
+                           }
 
             self.has_radar = False
             self.has_spaceport = False

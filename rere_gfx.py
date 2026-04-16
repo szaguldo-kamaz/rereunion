@@ -1501,8 +1501,11 @@ class ReReGFX:
                 craftkey = screenobj_group.inventory_to_show_crafts[c_idx]
                 craftquantity = f"{curgrp.fleet[craftkey]:3d}"
 
+                craft_in_stock = str(screenobj_group.inventory_to_show_crafts_in_stock[c_idx])
+
                 yellow_text_craftname = self.render_text(craftname, textcolor = 1)
                 text_craft_quantity = self.render_text(craftquantity, textcolor = quantity_text_color)
+                text_craft_in_stock = self.render_text(craft_in_stock, textcolor = 1)
 
                 if curgrp.type == 2:  # trade
                     craftname_posidx_x = c_idx in [1, 2]
@@ -1511,9 +1514,21 @@ class ReReGFX:
                     craftname_posidx_x = c_idx // 2
                     craftname_posidx_y = c_idx % 2
 
+                if curgrp.type in [1, 5]:  # army
+                    craft24_in_stock_pos_x = 146
+                else:
+                    craft24_in_stock_pos_x = 158
+
+                if curgrp.type == 4:  # carrier
+                    craft13_in_stock_pos_x = 67
+                else:
+                    craft13_in_stock_pos_x = 62
+
                 self.screen_buffer.blit(yellow_text_craftname, (21, 109 + c_idx * 10))
+                self.screen_buffer.blit(text_craft_quantity,  (109, 109 + c_idx * 10))
                 self.screen_buffer.blit(yellow_text_craftname, ([16, 88][craftname_posidx_x], [176, 186][craftname_posidx_y]))
-                self.screen_buffer.blit(text_craft_quantity, (109, 109 + c_idx * 10))
+                self.screen_buffer.blit(text_craft_in_stock, ([craft13_in_stock_pos_x, craft24_in_stock_pos_x][craftname_posidx_x],
+                                                              [176, 186][craftname_posidx_y]))
 
                 for e_idx in range(len(screenobj_group.inventory_to_show_equips)):
 
@@ -1521,13 +1536,18 @@ class ReReGFX:
                     equipkey = screenobj_group.inventory_to_show_equips[e_idx]
 
                     if c_idx == 0:
+                        equip_in_stock = str(screenobj_group.inventory_to_show_equips_in_stock[e_idx])
+                        text_equip_in_stock = self.render_text(equip_in_stock, textcolor = 1)
                         yellow_text_equipname = self.render_text(equipname, textcolor = 1)
                         if curgrp.type == 4:  # carrier
-                            equipname_xposes = [ 99, 148]
+                            equipname_xposes  = [ 99, 161]
+                            equipstock_xposes = [132, 194]
                         else:
-                            equipname_xposes = [188, 248]
+                            equipname_xposes  = [188, 248]
+                            equipstock_xposes = [222, 282]
                         self.screen_buffer.blit(yellow_text_equipname, (144 + e_idx * 38, 99))
                         self.screen_buffer.blit(yellow_text_equipname, (equipname_xposes[e_idx // 2], [176, 186][e_idx % 2]))
+                        self.screen_buffer.blit(text_equip_in_stock,  (equipstock_xposes[e_idx // 2], [176, 186][e_idx % 2]))
 
                     if curgrp.fleet[craftkey + '_' + equipkey] == -1:
                         equipquantity = "  -"

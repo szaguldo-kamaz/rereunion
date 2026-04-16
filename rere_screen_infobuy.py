@@ -11,7 +11,7 @@ from rere_screen import screen
 
 class screen_infobuy(screen):
 
-    def __init__(self, gamedata_static, gamedata_dynamic):
+    def __init__(self, gamedata_const, gamedata_static, gamedata_dynamic, solarsystems):
 
         self.screentype = "infobuy"
 
@@ -21,7 +21,9 @@ class screen_infobuy(screen):
 
         super().__init__(gamedata_dynamic, [ self.menu_icons, self.menu_text, self.menu_sfx ])
 
+        self.gamedata_const  = gamedata_const
         self.gamedata_static = gamedata_static
+        self.solarsystems = solarsystems
 
         self.anim_exists = False
         # TODO vector anim
@@ -69,7 +71,8 @@ class screen_infobuy(screen):
 
         if self.selected_invention['can_be_produced_asis'] == 1:
             self.can_be_produced = True
-            self.stores = self.selected_invention['quantity_in_storage']
+            invention_name_in_storage = self.gamedata_const["invention_to_storage_mapping"][self.selected_item_invno]
+            self.stores = self.solarsystems[1].planets[(1,5,0)].storage[invention_name_in_storage ]
             self.items_in_production = self.selected_invention['quantity_in_production']
             self.total_price = self.selected_invention['quantity_in_production'] * self.selected_invention['price']
             if self.selected_invention['time_to_produce_next'] == 0 and self.selected_invention['quantity_in_production'] > 0:

@@ -33,7 +33,7 @@ class screen_mine(screen):
         self.update_menu(gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent)
 
         self.num_of_droids_active = self.planet.miner_droids
-        self.num_of_droids_stock = min(self.planet.storage["miner_droids"], 99)
+        self.num_of_droids_stock = min(self.planet.storage["MinerDroid"], 99)
         self.num_of_mines = min(self.planet.num_of_mines, 99)
         self.mineral_storage = self.planet.mineral_storage
         self.mineral_production = self.planet.mineral_production_actual.copy()
