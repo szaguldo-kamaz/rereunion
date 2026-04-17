@@ -71,6 +71,8 @@ class ReReSFX:
 
         self.effects["SHIP"] = self.effects["BASEEFF"]
 
+        self.background_channel = pygame.mixer.Channel(2)
+
 
     def play_effect(self, effectname):
         self.effects[effectname].play()
@@ -87,3 +89,7 @@ class ReReSFX:
 
     def stop_music(self):
         pygame.mixer.music.stop()
+
+
+    def background_queue_add(self, effectname):
+        self.background_channel.queue(self.effects[effectname])
