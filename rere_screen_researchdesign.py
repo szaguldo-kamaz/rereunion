@@ -76,12 +76,12 @@ class screen_researchdesign(screen):
 
         if gamedata_dynamic["commanders"][3] > 0:
             self.computer_state = 1  # on
-            self.developer_level = gamedata_dynamic["developer_level"]  # name, math, phys, elect, AI
+            self.developer_skills = gamedata_dynamic["developer_skills"]  # name, math, phys, elect, AI
             self.developer_name = self.developer_names[gamedata_dynamic["commanders"][3] - 1]
         else:
             self.computer_state = 0  # off
             self.developer_name = "No developer"
-            self.developer_level = [ '-', '-', '-', '-' ]
+            self.developer_skills = [ '-', '-', '-', '-' ]
 
         if self.waitingforanim != None:
 
