@@ -189,15 +189,19 @@ class screen_group(screen):
         self.__update_from_dynamic()
         self.__gen_inventory_to_show()
 
-        if self.current_shipgroup[self.selected_group_no_current] != [] and \
-           self.current_shipgroup[self.selected_group_no_current].type == 2:  # trade
-            self.menu_icons = [ "BACK TO M.SCREEN", "SHIP INFO", "CONTROL PANEL", "TRANSFER", "GALACTIC MAP", "PLANET MAIN" ]
-            self.menu_text  = [ "BACK TO M.SCREEN", "SHIP INFO", "CONTROL PANEL", "TRANSFER", "GALACTIC MAP", "PLANET MAIN" ]
-            self.menu_sfx   = [ "BACK", "SHIP", "CONTROLL", "TRANSFER", "STARMAP", "PLANET" ]
-        else:
-            self.menu_icons = [ "BACK TO M.SCREEN", "SHIP INFO", "CONTROL PANEL", "GALACTIC MAP", "PLANET MAIN" ]
-            self.menu_text  = [ "BACK TO M.SCREEN", "SHIP INFO", "CONTROL PANEL", "GALACTIC MAP", "PLANET MAIN" ]
-            self.menu_sfx   = [ "BACK", "SHIP", "CONTROLL", "STARMAP", "PLANET" ]
+        self.menu_icons = [ "BACK TO M.SCREEN", "SHIP INFO", "CONTROL PANEL", "GALACTIC MAP", "PLANET MAIN" ]
+        self.menu_text  = [ "BACK TO M.SCREEN", "SHIP INFO", "CONTROL PANEL", "GALACTIC MAP", "PLANET MAIN" ]
+        self.menu_sfx   = [ "BACK", "SHIP", "CONTROLL", "STARMAP", "PLANET" ]
+
+        if self.current_shipgroup[self.selected_group_no_current] != []:
+            if self.current_shipgroup[self.selected_group_no_current].type == 2:  # trade
+                self.menu_icons = [ "BACK TO M.SCREEN", "SHIP INFO", "CONTROL PANEL", "TRANSFER", "GALACTIC MAP", "PLANET MAIN" ]
+                self.menu_text  = [ "BACK TO M.SCREEN", "SHIP INFO", "CONTROL PANEL", "TRANSFER", "GALACTIC MAP", "PLANET MAIN" ]
+                self.menu_sfx   = [ "BACK", "SHIP", "CONTROLL", "TRANSFER", "STARMAP", "PLANET" ]
+            elif self.current_shipgroup[self.selected_group_no_current].type == 5:  # planet forces
+                self.menu_icons = [ "BACK TO M.SCREEN", "SHIP INFO", "GALACTIC MAP", "PLANET MAIN" ]
+                self.menu_text  = [ "BACK TO M.SCREEN", "SHIP INFO", "GALACTIC MAP", "PLANET MAIN" ]
+                self.menu_sfx   = [ "BACK", "SHIP", "STARMAP", "PLANET" ]
 
         self.define_menu([ self.menu_icons, self.menu_text, self.menu_sfx])
         self.update_menu(gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent)
