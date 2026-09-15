@@ -26,6 +26,7 @@ from rere_screen_messages import *
 from rere_screen_spacelocal import *
 from rere_screen_commanders import *
 from rere_screen_planetinfo import *
+from rere_screen_control import *
 
 
 class ReReGame:
@@ -1236,6 +1237,26 @@ class ReReGame:
                         currinv['time_to_produce_next'] = 0
 
 
+    def shipgroups_update_hourly(self):
+
+        for curr_shipgroup in self.shipgroups_spaceforces:
+            if curr_shipgroup != []:
+                if curr_shipgroup.orbit_status in [ 4, 6 ]:  # 5?
+                    curr_shipgroup.remaining_flight_time -= 1
+                    if curr_shipgroup.remaining_flight_time == 0:
+                        curr_shipgroup.orbit_status = 2
+                        sysno, planetno, moonno = curr_shipgroup.location
+                        sysname = self.gamedata_static["system_names"][sysno-1]
+                        planetname = self.solarsystems[sysno].planets[(sysno, planetno, 0)].planetname
+                        locationname = sysname + ' ' + planetname
+                        if moonno != 0:
+                            moonname = self.solarsystems[sysno].planets[(sysno, planetno, moonno)].planetname
+                            locationname += ' ' + moonname
+
+                        # TODO message()
+                        print(f"{curr_shipgroup.name} arrived to {locationname}")
+
+
     def __init__(self, config):
 
         self.config = config
@@ -1329,6 +1350,7 @@ class ReReGame:
             screen_changed = True
         elif screen_action in [ "SHIP INFO", "SPACEPORT" ]:
             self.current_screen = self.screens["ship"]
+            self.current_screen.enter()
             screen_changed = True
         elif screen_action in [ "GROUP", "PLANET FORCES" ]:
             if screen_action == "PLANET FORCES":
@@ -1338,6 +1360,10 @@ class ReReGame:
             screen_changed = True
         elif screen_action == "GALACTIC MAP":
             self.current_screen = self.screens["starmap"]
+            if screen_action_params[0] == "controlmove":
+                self.current_screen.set_mode("controlmove")
+            else:
+                self.current_screen.set_mode("normal")
             screen_changed = True
         elif screen_action == "ZOOM OUT":
             self.screens["starmap"].zoomout()
@@ -1352,7 +1378,15 @@ class ReReGame:
             self.screens["commanders"] = screen_commanders(self.gamedata_static, self.gamedata_dynamic)
             self.current_screen = self.screens["commanders"]
             screen_changed = True
-
+        elif screen_action == "CONTROL PANEL":
+            target_planet = screen_action_params[0]
+            self.screens["control"] = screen_control(self.gamedata_static, self.gamedata_dynamic, self.solarsystems, self.shipgroups_spaceforces, self.shipgroups_planetforces, target_planet)
+            self.current_screen = self.screens["control"]
+            screen_changed = True
+        elif screen_action == "ABORT MOVE":
+            self.current_screen = self.screens["control"]
+            self.current_screen.animstates["stick"].activate(0)
+            screen_changed = True
 
         [ a_hour_has_passed, a_day_has_passed ] = self.update_date()
 
@@ -1363,6 +1397,8 @@ class ReReGame:
                     self.solarsystems[solsys_id].planets[planet_id].update_hourly()
 
             self.inventions_update_hourly()
+
+            self.shipgroups_update_hourly()
 
             # todo, call updates for research, events, etc.
 

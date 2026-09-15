@@ -21,7 +21,9 @@ class screen_starmap(screen):
 
         super().__init__(gamedata_dynamic, [ self.menu_icons, self.menu_text, self.menu_sfx ])
 
-        self.anim_exists = False
+        self.anim_exists = True
+        self.add_anim("selectdestination", 2, 5, 1)  # should be 0.2s
+
         self.gamedata_static = gamedata_static
         self.solarsystems = solarsystems
         self.location = (1, 0)  # System 1 view by default
@@ -31,6 +33,30 @@ class screen_starmap(screen):
         self.planet_and_moon_mode = False
         self.selected_planet = None
         self.mousecursor = "normal"
+        self.mode = "surface"
+
+
+    def set_mode(self, starmap_mode):
+
+        if starmap_mode == "controlmove":
+            self.mode = "controlmove"
+            self.menu_icons = [ "ABORT" ]
+            self.menu_text  = [ "ABORT MOVE" ]
+            self.menu_sfx   = [ "ABORT" ]
+            self.animstates["selectdestination"].activate(1)
+        else:
+            self.mode = "surface"
+            self.menu_icons = [ "BACK TO M.SCREEN" ]
+            self.menu_text  = [ "BACK TO M.SCREEN" ]
+            self.menu_sfx   = [ "BACK" ]
+            self.animstates["selectdestination"].activate(0)
+
+        if self.planet_and_moon_mode:
+            self.menu_icons.append("ZOOM OUT")
+            self.menu_text.append("ZOOM OUT")
+            self.menu_sfx.append("ZOOMOUT")
+
+        self.define_menu([ self.menu_icons, self.menu_text, self.menu_sfx])
 
 
     def update(self, gamedata_dynamic, mouse_pos, mouse_buttonstate, mouse_buttonevent):
@@ -52,9 +78,14 @@ class screen_starmap(screen):
 
                 self.menu_info["actiontext"] = self.selected_planet.planetname
                 if mouse_buttonevent[0]:
-                    self.sfx_to_play = "SURFACE"
-                    self.action = "PLANET MAIN"
-                    self.action_params = [ self.location + (0, ), None ]
+                    if self.mode == "controlmove":
+                        self.sfx_to_play = "MOVESHIP"
+                        self.action = "CONTROL PANEL"
+                        self.action_params = [ self.location + (0, ) ]
+                    else:
+                        self.sfx_to_play = "SURFACE"
+                        self.action = "PLANET MAIN"
+                        self.action_params = [ self.location + (0, ), None ]
                 else:
                     self.mousecursor = "cross"
 
@@ -67,9 +98,14 @@ class screen_starmap(screen):
                         selected_moon_id = self.selected_planet.moons_ids[moon_no]
                         self.menu_info["actiontext"] = self.selected_solarsystem.planets[selected_moon_id].planetname
                         if mouse_buttonevent[0]:
-                            self.sfx_to_play = "SURFACE"
-                            self.action = "PLANET MAIN"
-                            self.action_params = [ self.location + (moon_no + 1,), None ]
+                            if self.mode == "controlmove":
+                                self.sfx_to_play = "MOVESHIP"
+                                self.action = "CONTROL PANEL"
+                                self.action_params = [ self.location + (moon_no + 1,) ]
+                            else:
+                                self.sfx_to_play = "SURFACE"
+                                self.action = "PLANET MAIN"
+                                self.action_params = [ self.location + (moon_no + 1,), None ]
                             break
                         else:
                             self.mousecursor = "cross"
@@ -103,9 +139,14 @@ class screen_starmap(screen):
                             self.location = full_location[:2]
                             self.selected_solarsystem = self.solarsystems[self.location[0]]
                             self.selected_planet = self.selected_solarsystem.planets[full_location]
-                            self.menu_icons = [ "BACK TO M.SCREEN", "ZOOM OUT" ]
-                            self.menu_text  = [ "BACK TO M.SCREEN", "ZOOM OUT" ]
-                            self.menu_sfx   = [ "BACK", "ZOOMOUT" ]
+                            if self.mode == "controlmove":
+                                self.menu_icons = [ "ABORT", "ZOOM OUT" ]
+                                self.menu_text  = [ "ABORT MOVE", "ZOOM OUT" ]
+                                self.menu_sfx   = [ "ABORT", "ZOOMOUT" ]
+                            else:
+                                self.menu_icons = [ "BACK TO M.SCREEN", "ZOOM OUT" ]
+                                self.menu_text  = [ "BACK TO M.SCREEN", "ZOOM OUT" ]
+                                self.menu_sfx   = [ "BACK", "ZOOMOUT" ]
                             self.define_menu([ self.menu_icons, self.menu_text, self.menu_sfx])
                             self.sfx_to_play = "X"
                             break
@@ -115,7 +156,12 @@ class screen_starmap(screen):
 
         self.planet_and_moon_mode = False
         self.location = self.parent_location
-        self.menu_icons = [ "BACK TO M.SCREEN" ]
-        self.menu_text  = [ "BACK TO M.SCREEN" ]
-        self.menu_sfx   = [ "BACK" ]
+        if self.mode == "controlmove":
+            self.menu_icons = [ "ABORT" ]
+            self.menu_text  = [ "ABORT MOVE" ]
+            self.menu_sfx   = [ "ABORT" ]
+        else:
+            self.menu_icons = [ "BACK TO M.SCREEN" ]
+            self.menu_text  = [ "BACK TO M.SCREEN" ]
+            self.menu_sfx   = [ "BACK" ]
         self.define_menu([ self.menu_icons, self.menu_text, self.menu_sfx])

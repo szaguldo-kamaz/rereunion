@@ -251,6 +251,10 @@ class screen:
                                 elif self.action == "PLANET INFO":
                                     preserved_position = self.map_position
                                     self.action_params = [ self.planet, preserved_position ]
+                            elif self.action == "GALACTIC MAP":
+                                self.action_params = [ None ]
+                            elif self.action == "CONTROL PANEL":
+                                self.action_params = [ None ]  # target planet
 
                             self.sfx_to_play = self.menu_info["sfx"][menuicon_pointerover_index]
                     else:

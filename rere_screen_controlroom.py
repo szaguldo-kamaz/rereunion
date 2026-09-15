@@ -111,7 +111,7 @@ class screen_controlroom(screen):
             if mouse_buttonevent[0]:  # mouse button pressed
                 self.sfx_to_play = "STARMAP"
                 self.action = "GALACTIC MAP"
-                self.action_params = [ ]
+                self.action_params = [ None ]
 
         # Messages
         elif 23+49 <= mouse_pos[1] <= 98+49 and 0 <= mouse_pos[0] <= 40:

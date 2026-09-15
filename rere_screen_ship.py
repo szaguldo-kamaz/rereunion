@@ -34,11 +34,18 @@ class screen_ship(screen):
         self.current_shipgroup = self.shipgroups_spaceforces
         self.numofgroups_spaceforces = gamedata_dynamic["groups_numofgroups"][1]
         self.numofgroups_planetforces = gamedata_dynamic["groups_numofgroups"][2]
-        if self.currentview == 0 and self.numofgroups_spaceforces > 0:
-            self.__set_location_names()
-            self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
+
+        self.enter()
 
         self.update(gamedata_dynamic, (0,0), [0,0,0], [0,0,0])
+
+
+    def enter(self):
+
+        if self.currentview == 0 and \
+           self.numofgroups_spaceforces > 0:
+            self.__set_location_names()
+            self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
 
 
     def __set_location_names(self, use_long_sysname = False):
@@ -128,11 +135,13 @@ class screen_ship(screen):
                     self.__set_location_names(bool(self.currentview))
                     self.current_planet_surface = self.current_shipgroup[self.selected_group_no_current].location
                     if is_icon:
-                        self.action = "GROUP"
                         if self.currentview == 0:
                             self.sfx_to_play = "CONTROLL"
+                            self.action = "CONTROL PANEL"
+                            self.action_params = [ None ]
                         else:
                             self.sfx_to_play = "GROUP"
+                            self.action = "GROUP"
 
         # CHANGE at the bottom
         if (188 <= mouse_pos[1] <= 200) and (0 <= mouse_pos[0] <= 191):

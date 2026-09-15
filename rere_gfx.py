@@ -72,12 +72,14 @@ class ReReGFX:
         self.prepare_ship()
         self.prepare_group()
         self.prepare_starmap()
+        self.prepare_starmap_anims()
         self.prepare_felszin()
         self.prepare_planetmain()
         self.prepare_mine_szamok()
         self.prepare_kocsma_anims()
         self.prepare_kocsmatoltelekek()
         self.prepare_planetinfo()
+        self.prepare_control_muszi()
 
         self.menu_full = pygame.Surface((320, 64))
         self.infobar = pygame.Surface((320, 17))
@@ -392,8 +394,11 @@ class ReReGFX:
         for alien_no in range(1,17):
             PIClist.append("ALIEN/ALIEN%d.PIC"%(alien_no))  # Nagy alien arckep - Alien faces
 
-        #PIClist.append("PLANETS/MUSZI.PIC")  # Urhajo Muszerfal
-        #PIClist.append("PLANETS/MUSZIANM.PIC")  # Urhajo Muszerfal animacio
+        PIClist.append("PLANETS/MUSZI.PIC")  # Urhajo Muszerfal
+        PIClist.append("PLANETS/MUSZIANM.PIC")  # Urhajo Muszerfal animaciok
+
+        PIClist.append("INTRO/GABOR.PIC")  # Cover
+
         #PIClist.append("PLANETS/MASZK1.PIC")  #.
         #PIClist.append("PLANETS/MASZK2.PIC")  #.
 
@@ -672,6 +677,7 @@ class ReReGFX:
         self.starmap_labels = []
         self.starmap_planets = []  # for each solsys
         self.starmap_moons = []  # for each solsys
+        self.starmap_moons = []  # for each solsys
 
         for solsys_no in range(8):
 
@@ -694,6 +700,26 @@ class ReReGFX:
                 moon_idx = moon_no % 14
                 self.starmap_moons[solsys_no].append(self.PICs[f"NAPR{solsys_no+1}"].subsurface(pygame.Rect(66 + moon_idx*17, 34 + (moon_col * 17), 16, 16)))
                 self.starmap_moons[solsys_no][moon_no].set_colorkey(pygame.Color(0, 0, 0))
+
+
+    def prepare_starmap_anims(self):
+
+        self.starmap_anims = {}
+
+        self.starmap_anims_pasteposes = {
+            "selectdestination"        : (10, 188)
+        }
+
+        self.starmap_selectdestination = pygame.Surface((57*2, 5))
+        self.starmap_selectdestination.blit(self.PICs["HATTER3"].subsurface(pygame.Rect(263, 26, 57, 5)), ( 0, 0))
+        self.starmap_selectdestination.blit(self.PICs["HATTER3"].subsurface(pygame.Rect(262, 32, 57, 5)), (57, 0))
+        self.starmap_selectdestination.set_colorkey(pygame.Color((0,0,0)))
+
+        self.starmap_selectdestination_empty = pygame.Surface((57*2, 5))
+        self.starmap_selectdestination_empty.fill((0,0,0))
+        self.starmap_selectdestination_empty.set_colorkey(pygame.Color((0,0,0)))
+
+        self.starmap_anims["selectdestination"] = [ self.starmap_selectdestination_empty, self.starmap_selectdestination ]
 
 
     def prepare_planetmain(self):
@@ -861,6 +887,36 @@ class ReReGFX:
         # Alien faces pic
         for alien_no in range(1,17):
             self.PICs[f"ALIEN{alien_no}"] = self.PICs[f"ALIEN{alien_no}"].subsurface(pygame.Rect( 1, 6, 94, 144))
+
+
+    def prepare_control_muszi(self):
+
+        self.PICs["MUSZI"].set_colorkey(pygame.Color(0xFF, 0xFF, 0x00))
+
+        self.control_muszi_anims_pasteposes = {
+            "transfer"      : ( 83, 49 +  98),
+            "stick"         : (151, 49 + 112),
+#            "redlights"     : (201, 49 +  78),
+            "radiodetector" : (193, 49 + 102),
+            "terminal"      : (201, 49 + 133),
+            "throttledown"  : ( 15, 49 + 108),
+            "throttleup"    : ( 15, 49 + 108),
+        }
+
+        self.control_muszi_anim_defs = {
+            # name                  PICsurface         nf  fr   w   h   wo   ho cs rs  colorkey
+            "transfer"      : [ self.PICs["MUSZIANM"],  3,  3, 29, 30,   1,   1, 1, 0, None ],
+            "stick"         : [ self.PICs["MUSZIANM"],  4,  4, 21, 39,   1,  32, 1, 0, None ],
+#            "redlights"     : [ self.PICs["MUSZIANM"],  2,  2, 45, xx,  89,  32, 1, 0, None ],
+            "radiodetector" : [ self.PICs["MUSZIANM"],  4,  4, 10, 16,  89,  54, 1, 0, None ],
+            "terminal"      : [ self.PICs["MUSZIANM"],  5,  5, 25, 18, 135,  45, 1, 0, None ],  # frame 6 not used in the original game (its first line is black anyway)
+            "throttledown"  : [ self.PICs["MUSZIANM"],  4,  4, 47, 43,   1,  73, 1, 0, None ],
+        }
+
+        self.control_muszi_anims = self.slice_picsequence(self.control_muszi_anim_defs)
+
+        self.control_muszi_anims["throttleup"] = self.control_muszi_anims["throttledown"].copy()
+        self.control_muszi_anims["throttleup"].reverse()
 
 
     #################
@@ -1046,6 +1102,8 @@ class ReReGFX:
             return self.render_spacelocal(screenobj)
         elif screenobj.screentype == "commanders":
             return self.render_commanders(screenobj)
+        elif screenobj.screentype == "control":
+            return self.render_control(screenobj)
 
 
     def __render_anims_helper(self, anims, animstates, pasteposes, blitscreen):
@@ -1318,6 +1376,8 @@ class ReReGFX:
                 if screenobj_starmap.gamedata_dynamic["systems_available"][system_no] > -1:
                     self.screen_buffer.blit(self.starmap_labels[system_no], (256, 49 + system_no * 19))
 
+
+        self.__render_anims_helper(self.starmap_anims, screenobj_starmap.animstates, self.starmap_anims_pasteposes, self.screen_buffer)
 
         self.set_mousecursor(screenobj_starmap.mousecursor)
 
@@ -1936,5 +1996,27 @@ class ReReGFX:
             for commander_says_text in screenobj_commanders.commander_says:
                 self.screen_buffer.blit( self.render_text(commander_says_text, textcolor = 1), (10, 164 + textcounter*8))
                 textcounter += 1
+
+        return self.screen_buffer
+
+
+    # control
+    def render_control(self, screenobj_control):
+
+        # main pic (before menu)
+        if screenobj_control.current_shipgroup.orbit_status == 2:
+            self.screen_buffer.blit(self.PICs["NAGY0"], (0, 48))
+        elif screenobj_control.current_shipgroup.orbit_status == 1:
+            self.screen_buffer.blit(self.PICs[f"NAGY{screenobj_control.planet.planettype}"], (0, 6))
+        else:
+            self.screen_buffer.blit(self.PICs["GABOR"], (0, 48))
+            # TODO moving/hyperjump anim
+
+        self.screen_buffer.blit(self.render_menu(screenobj_control.menu_info), (0, 0))
+        self.screen_buffer.blit(self.render_infobar(screenobj_control.menu_info), (0, 32))
+
+        self.screen_buffer.blit(self.PICs["MUSZI"], (0, 49))
+
+        self.__render_anims_helper(self.control_muszi_anims, screenobj_control.animstates, self.control_muszi_anims_pasteposes, self.screen_buffer)
 
         return self.screen_buffer
