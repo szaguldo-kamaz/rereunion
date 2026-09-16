@@ -677,7 +677,7 @@ class ReReGFX:
         self.starmap_labels = []
         self.starmap_planets = []  # for each solsys
         self.starmap_moons = []  # for each solsys
-        self.starmap_moons = []  # for each solsys
+        self.starmap_raceicons_small = []
 
         for solsys_no in range(8):
 
@@ -700,6 +700,11 @@ class ReReGFX:
                 moon_idx = moon_no % 14
                 self.starmap_moons[solsys_no].append(self.PICs[f"NAPR{solsys_no+1}"].subsurface(pygame.Rect(66 + moon_idx*17, 34 + (moon_col * 17), 16, 16)))
                 self.starmap_moons[solsys_no][moon_no].set_colorkey(pygame.Color(0, 0, 0))
+
+        for raceicon_no in range(14):
+            # original game shows only 7x7 (top-right) of these icons
+            self.starmap_raceicons_small.append(self.PICs["HATTER3"].subsurface(pygame.Rect(raceicon_no*8, 39, 8, 8)))
+            self.starmap_raceicons_small[-1].set_colorkey(pygame.Color(0, 0, 0))
 
 
     def prepare_starmap_anims(self):
@@ -1341,22 +1346,43 @@ class ReReGFX:
         self.screen_buffer.blit(self.render_menu(screenobj_starmap.menu_info), (0, 0))
         self.screen_buffer.blit(self.render_infobar(screenobj_starmap.menu_info), (0, 32))
 
-        curr_solsys_no = screenobj_starmap.location[0] - 1
+        curr_solsys_no = screenobj_starmap.starmaplocation[0] - 1
 
         if screenobj_starmap.planet_and_moon_mode:
 
-            curr_planet_no = screenobj_starmap.location[1] - 1
+            curr_planet_no = screenobj_starmap.starmaplocation[1] - 1
 
             # background pic
             self.screen_buffer.blit(self.PICs["HATTER2"], (0, 49))
 
             # Planet
             self.screen_buffer.blit(self.starmap_planets[curr_solsys_no][curr_planet_no], (160-16, 49+75-16))
+            # red dot
+            if screenobj_starmap.mode == "controlmove" and \
+               screenobj_starmap.shipgroup_to_be_moved_location == screenobj_starmap.starmaplocation + (0,):
+                self.screen_buffer.blit(self.starmap_raceicons_small[-1], (143, 49+88))
+            # show race icon if inhabited
+            planetrace = screenobj_starmap.planetandmoonlist[screenobj_starmap.starmaplocation + (0,)].race
+            if planetrace > 0:
+                self.screen_buffer.blit(self.starmap_raceicons_small[planetrace], (160-16, 49+75-16))
 
             # Moons
             mooncnt = 0
             for moon_seqid in screenobj_starmap.selected_planet.moons_seqids:
                 self.screen_buffer.blit(self.starmap_moons[curr_solsys_no][moon_seqid], screenobj_starmap.orbit_pixposes[mooncnt])
+                # red dot
+                if screenobj_starmap.mode == "controlmove" and \
+                   screenobj_starmap.shipgroup_to_be_moved_location == screenobj_starmap.starmaplocation + (mooncnt+1,):
+                    self.screen_buffer.blit(self.starmap_raceicons_small[-1],
+                                            (screenobj_starmap.orbit_pixposes[mooncnt][0] - 4,
+                                             screenobj_starmap.orbit_pixposes[mooncnt][1] + 9))
+                # show race icon if inhabited
+                moonrace = screenobj_starmap.planetandmoonlist[screenobj_starmap.starmaplocation + (mooncnt+1,)].race
+                if moonrace > 0:
+                    self.screen_buffer.blit(self.starmap_raceicons_small[moonrace],
+                                            (screenobj_starmap.orbit_pixposes[mooncnt][0] - 3,
+                                             screenobj_starmap.orbit_pixposes[mooncnt][1] - 3))
+
                 mooncnt += 1
 
         else:

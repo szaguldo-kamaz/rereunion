@@ -11,7 +11,7 @@ from rere_screen import screen
 
 class screen_starmap(screen):
 
-    def __init__(self, gamedata_static, gamedata_dynamic, solarsystems):
+    def __init__(self, gamedata_static, gamedata_dynamic, solarsystems, shipgroups_spaceforces):
 
         self.screentype = "starmap"
 
@@ -26,9 +26,8 @@ class screen_starmap(screen):
 
         self.gamedata_static = gamedata_static
         self.solarsystems = solarsystems
-        self.location = (1, 0)  # System 1 view by default
-        self.parent_location = self.location
-        self.selected_solarsystem = self.solarsystems[self.location[0]]
+        self.shipgroups_spaceforces = shipgroups_spaceforces
+        self.set_starmaplocation((1, 0))  # System 1 view by default
         self.orbit_pixposes = [ [10+planet_no*35, 64] for planet_no in range(8) ]
         self.planet_and_moon_mode = False
         self.selected_planet = None
@@ -36,7 +35,17 @@ class screen_starmap(screen):
         self.mode = "surface"
 
 
-    def set_mode(self, starmap_mode):
+    def set_starmaplocation(self, new_starmaplocation):
+
+        self.starmaplocation = new_starmaplocation
+        self.planetandmoonlist = {}
+        for location_id in self.solarsystems[self.starmaplocation[0]].planets.keys():
+            if location_id[0:2] == self.starmaplocation:
+                self.planetandmoonlist[location_id] = self.solarsystems[self.starmaplocation[0]].planets[location_id]
+        self.selected_solarsystem = self.solarsystems[self.starmaplocation[0]]
+
+
+    def set_mode(self, starmap_mode, shipgroup_to_be_moved_location = None):
 
         if starmap_mode == "controlmove":
             self.mode = "controlmove"
@@ -44,6 +53,10 @@ class screen_starmap(screen):
             self.menu_text  = [ "ABORT MOVE" ]
             self.menu_sfx   = [ "ABORT" ]
             self.animstates["selectdestination"].activate(1)
+            self.shipgroup_to_be_moved_location = shipgroup_to_be_moved_location
+            self.set_starmaplocation(shipgroup_to_be_moved_location[0:2])
+            self.planet_and_moon_mode = True
+            self.selected_planet = self.selected_solarsystem.planets[shipgroup_to_be_moved_location[0:2] + (0,)]
         else:
             self.mode = "surface"
             self.menu_icons = [ "BACK TO M.SCREEN" ]
@@ -81,11 +94,11 @@ class screen_starmap(screen):
                     if self.mode == "controlmove":
                         self.sfx_to_play = "MOVESHIP"
                         self.action = "CONTROL PANEL"
-                        self.action_params = [ self.location + (0, ) ]
+                        self.action_params = [ self.starmaplocation + (0, ) ]
                     else:
                         self.sfx_to_play = "SURFACE"
                         self.action = "PLANET MAIN"
-                        self.action_params = [ self.location + (0, ), None ]
+                        self.action_params = [ self.starmaplocation + (0, ), None ]
                 else:
                     self.mousecursor = "cross"
 
@@ -101,11 +114,11 @@ class screen_starmap(screen):
                             if self.mode == "controlmove":
                                 self.sfx_to_play = "MOVESHIP"
                                 self.action = "CONTROL PANEL"
-                                self.action_params = [ self.location + (moon_no + 1,) ]
+                                self.action_params = [ self.starmaplocation + (moon_no + 1,) ]
                             else:
                                 self.sfx_to_play = "SURFACE"
                                 self.action = "PLANET MAIN"
-                                self.action_params = [ self.location + (moon_no + 1,), None ]
+                                self.action_params = [ self.starmaplocation + (moon_no + 1,), None ]
                             break
                         else:
                             self.mousecursor = "cross"
@@ -119,9 +132,8 @@ class screen_starmap(screen):
                 if gamedata_dynamic["systems_available"][mouse_over_system_no] > -1:
                     self.menu_info["actiontext"] = self.gamedata_static["system_names"][mouse_over_system_no]
                     if mouse_buttonevent[0]:
+                        self.set_starmaplocation((mouse_over_system_no+1, 0))
                         self.zoomout()
-                        self.location = (mouse_over_system_no+1, 0)
-                        self.selected_solarsystem = self.solarsystems[self.location[0]]
                         self.sfx_to_play = "X"
 
             else:
@@ -130,14 +142,12 @@ class screen_starmap(screen):
                     if (self.orbit_pixposes[planet_no][1] <= mouse_pos[1] <= self.orbit_pixposes[planet_no][1] + 32) and \
                        (self.orbit_pixposes[planet_no][0] <= mouse_pos[0] <= self.orbit_pixposes[planet_no][0] + 32):
 
-                        full_location = (self.location[0], planet_no + 1, 0)
+                        full_location = (self.starmaplocation[0], planet_no + 1, 0)
                         self.menu_info["actiontext"] = self.selected_solarsystem.planets[full_location].planetname
                         self.mousecursor = "cross"
                         if mouse_buttonevent[0]:
                             self.planet_and_moon_mode = True
-                            self.parent_location = self.location
-                            self.location = full_location[:2]
-                            self.selected_solarsystem = self.solarsystems[self.location[0]]
+                            self.set_starmaplocation(full_location[:2])
                             self.selected_planet = self.selected_solarsystem.planets[full_location]
                             if self.mode == "controlmove":
                                 self.menu_icons = [ "ABORT", "ZOOM OUT" ]
@@ -155,7 +165,7 @@ class screen_starmap(screen):
     def zoomout(self):
 
         self.planet_and_moon_mode = False
-        self.location = self.parent_location
+        self.set_starmaplocation((self.starmaplocation[0], 0))
         if self.mode == "controlmove":
             self.menu_icons = [ "ABORT" ]
             self.menu_text  = [ "ABORT MOVE" ]

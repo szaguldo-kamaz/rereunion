@@ -91,7 +91,7 @@ class screen_control(screen):
 
                 elif self.waitingforanim == "stick":
                     self.action = "GALACTIC MAP"
-                    self.action_params = [ "controlmove" ]
+                    self.action_params = [ "controlmove", self.current_shipgroup.location ]
                     self.waitingforanim = None
 
             return

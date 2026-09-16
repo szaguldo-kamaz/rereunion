@@ -1308,7 +1308,7 @@ class ReReGame:
         self.screens["researchdesign"] = screen_researchdesign(self.gamedata_static, self.gamedata_dynamic)
         self.screens["ship"] = screen_ship(self.gamedata_static, self.gamedata_dynamic, self.solarsystems, self.shipgroups_spaceforces, self.shipgroups_planetforces)
         self.screens["group"] = screen_group(self.gamedata_static, self.gamedata_dynamic, self.solarsystems, self.shipgroups_spaceforces, self.shipgroups_planetforces)
-        self.screens["starmap"] = screen_starmap(self.gamedata_static, self.gamedata_dynamic, self.solarsystems)
+        self.screens["starmap"] = screen_starmap(self.gamedata_static, self.gamedata_dynamic, self.solarsystems, self.shipgroups_spaceforces)
         self.screens["messages"] = screen_messages(self.gamedata_dynamic)
         self.screens["spacelocal"] = screen_spacelocal(self.gamedata_dynamic)
         self.screens["commanders"] = screen_commanders(self.gamedata_static, self.gamedata_dynamic)
@@ -1361,7 +1361,7 @@ class ReReGame:
         elif screen_action == "GALACTIC MAP":
             self.current_screen = self.screens["starmap"]
             if screen_action_params[0] == "controlmove":
-                self.current_screen.set_mode("controlmove")
+                self.current_screen.set_mode("controlmove", shipgroup_to_be_moved_location = screen_action_params[1])
             else:
                 self.current_screen.set_mode("normal")
             screen_changed = True
