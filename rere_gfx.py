@@ -1183,18 +1183,20 @@ class ReReGFX:
             self.screen_buffer.blit(self.render_text(f"Ore needed: ({screenobj_infobuy.items_in_production} piece{piecesplural} )", textcolor = 2), (136, 133) )
 
             mineral_index = 0
-            for mineral_name in screenobj_infobuy.mineral_names_list:
+            for mineral_id in screenobj_infobuy.mineral_names_list:
+
+                mineral_name = self.gamedata_static['mineral_names'][mineral_index]
                 if self.infobuy_buysell_mineral_text_poses[mineral_index][0] == 225:
                     mineraltext = mineral_name.ljust(8)
                 else:
                     mineraltext = mineral_name
 
-                if minerals_main[mineral_name] >= 100000:
-                    mineraltext_stock = mineraltext + "%6d"%(minerals_main[mineral_name])
+                if minerals_main[mineral_id] >= 100000:
+                    mineraltext_stock = mineraltext + "%6d"%(minerals_main[mineral_id])
                 else:
-                    mineraltext_stock = mineraltext + ":%5d"%(minerals_main[mineral_name])
+                    mineraltext_stock = mineraltext + ":%5d"%(minerals_main[mineral_id])
 
-                mineral_needed = screenobj_infobuy.needed_minerals[mineral_name]
+                mineral_needed = screenobj_infobuy.needed_minerals[mineral_id]
                 if mineral_needed >= 100000:
                     mineraltext_needed = mineraltext + "%6d"%(mineral_needed)
                 else:
@@ -1204,7 +1206,7 @@ class ReReGFX:
                                         (self.infobuy_buysell_mineral_text_poses[mineral_index]) )
 
                 if screenobj_infobuy.timed_screen_event_active and \
-                   screenobj_infobuy.mineral_flash_minerals[mineral_name]:
+                   screenobj_infobuy.mineral_flash_minerals[mineral_id]:
                     mineralneeded_textcolor = 2
                 else:
                     mineralneeded_textcolor = 1
@@ -1226,9 +1228,9 @@ class ReReGFX:
                     self.screen_buffer.blit(self.render_text(screenobj_infobuy.invention_description[descline_no], textcolor = 1), (136, 61 + descline_no * 10) )
                 self.screen_buffer.blit(self.render_text("Ore needed: (One piece)", textcolor = 2), (136, 133) )
                 mineral_index = 0
-                for mineral_name in screenobj_infobuy.mineral_names_list:
+                for mineral_id in screenobj_infobuy.mineral_names_list:
                     mineral_name_and_amount = \
-                                mineral_name + \
+                                self.gamedata_static['mineral_names'][mineral_index] + \
                                 self.infobuy_info_mineral_text_padding[mineral_index] + \
                                 ":%5d"%(screenobj_infobuy.minerals[mineral_index])
                     self.screen_buffer.blit(
@@ -1925,7 +1927,7 @@ class ReReGFX:
         mineral_no = 0
         for mineral in screenobj_mine.mineral_production.keys():
             mineral_production = screenobj_mine.mineral_production[mineral]
-            mineral_stock = screenobj_mine.mineral_storage[mineral]
+            mineral_stock = screenobj_mine.storage[mineral]
             if mineral_production == 0:
                 mineral_production_string = ' -'
             elif mineral_production == -1:

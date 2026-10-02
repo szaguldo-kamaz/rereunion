@@ -53,6 +53,29 @@ class solarsystem:
                     return 0
 
 
+            def get_mineral_storage_capacity(self):
+                if self.building_type in [ 4, 25 ]:
+                    return 10000
+                elif self.building_type == 5:
+                    return 5000
+                elif self.building_type == 11:
+                    return 20000
+                else:
+                    return 0
+
+
+            def get_food_production(self):
+                # TODO: real number, these are just made up
+                if self.building_type == 1:
+                    return 15000
+                elif self.building_type == 16:
+                    return 20000
+                elif self.building_type == 21:
+                    return 10000
+                else:
+                    return 0
+
+
         class planetsurface:
 
 
@@ -121,7 +144,6 @@ class solarsystem:
             self.population_mood = planet_data["population_mood"]
             self.development_level = planet_data["development_level"]
             self.tax_level = planet_data["tax_level"]
-            self.mineral_storage = planet_data["mineral_storage"]
             self.alien_garrison = planet_data["alien_garrison"]
             self.mineral_production_base = planet_data["mineral_production"]
             self.deployed_sat_type = planet_data["deployed_sat_type"]
@@ -133,7 +155,8 @@ class solarsystem:
             self.moons_seqids = []  # no in solsys
             self.moons_ids = []  # solsys, planet, moon
 
-            self.storage = { "ArmyShip1"    : 0, "ArmyShip2"    : 0, "ArmyShip3"    : 0, "ArmyShip4"    : 0,
+            self.storage = planet_data["mineral_storage"] | \
+                           { "ArmyShip1"    : 0, "ArmyShip2"    : 0, "ArmyShip3"    : 0, "ArmyShip4"    : 0,
                              "ArmyVehicle1" : 0, "ArmyVehicle2" : 0, "ArmyVehicle3" : 0, "ArmyVehicle4" : 0,
                              "ArmyEquip1"   : 0, "ArmyEquip2"   : 0, "ArmyEquip3"   : 0, "ArmyEquip4"   : 0,
                              "TradeShip1"   : 0, "TradeShip2"   : 0, "TradeShip3"   : 0, "TradeShip4"   : 0,
@@ -152,6 +175,7 @@ class solarsystem:
             self.has_vehicle_plant = False
             self.has_medicine_plant = False
             self.has_radshield = False
+            self.has_observatory = False
 
             self.solar_plants = 0
 
@@ -162,6 +186,8 @@ class solarsystem:
             self.hospital_need = 0
             self.power_production = 0
             self.power_need = 0
+            self.mineral_storage_capacity = 0
+            self.num_of_derricks = 0
 
             self.radiation = False
             self.meteors = False
@@ -186,15 +212,17 @@ class solarsystem:
 
 
         def update_mineral_production(self):
-            self.mineral_production_actual = {}
-            for mineralname in self.mineral_production_base.keys():
+            # TODO: real production?
+            self.mineral_production_actual = { 'Mineral1' : self.mineral_production_base['Mineral1'] * self.num_of_derricks // 10 }
+            for mineralname in list(self.mineral_production_base.keys())[1:]:
                 self.mineral_production_actual[mineralname] = self.mineral_production_base[mineralname] * self.miner_droids // 10
 
 
         def do_mining(self):
             for mineralname in self.mineral_production_base.keys():
-            # TODO planet maxstorage
-                self.mineral_storage[mineralname] += self.mineral_production_actual[mineralname]
+                # as in the original game, "last chunk" of the production is not truncated to the max limit
+                if self.storage[mineralname] < self.mineral_storage_capacity:
+                    self.storage[mineralname] += self.mineral_production_actual[mineralname]
 
 
         def add_moon(self, moon_seqid, moon_id):
@@ -266,8 +294,8 @@ class solarsystem:
 
             self.add_building_to_map_of_buildings(building_no)
 
-            if building_type in [ 4, 25 ]:  # 4 = mine, 25 = miner station
-                self.num_of_mines += 1
+            if not force_build:
+                self.buildings_update()
 
             return building_type_data["price"]
 
@@ -303,35 +331,57 @@ class solarsystem:
             if self.buildings[building_no].building_type == 1:
                 return False
 
-            # Mine
-            if self.buildings[building_no].building_type in [ 4, 25 ]:
-                self.num_of_mines -= 1
-
             building_to_del = self.buildings.pop(building_no)
             del building_to_del
 
             self.recreate_map_of_buildings()
+            self.buildings_update()
+            self.update_mineral_production()
 
             return True
 
 
         def buildings_update(self):
 
-            planet_living_capacity = 0
-            for building in self.buildings:
-                building.update()
-                planet_living_capacity += building.get_living_capacity()
+            self.living_capacity = 0
+            self.food_production = 0
+            self.mineral_storage_capacity = 0
+            self.num_of_mines = 0
+            self.num_of_derricks = 0
 
-                if building.building_type == 9:
+            for building in self.buildings:
+
+                building.update()
+
+                if building.building_type == 1:
+                    self.living_capacity += building.get_living_capacity()
+                    self.food_production += building.get_food_production()
+                elif building.building_type == 4:
+                    self.num_of_mines += 1
+                    self.mineral_storage_capacity += building.get_mineral_storage_capacity()
+                elif building.building_type == 5:
+                    self.num_of_derricks += 1
+                    self.mineral_storage_capacity += building.get_mineral_storage_capacity()
+                elif building.building_type == 6:
+                    self.has_observatory = True
+                elif building.building_type == 7:
+                    self.living_capacity += building.get_living_capacity()
+                elif building.building_type == 9:
                     self.has_stadium = True
+                elif building.building_type == 11:
+                    self.mineral_storage_capacity += building.get_mineral_storage_capacity()
                 elif building.building_type == 12:
                     self.has_spaceport = True
                 elif building.building_type == 13:
                     self.has_university = True
+                elif building.building_type == 16:
+                    self.food_production += building.get_food_production()
                 elif building.building_type == 17:
                     self.has_radar = True
                 elif building.building_type == 19:
                     self.has_radshield = True
+                elif building.building_type == 21:
+                    self.food_production += building.get_food_production()
                 elif building.building_type == 22:
                     self.has_builder_plant = True
                 elif building.building_type == 23:
@@ -340,8 +390,8 @@ class solarsystem:
                     self.has_medicine_plant = True
                 elif building.building_type == 25:
                     self.minerstation = True
-
-            self.living_capacity = planet_living_capacity
+                    self.num_of_mines += 1
+                    self.mineral_storage_capacity += building.get_mineral_storage_capacity()
 
 
         def population_count_update(self):
@@ -380,9 +430,9 @@ class solarsystem:
 
 
         def add_droid(self):
-            if self.miner_droids < min(self.num_of_mines, 9) and self.storage["miner_droids"] > 0:
+            if self.miner_droids < min(self.num_of_mines, 9) and self.storage["MinerDroid"] > 0:
                 self.miner_droids += 1
-                self.storage["miner_droids"] -= 1
+                self.storage["MinerDroid"] -= 1
                 self.update_mineral_production()
                 return True
             else:
@@ -392,7 +442,7 @@ class solarsystem:
         def remove_droid(self):
             if self.miner_droids > 0:
                 self.miner_droids -= 1
-                self.storage["miner_droids"] += 1
+                self.storage["MinerDroid"] += 1
                 self.update_mineral_production()
                 return True
             else:

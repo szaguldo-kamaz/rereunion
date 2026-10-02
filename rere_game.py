@@ -136,7 +136,6 @@ class ReReGame:
          6: (4, 1, 3), # 'Moon 3'
 
          7: (4, 2, 1), # 'Moon 1'
-         8: (4, 2, 2), # 'Moon 2'
     }
 
     gamedata_const["planets_id_mapping"][5] = {
@@ -1179,6 +1178,12 @@ class ReReGame:
                                 workers = workers,
                                 energy_use = energy_use,
                                 working = working )
+
+        for solsys_id in self.gamedata_const["planets_id_mapping"].keys():
+            for planet_index in self.gamedata_const["planets_id_mapping"][solsys_id].keys():
+                planet_id = self.gamedata_const["planets_id_mapping"][solsys_id][planet_index]
+                self.solarsystems[solsys_id].planets[planet_id].buildings_update()
+                self.solarsystems[solsys_id].planets[planet_id].update_mineral_production()
 
 
     def __setup_shipgroups(self, loc_gamedata_dynamic):
