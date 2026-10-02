@@ -10,7 +10,9 @@ import math
 class shipgroup:
 
 
-    def __init__(self, groupname, grouptype, initial_groupraw_data = None):
+    def __init__(self, gamedata_static, groupname, grouptype, initial_groupraw_data = None):
+
+        self.gamedata_static = gamedata_static
 
         self.__cargonames = (  # see also: process_raw_groupdata() in rere_game.py
                              "Mineral1",
@@ -63,6 +65,12 @@ class shipgroup:
                      "Ship4": 0, "Ship4_Equip1":  0, "Ship4_Equip2": -1, "Ship4_Equip3": -1, "Ship4_Equip4":  0,
                 }
 
+                self.cargo_capacity_total = 0
+                self.cargo_capacity_used = 0
+                self.transfer = {}
+                for cargoname in self.__cargonames:
+                    self.transfer[cargoname] = 0
+
             elif self.type == 4:  # carrier
 
                 self.fleet = {
@@ -72,10 +80,6 @@ class shipgroup:
             else:
                 print(f"FATAL: Invalid shipgroup type: {self.type}!")
                 exit(1)
-
-            self.transfer = {}
-            for cargoname in self.__cargonames:
-                self.transfer[cargoname] = 0
 
         else:
 
@@ -159,6 +163,11 @@ class shipgroup:
                     "Ship4_Equip4": initial_groupraw_data['Ship4_Equip4']
                 }
 
+                self.transfer = {}
+                for cargoname in self.__cargonames:
+                    self.transfer[cargoname] = initial_groupraw_data[f"Transfer_{cargoname}"]
+                self.update_cargo_capacity()
+
             elif self.type == 4:  # carrier
                 self.fleet = {
                     "Ship1":        initial_groupraw_data['Ship1'],
@@ -172,11 +181,20 @@ class shipgroup:
                 print(f"FATAL: Invalid shipgroup type: {self.type}!")
                 exit(1)
 
-            self.transfer = {}
-            for cargoname in self.__cargonames:
-                self.transfer[cargoname] = initial_groupraw_data[f"Transfer_{cargoname}"]
-
         self.update()
+
+
+    def update_cargo_capacity(self):
+
+        self.cargo_capacity_total = 0
+        for shipname in [ "Ship1", "Ship2", "Ship3", "Ship4" ]:
+            self.cargo_capacity_total += self.fleet[shipname] * self.gamedata_static['tradeship_capacities'][shipname]
+
+        self.cargo_capacity_used = 0
+        for cargoname in self.__cargonames[:6]:
+            self.cargo_capacity_used += self.transfer[cargoname]
+        for cargoname in self.__cargonames[6:]:
+            self.cargo_capacity_used += self.transfer[cargoname] * self.gamedata_static['tradeship_capacities_needed'][cargoname]
 
 
     def update(self):
