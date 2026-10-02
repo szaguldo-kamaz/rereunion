@@ -399,6 +399,8 @@ class ReReGFX:
 
         PIClist.append("INTRO/GABOR.PIC")  # Cover
 
+        PIClist.append("GRAFIKA/TRANSFER.PIC")  # Transfer
+
         #PIClist.append("PLANETS/MASZK1.PIC")  #.
         #PIClist.append("PLANETS/MASZK2.PIC")  #.
 
@@ -1109,6 +1111,8 @@ class ReReGFX:
             return self.render_commanders(screenobj)
         elif screenobj.screentype == "control":
             return self.render_control(screenobj)
+        elif screenobj.screentype == "transfer":
+            return self.render_transfer(screenobj)
 
 
     def __render_anims_helper(self, anims, animstates, pasteposes, blitscreen):
@@ -2046,5 +2050,47 @@ class ReReGFX:
         self.screen_buffer.blit(self.PICs["MUSZI"], (0, 49))
 
         self.__render_anims_helper(self.control_muszi_anims, screenobj_control.animstates, self.control_muszi_anims_pasteposes, self.screen_buffer)
+
+        return self.screen_buffer
+
+
+    # transfer
+    def render_transfer(self, screenobj_transfer):
+
+        self.screen_buffer.blit(self.render_menu(screenobj_transfer.menu_info), (0, 0))
+        self.screen_buffer.blit(self.render_infobar(screenobj_transfer.menu_info), (0, 32))
+
+        self.screen_buffer.blit(self.PICs["TRANSFER"], (0, 49))
+
+        text_shipspace = self.render_text(self.gamedata_static['texts']['txt_transfer_ship_storage'], textcolor = 1)
+        text_shipspace_amount = self.render_text(f"{screenobj_transfer.current_shipgroup.cargo_capacity_used}{self.gamedata_static['texts']['txt_transfer_separator_char']}{screenobj_transfer.current_shipgroup.cargo_capacity_total}", textcolor = 1)
+        text_planetspace = self.render_text(f"{self.gamedata_static['texts']['txt_transfer_planet_storage']}{screenobj_transfer.planet.mineral_storage_capacity:6d}", textcolor = 1)
+
+        self.screen_buffer.blit(text_shipspace,        (  5, 193))
+        self.screen_buffer.blit(text_shipspace_amount, (119 - text_shipspace_amount.get_size()[0], 193))
+        self.screen_buffer.blit(text_planetspace,      (128, 193))
+
+        cargotext_ypos = 61
+        for cargoidx in range(len(screenobj_transfer.cargoids)):
+
+            cargoname = screenobj_transfer.cargonames[cargoidx]
+            if cargoidx == screenobj_transfer.selected_button_no:
+                cargoname_textcolor = screenobj_transfer.cargotext_color
+            else:
+                cargoname_textcolor = 1
+
+            text_cargoname = self.render_text(cargoname, textcolor = cargoname_textcolor)
+            text_cargoquantity_ship = self.render_text(f'{screenobj_transfer.cargoquantity_ship[cargoidx]:6d}', textcolor = 1)
+            self.screen_buffer.blit(text_cargoname,            (112, cargotext_ypos))
+            self.screen_buffer.blit(text_cargoquantity_ship,   (270, cargotext_ypos))
+
+            if screenobj_transfer.planet_cargo_part_available and \
+               ( cargoidx < 6 or \
+                 (cargoidx >= 6 and screenobj_transfer.planet.has_spaceport) \
+               ):
+                    text_cargoquantity_planet = self.render_text(f'{screenobj_transfer.cargoquantity_planet[cargoidx]:6d}', textcolor = 1)
+                    self.screen_buffer.blit(text_cargoquantity_planet, ( 12, cargotext_ypos))
+
+            cargotext_ypos += 8
 
         return self.screen_buffer

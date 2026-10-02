@@ -27,6 +27,7 @@ from rere_screen_spacelocal import *
 from rere_screen_commanders import *
 from rere_screen_planetinfo import *
 from rere_screen_control import *
+from rere_screen_transfer import *
 
 
 class ReReGame:
@@ -297,21 +298,42 @@ class ReReGame:
         13 : 'ArmyEquip2',
         15 : 'TradeShip4',
         16 : 'ArmyShip2',
-        17 : 'Vehicle1',
+        17 : 'ArmyVehicle1',
         19 : 'TradeShip3',
         20 : 'CarryEquip2',
-        21 : 'Vehicle2',
+        21 : 'ArmyVehicle2',
         22 : 'ArmyEquip3',
         23 : 'ArmyShip3',
         24 : 'SpaceStation',
         25 : 'CarryEquip3',
-        26 : 'Vehicle3',
+        26 : 'ArmyVehicle3',
         27 : 'CarryEquip4',
         31 : 'ArmyEquip4',
-        32 : 'Vehicle4',
+        32 : 'ArmyVehicle4',
         33 : 'ArmyShip4',
     }
 
+    gamedata_const["storage_to_invention_mapping"] = {
+        'ArmyShip1'    : 10,
+        'ArmyEquip1'   : 11,
+        'ArmyEquip2'   : 13,
+        'ArmyEquip3'   : 22,
+        'ArmyEquip4'   : 31,
+        'ArmyVehicle1' : 17,
+        'ArmyVehicle2' : 21,
+        'ArmyVehicle3' : 26,
+        'ArmyVehicle4' : 32,
+        'MinerDroid'   : 2,
+    }
+
+    gamedata_const["mineral_names_general"] = [
+        'Mineral1',
+        'Mineral2',
+        'Mineral3',
+        'Mineral4',
+        'Mineral5',
+        'Mineral6',
+    ]
 
     def extract_dynamic_strings(self, raw_data, rawdata_start, number_of_strings):
 
@@ -393,7 +415,7 @@ class ReReGame:
             # !: for alien planets this is the ground forces count!
             planetsdata[planetno]["mineral_storage"] = {}
             planetsdata[planetno]["alien_garrison"] = {}
-            for mineral in self.gamedata_static["mineral_names"]:
+            for mineral in self.gamedata_const["mineral_names_general"]:
                 if planetsdata[planetno]["race"] == 1:
                     mineral_bytes = raw_planetsdata[planet_imagepos:planet_imagepos + 4]
                     mineral_count = struct.unpack("<I", mineral_bytes)[0]
@@ -415,7 +437,7 @@ class ReReGame:
 
             # minerals production (/10)
             planetsdata[planetno]["mineral_production"] = {}
-            for mineral in self.gamedata_static["mineral_names"]:
+            for mineral in self.gamedata_const["mineral_names_general"]:
                 mineral_bytes = raw_planetsdata[planet_imagepos:planet_imagepos + 1]
                 planetsdata[planetno]["mineral_production"][mineral] = struct.unpack("B", mineral_bytes)[0]
                 planet_imagepos += 1
@@ -763,6 +785,19 @@ class ReReGame:
         exepos_FD['planetmain_messages'] = 0x04B06  # dynamic strings *6
         exepos_CD['planetmain_messages'] = 0x04B06  # dynamic strings *6
 
+        exepos_FD['msg_transfer_need_spaceport'] = 0x1A310  # len + string (es tenyleg csak olyan hosszu)
+        exepos_FD['txt_transfer_to_planet']      = 0x1AA92  # len + string (es tenyleg csak olyan hosszu)
+        exepos_FD['txt_transfer_to_ship']        = 0x1AAA5  # len + string (es tenyleg csak olyan hosszu)
+        exepos_FD['txt_transfer_ship_storage']   = 0x1ACB2  # len + string (es tenyleg csak olyan hosszu)
+        exepos_FD['txt_transfer_separator_char'] = 0x1ACBA  # len + string (es tenyleg csak olyan hosszu)
+        exepos_FD['txt_transfer_planet_storage'] = 0x1ACBC  # len + string (es tenyleg csak olyan hosszu)
+        exepos_CD['msg_transfer_need_spaceport'] = 0x1A300  # len + string (es tenyleg csak olyan hosszu)
+        exepos_CD['txt_transfer_to_planet']      = 0x1AA50  # len + string (es tenyleg csak olyan hosszu)
+        exepos_CD['txt_transfer_to_ship']        = 0x1AA63  # len + string (es tenyleg csak olyan hosszu)
+        exepos_CD['txt_transfer_ship_storage']   = 0x1AC70  # len + string (es tenyleg csak olyan hosszu)
+        exepos_CD['txt_transfer_separator_char'] = 0x1AC78  # len + string (es tenyleg csak olyan hosszu)
+        exepos_CD['txt_transfer_planet_storage'] = 0x1AC7A  # len + string (es tenyleg csak olyan hosszu)
+
         exepos_FD['planet_popmood_names']  = 0x2A3A6  # len + string (es tenyleg csak olyan hosszu) 7 db
         exepos_FD['planet_taxlevel_names'] = 0x2A426  # len + string (es tenyleg csak olyan hosszu) 8 db
         exepos_FD['planet_devlevel_names'] = 0x2A468  # len + string (es tenyleg csak olyan hosszu) 6 db
@@ -794,15 +829,42 @@ class ReReGame:
         exepos_FD['spacelocal_guest']   = 0x3F42A  # len: 10 * 27
         exepos_CD['spacelocal_guest']   = 0x3F40A  # len: 10 * 27
         #...
-        exepos_FD['ship_capacity_sloop']      = 0x3FB38  # 4 bytes
-        exepos_FD['ship_capacity_tradeship']  = 0x3FB3C  # 4 bytes
-        exepos_FD['ship_capacity_piracyship'] = 0x3FB40  # 4 bytes
-        exepos_FD['ship_capacity_galleon']    = 0x3FB44  # 4 bytes
-        exepos_CD['ship_capacity_sloop']      = 0x3FB13  # 4 bytes
-        exepos_CD['ship_capacity_tradeship']  = 0x3FB17  # 4 bytes
-        exepos_CD['ship_capacity_piracyship'] = 0x3FB1B  # 4 bytes
-        exepos_CD['ship_capacity_galleon']    = 0x3FB1F  # 4 bytes
-        #...
+        exepos_FD['tradeship_capacity_needed_ArmyShip1']    = 0x3FB06  # 4 bytes
+        exepos_FD['tradeship_capacity_needed_ArmyShip2']    = 0x3FB0A  # 4 bytes
+        exepos_FD['tradeship_capacity_needed_ArmyShip3']    = 0x3FB0E  # 4 bytes
+        exepos_FD['tradeship_capacity_needed_ArmyShip4']    = 0x3FB12  # 4 bytes
+        exepos_FD['tradeship_capacity_needed_ArmyVehicle1'] = 0x3FB16  # 4 bytes
+        exepos_FD['tradeship_capacity_needed_ArmyVehicle2'] = 0x3FB1A  # 4 bytes
+        exepos_FD['tradeship_capacity_needed_ArmyVehicle3'] = 0x3FB1E  # 4 bytes
+        exepos_FD['tradeship_capacity_needed_ArmyVehicle4'] = 0x3FB22  # 4 bytes
+        exepos_FD['tradeship_capacity_needed_ArmyEquip1']   = 0x3FB26  # 4 bytes
+        exepos_FD['tradeship_capacity_needed_ArmyEquip2']   = 0x3FB2A  # 4 bytes
+        exepos_FD['tradeship_capacity_needed_ArmyEquip3']   = 0x3FB2E  # 4 bytes
+        exepos_FD['tradeship_capacity_needed_ArmyEquip4']   = 0x3FB32  # 4 bytes
+        exepos_FD['tradeship_capacity_needed_MinerDroid']   = 0x3FB36  # 4 bytes
+        exepos_FD['tradeship_capacity_Ship1'] = 0x3FB3A  # 4 bytes
+        exepos_FD['tradeship_capacity_Ship2'] = 0x3FB3E  # 4 bytes
+        exepos_FD['tradeship_capacity_Ship3'] = 0x3FB42  # 4 bytes
+        exepos_FD['tradeship_capacity_Ship4'] = 0x3FB46  # 4 bytes
+        #FD ... 0x3FB4A ... 0x3FBCC
+        exepos_CD['tradeship_capacity_needed_ArmyShip1']    = 0x3FAE1  # 4 bytes
+        exepos_CD['tradeship_capacity_needed_ArmyShip2']    = 0x3FAE5  # 4 bytes
+        exepos_CD['tradeship_capacity_needed_ArmyShip3']    = 0x3FAE9  # 4 bytes
+        exepos_CD['tradeship_capacity_needed_ArmyShip4']    = 0x3FAED  # 4 bytes
+        exepos_CD['tradeship_capacity_needed_ArmyVehicle1'] = 0x3FAF1  # 4 bytes
+        exepos_CD['tradeship_capacity_needed_ArmyVehicle2'] = 0x3FAF5  # 4 bytes
+        exepos_CD['tradeship_capacity_needed_ArmyVehicle3'] = 0x3FAF9  # 4 bytes
+        exepos_CD['tradeship_capacity_needed_ArmyVehicle4'] = 0x3FAFD  # 4 bytes
+        exepos_CD['tradeship_capacity_needed_ArmyEquip1']   = 0x3FB01  # 4 bytes
+        exepos_CD['tradeship_capacity_needed_ArmyEquip2']   = 0x3FB05  # 4 bytes
+        exepos_CD['tradeship_capacity_needed_ArmyEquip3']   = 0x3FB09  # 4 bytes
+        exepos_CD['tradeship_capacity_needed_ArmyEquip4']   = 0x3FB0D  # 4 bytes
+        exepos_CD['tradeship_capacity_needed_MinerDroid']   = 0x3FB11  # 4 bytes
+        exepos_CD['tradeship_capacity_Ship1'] = 0x3FB15  # 4 bytes
+        exepos_CD['tradeship_capacity_Ship2'] = 0x3FB19  # 4 bytes
+        exepos_CD['tradeship_capacity_Ship3'] = 0x3FB1D  # 4 bytes
+        exepos_CD['tradeship_capacity_Ship4'] = 0x3FB21  # 4 bytes
+        #CD ... 0x3FB25 ... 0x3FBA8
         exepos_FD['group_army_space_equip']  = 0x3FBCC  # 1+5(len+string) + 8 (unknown data)
         exepos_FD['group_army_space_craft']  = 0x3FC04  # 1+11(len+string) + 13 (unknown data)
         exepos_FD['group_trade_equip']       = 0x3FC6A  # 1+5(len+string) + 8 (unknown data)
@@ -900,6 +962,17 @@ class ReReGame:
             print("Cannot find any recognized REUNION executable.")
             return None
 
+        texts = {}
+        for text_id in [ 'msg_transfer_need_spaceport',
+                         'txt_transfer_to_planet',
+                         'txt_transfer_to_ship',
+                         'txt_transfer_ship_storage',
+                         'txt_transfer_separator_char',
+                         'txt_transfer_planet_storage',
+                       ]:
+
+            texts[text_id] = self.extract_dynamic_strings(reunionexe_image, exepos[text_id], 1)[0]
+
         buildings_info = self.process_raw_buildingsinfodata(reunionexe_image[exepos['buildings_info']:exepos['buildings_info'] + 25*63])
         planetmain_messages = self.extract_dynamic_strings(reunionexe_image, exepos['planetmain_messages'], 6)
         planet_type_names_from_exe = self.extract_dynamic_strings(reunionexe_image, exepos['planet_type_names'], 10)
@@ -934,6 +1007,15 @@ class ReReGame:
         races_info = self.process_raw_racedata(reunionexe_image[exepos['races']:exepos['races']+228*11])
         race_nation_names = list(races_info.keys())
 
+        tradeship_capacities_needed = dict(zip([ "ArmyShip1", "ArmyShip2", "ArmyShip3", "ArmyShip4",
+                                          "ArmyVehicle1", "ArmyVehicle2", "ArmyVehicle3", "ArmyVehicle4",
+                                          "ArmyEquip1", "ArmyEquip2", "ArmyEquip3", "ArmyEquip4",
+                                          "MinerDroid" ],
+                                          struct.unpack_from("<"+"I"*13, reunionexe_image, exepos['tradeship_capacity_needed_ArmyShip1'])))
+
+        tradeship_capacities = dict(zip([ "Ship1", "Ship2", "Ship3", "Ship4" ],
+                                    struct.unpack_from("<"+"I"*4, reunionexe_image, exepos['tradeship_capacity_Ship1'])))
+
         craftlist_army_space  = self.process_raw_groupcraftdata(reunionexe_image[exepos['group_army_space_craft']:exepos['group_army_space_craft']+4*25])
         craftlist_army_ground = self.process_raw_groupcraftdata(reunionexe_image[exepos['group_army_ground_craft']:exepos['group_army_ground_craft']+4*25])
         craftlist_trade       = self.process_raw_groupcraftdata(reunionexe_image[exepos['group_trade_craft']:exepos['group_trade_craft']+4*25])
@@ -947,6 +1029,7 @@ class ReReGame:
 
         gamedata_static = {
                 "reunion_version": reunion_version,
+                "texts": texts,
                 "buildings_info": buildings_info,
                 "planetmain_messages": planetmain_messages,
                 "planet_type_names": planet_type_names,
@@ -961,6 +1044,8 @@ class ReReGame:
                 "group_type_names": group_type_names,
                 "group_craftlist": group_craftlist,
                 "group_equiplist": group_equiplist,
+                "tradeship_capacities": tradeship_capacities,
+                "tradeship_capacities_needed": tradeship_capacities_needed,
                 "ship_on_ground_names": ship_on_ground_names,
                 "vehicle_on_ground_names": vehicle_on_ground_names,
                 "mineral_names": mineral_names,
@@ -1079,7 +1164,7 @@ class ReReGame:
         savegame["commander_level"]   = list(struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_commander_level))  # pbfd
         savegame["developer_skills"]  = list(struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_developer_skills))
         savegame["commanders"]        = list(struct.unpack_from("<HHHH", savegame_fileimage, savegamepos_commanders))
-        savegame["minerals_main"]     = dict(zip(self.gamedata_static["mineral_names"], struct.unpack_from("<IIIIII", savegame_fileimage, savegamepos_minerals_main)))
+        savegame["minerals_main"]     = dict(zip(self.gamedata_const["mineral_names_general"], struct.unpack_from("<IIIIII", savegame_fileimage, savegamepos_minerals_main)))
         savegame["inventions"]        = self.process_raw_inventionsdata(savegame_fileimage[savegamepos_inventions:savegamepos_inventions + savegamepos_inventions_len])
         savegame["herotype"]          = struct.unpack_from("<H", savegame_fileimage, savegamepos_herotype)[0]
         savegame["systems_available"] = struct.unpack_from("bbbbbbbb", savegame_fileimage, savegamepos_systemsavailable)
@@ -1192,11 +1277,11 @@ class ReReGame:
         self.shipgroups_planetforces = [ [] ]
 
         for group_no in range(loc_gamedata_dynamic["groups_numofgroups"][1]):  # space groups
-            shipgroup_toadd = shipgroup("", 0, loc_gamedata_dynamic["groups_spacegroups"][group_no])
+            shipgroup_toadd = shipgroup(self.gamedata_static, "", 0, loc_gamedata_dynamic["groups_spacegroups"][group_no])
             self.shipgroups_spaceforces.append(shipgroup_toadd)
 
         for group_no in range(loc_gamedata_dynamic["groups_numofgroups"][2]):  # planet forces
-            shipgroup_toadd = shipgroup("", 0, loc_gamedata_dynamic["groups_planetforces"][group_no])
+            shipgroup_toadd = shipgroup(self.gamedata_static, "", 0, loc_gamedata_dynamic["groups_planetforces"][group_no])
             self.shipgroups_planetforces.append(shipgroup_toadd)
 
 
@@ -1391,6 +1476,10 @@ class ReReGame:
         elif screen_action == "ABORT MOVE":
             self.current_screen = self.screens["control"]
             self.current_screen.animstates["stick"].activate(0)
+            screen_changed = True
+        elif screen_action == "TRANSFER":
+            self.screens["transfer"] = screen_transfer(self.gamedata_const, self.gamedata_static, self.gamedata_dynamic, self.solarsystems, self.shipgroups_spaceforces)
+            self.current_screen = self.screens["transfer"]
             screen_changed = True
 
         [ a_hour_has_passed, a_day_has_passed ] = self.update_date()
